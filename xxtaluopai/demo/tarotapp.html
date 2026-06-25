@@ -92,6 +92,8 @@
   .read-head .rh-title{font-family:var(--serif);font-size:23px;letter-spacing:.04em;}
   .cards-row{display:flex;justify-content:center;gap:10px;margin-bottom:8px;perspective:1400px;}
   .card{flex:1 1 0;max-width:100px;aspect-ratio:100/166;position:relative;opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.8,.2,1);}
+  .cards-row.multi{flex-wrap:wrap;gap:8px;}
+  .cards-row.multi .card{flex:none;width:64px;max-width:64px;}
   .card.in{opacity:1;transform:translateY(0);}
   .card-inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform 1.05s cubic-bezier(.16,1,.3,1);}
   .card.flip .card-inner{transform:rotateY(180deg);}
@@ -202,6 +204,7 @@
     <div class="today-card" id="homeCard"></div>
     <div class="tip" id="homeTip"></div>
     <div class="yj" id="homeYj"></div>
+    <div id="signRow" style="text-align:center;margin:4px 0 16px"></div>
     <div class="cta-line">心里有正纠结的事？</div>
     <button class="btn block" onclick="go('ask')">问一事，看清此刻 →</button>
     <div class="disclaimer">每日一签仅供自我觉察与提点，不构成确定性预测。</div>
@@ -218,12 +221,14 @@
       <div class="domain" data-domain="事业"><div class="d-char">事业</div><div class="d-en">Career</div></div>
       <div class="domain" data-domain="财运"><div class="d-char">财运</div><div class="d-en">Fortune</div></div>
     </div>
+    <div class="label" style="margin-top:22px">选个牌阵</div>
+    <div class="domains" id="spreadSel"></div>
     <div class="field-wrap">
       <textarea class="field" id="situation" rows="3" maxlength="200" placeholder="比如：和对象在一起三年，最近总吵架，不知道该不该继续…"></textarea>
       <div class="count"><span id="cc">0</span>/200</div>
     </div>
     <div class="go-row">
-      <div class="go-hint">默契抽三张牌：<br>现状 · 阻碍 · 指引</div>
+      <div class="go-hint" id="goHint">默契抽三张牌：<br>现状 · 阻碍 · 指引</div>
       <button class="go-btn" id="goBtn" disabled onclick="goReading()">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
       </button>
@@ -303,6 +308,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
+<div id="posterMask" onclick="this.style.display='none'" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:60;align-items:center;justify-content:center;flex-direction:column;padding:30px"><img id="posterImg" style="max-width:90%;max-height:78%;border-radius:12px;box-shadow:0 12px 44px rgba(0,0,0,.45)"/><div style="color:#fff;font-size:13px;margin-top:16px;text-align:center">长按图片保存 / 转发 · 点空白处关闭</div></div>
 
 <script>
 /* ============ 牌库 ============ */
@@ -311,7 +317,7 @@ const SUITS=[["权杖","杖"],["圣杯","杯"],["宝剑","剑"],["星币","币"]
 const RANKS=["王牌","二","三","四","五","六","七","八","九","十","侍从","骑士","皇后","国王"];
 const DECK=[];MAJOR.forEach(([n,m])=>DECK.push({name:n,mark:m}));SUITS.forEach(([s,g])=>RANKS.forEach(r=>DECK.push({name:s+r,mark:g})));
 const POSITIONS=["现状","阻碍","指引"];
-function drawCards(n){const d=DECK.slice();for(let i=d.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[d[i],d[j]]=[d[j],d[i]];}return d.slice(0,n).map((c,i)=>({position:POSITIONS[i],name:c.name,mark:c.mark,reversed:Math.random()<0.5}));}
+function drawCards(n,positions){const d=DECK.slice();for(let i=d.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[d[i],d[j]]=[d[j],d[i]];}return d.slice(0,n).map((c,i)=>({position:(positions&&positions[i])||POSITIONS[i]||('位置'+(i+1)),name:c.name,mark:c.mark,reversed:Math.random()<0.5}));}
 
 const SUITTIP={"权杖":{tip:"心里那点火还在，今天让它带你迈出一小步。",yi:"行动",ji:"空想"},"圣杯":{tip:"照顾一下自己的感受，它在跟你说真话。",yi:"倾听",ji:"压抑"},"宝剑":{tip:"想清楚比想得多更重要，给念头一点秩序。",yi:"梳理",ji:"钻牛角"},"星币":{tip:"把注意力放回手边能落地的小事上。",yi:"务实",ji:"攀比"}};
 const MAJORTIP={tip:"今天适合慢下来，听听自己真正想要什么。",yi:"觉察",ji:"勉强"};
@@ -327,7 +333,8 @@ const state={
     data:{cards:[{position:"现状",name:"星币八",mark:"币",reversed:true,meaning:"星币八逆位——你不是在精进，是在重复；手还在动，人已经停了。"},{position:"阻碍",name:"月亮",mark:"XVIII",reversed:false,meaning:"月亮正位——挡路的不是那份风险，是你在用半夜的恐惧、而不是白天的清醒做决定。"},{position:"指引",name:"权杖二",mark:"杖",reversed:false,meaning:"权杖二正位——退一步看你手里的地图：这是个要规划丈量的选择，不是梭哈的赌。"}],situation:"你嘴上说在权衡稳定和机会，其实心里早就待腻了——真正让你迈不动的不是这步有多险，是你还没把'险'看清楚，只剩一团模糊的怕。",perspective:"星币八逆位摆在现状，说你已在原地空转，'稳定'对你早不是安全，是温水。绊住你的月亮，是你自己想象出来的迷雾。而权杖二告诉你，出路是把那团模糊摊开成一张能看的地图。",insights:["先分清你是'奔着成长去'，还是'逃着无聊走'——前者让你挑对机会，后者只会让你逃进下一个坑。","'稳定'不是没有成本的选项，你已经在用停滞付费了。","把'风险大'翻译成'我得先搞清哪三件事，这个险才算我扛得住'。"],action:"列出你必须先弄明白的几个问题再决定：这家公司的钱能撑多久、你去了具体做什么、最坏情况能不能兜得住。"}
   }],
   ledger:[{type:"新人赠送",amount:"+300",when:"刚刚"}],
-  orders:[], _pollTimer:null
+  orders:[], _pollTimer:null,
+  firstFree:true, signedToday:false, _lastReading:null, _lastDomain:""
 };
 
 /* ============ 路由 ============ */
@@ -363,6 +370,27 @@ function renderHome(){
   $("#homeCard").innerHTML=cardHTML(s.card,true,150);
   $("#homeTip").textContent=s.tip;
   $("#homeYj").innerHTML=`<div class="yj-item"><div class="yj-k">宜</div><div class="yj-v">${s.yi}</div></div><div class="yj-sep"></div><div class="yj-item"><div class="yj-k">忌</div><div class="yj-v">${s.ji}</div></div><div class="yj-sep"></div><div class="yj-item"><div class="yj-k">能量</div><div class="yj-v">${s.energy}</div></div>`;
+  renderSignRow();
+}
+function renderSignRow(){
+  const MS={3:50,7:290};
+  const next=Object.keys(MS).map(Number).find(d=>d>state.streak);
+  const sr=$("#signRow"); if(!sr)return;
+  const tip=next?(' · 再签 '+(next-state.streak)+' 天得 '+(MS[next]===290?'1次深读':MS[next]+'积分')):'';
+  sr.innerHTML=state.signedToday
+    ? `<div style="font-size:12.5px;color:var(--ink-faint)">✓ 今日已签 · 连签 ${state.streak} 天${tip}</div>`
+    : `<button class="btn" style="padding:12px 34px;font-size:14px" onclick="signIn()">📅 今日签到${tip}</button>`;
+}
+function signIn(){
+  if(state.signedToday)return;
+  state.signedToday=true;state.streak++;
+  const MS={3:50,7:290};
+  let reward=10,msg='签到成功 +10 积分';
+  if(MS[state.streak]){reward=MS[state.streak];msg=state.streak===7?'🎉 连签7天！送 1 次深度解读（+290 积分）':('🎉 连签'+state.streak+'天！奖励 +'+reward+' 积分');}
+  state.balance+=reward;
+  state.ledger.unshift({type:'签到奖励',amount:'+'+reward,when:'刚刚'});
+  renderHome();
+  toast(msg);
 }
 function cardHTML(c,flipped,w){
   const width=w||100;
@@ -373,15 +401,26 @@ function cardHTML(c,flipped,w){
 
 /* ============ 问事 ============ */
 let domain="姻缘";
+const SPREADS=[
+  {id:'three',name:'三牌阵',sub:'现状·阻碍·指引',positions:['现状','阻碍','指引'],price:290},
+  {id:'choice',name:'关系抉择',sub:'5张·进阶',positions:['你的处境','对方/阻力','你真正要的','现实考量','指引'],price:590}
+];
+let spread=SPREADS[0];
+function pickSpread(id){const s=SPREADS.find(x=>x.id===id);if(s){spread=s;renderAsk();}}
 document.querySelectorAll("#domains .domain").forEach(d=>d.addEventListener("click",()=>{document.querySelectorAll("#domains .domain").forEach(x=>x.classList.remove("sel"));d.classList.add("sel");domain=d.dataset.domain;}));
 const field=$("#situation"),goBtn=$("#goBtn"),cc=$("#cc");
 field.addEventListener("input",()=>{cc.textContent=field.value.length;goBtn.disabled=field.value.trim().length<4;});
-function renderAsk(){$("#askBal").textContent=`当前积分 ${state.balance} · 深度解读 ${PRICE}/次`;}
+function renderAsk(){
+  $("#spreadSel").innerHTML=SPREADS.map(s=>`<div class="domain ${s.id===spread.id?'sel':''}" style="padding:14px 0 12px" onclick="pickSpread('${s.id}')"><div class="d-char" style="font-size:18px">${s.name}</div><div class="d-en" style="text-transform:none;letter-spacing:0;font-size:11px">${s.sub} · ${s.price}积分</div></div>`).join("");
+  const gh=$("#goHint"); if(gh)gh.innerHTML='抽 '+spread.positions.length+' 张牌：<br>'+spread.positions.slice(0,3).join(' · ')+(spread.positions.length>3?' …':'');
+  $("#askBal").innerHTML=state.firstFree?`<span style="color:var(--amber)">✨ 新人首单免费</span> · 当前积分 ${state.balance}`:`当前积分 ${state.balance} · ${spread.name} ${spread.price}/次`;
+}
 
 function goReading(){
   if(field.value.trim().length<4)return;
-  if(state.balance<PRICE){
-    if(confirm(`深度解读需 ${PRICE} 积分，当前 ${state.balance}，去充值？`))go("recharge");
+  const cost=state.firstFree?0:spread.price;
+  if(state.balance<cost){
+    if(confirm(`${spread.name}需 ${spread.price} 积分，当前 ${state.balance}，去充值？`))go("recharge");
     return;
   }
   const text=field.value.trim();
@@ -395,7 +434,8 @@ async function runReading(dm,text){
   $("#rhTitle").textContent="正在为你抽牌";$("#rhPy").textContent="chōu pái zhōng";
   $("#cardsRow").innerHTML="";$("#meanings").innerHTML="";$("#readingBody").innerHTML="";$("#interpWait").style.display="none";
   $("#orb").classList.add("show","pulse");
-  const cards=drawCards(3);
+  const cards=drawCards(spread.positions.length,spread.positions);
+  $("#cardsRow").className="cards-row"+(cards.length>3?" multi":"");
   const apiPromise=interpret(dm,text,cards);
   await renderCardBacks(cards);
   await sleep(550);
@@ -412,10 +452,14 @@ async function runReading(dm,text){
     await sleep(200);
     fillMeanings(cards,data.cards);
     renderBody(data);
-    // 扣分 + 入账 + 记历史
-    state.balance-=PRICE;
-    state.ledger.unshift({type:"深度解读",amount:"-"+PRICE,when:"刚刚"});
-    state.history.unshift({domain:dm,when:"刚刚",data:{cards:cards.map((c,i)=>({...c,meaning:(data.cards[i]||{}).meaning||""})),situation:data.situation,perspective:data.perspective,insights:data.insights,action:data.action}});
+    // 扣分（首单免费）+ 入账 + 记历史
+    const cost=state.firstFree?0:spread.price;
+    state.balance-=cost;
+    state.ledger.unshift({type:cost===0?'首单免费体验':(spread.name+'解读'),amount:cost===0?'0':'-'+cost,when:'刚刚'});
+    if(cost===0)state.firstFree=false;
+    const rdData={cards:cards.map((c,i)=>({...c,meaning:(data.cards[i]||{}).meaning||""})),situation:data.situation,perspective:data.perspective,insights:data.insights,action:data.action};
+    state.history.unshift({domain:dm,when:"刚刚",data:rdData});
+    state._lastReading=rdData;
   }catch(e){
     $("#interpWait").style.display="none";
     $("#readingBody").innerHTML=`<div class="panel" style="text-align:center;"><div style="font-size:14px;line-height:1.7;color:var(--ink-soft);margin-bottom:14px;">牌已摊开，但解读没接上——可能网络晃了一下或体验太频繁。积分未扣，再试一次。</div><button class="btn ghost" onclick="go('ask')">重新抽牌</button></div>`;
@@ -430,6 +474,7 @@ async function flipCards(){const els=$("#cardsRow").querySelectorAll(".card");fo
 function showMeaningSkeleton(cards){const box=$("#meanings");box.innerHTML="";cards.forEach((c,i)=>{const el=document.createElement("div");el.className="meaning";el.id="mn"+i;el.innerHTML=`<div class="m-pos">${c.position}</div><div class="m-text"><span class="m-card">${c.name}·${c.reversed?'逆位':'正位'}</span></div>`;box.appendChild(el);setTimeout(()=>el.classList.add("in"),120*i);});}
 function fillMeanings(cards,aiCards){cards.forEach((c,i)=>{const el=$("#mn"+i);if(!el)return;const m=(aiCards&&aiCards[i]&&aiCards[i].meaning)||"";el.querySelector(".m-text").innerHTML=`<span class="m-card">${c.name}·${c.reversed?'逆位':'正位'}</span>　${m}`;});}
 function renderBody(d){
+  state._lastReading=d;
   const ins=(d.insights||[]).map((t,i)=>`<div class="ins"><div class="ins-n">${i+1}</div><div class="ins-t">${t}</div></div>`).join("");
   $("#readingBody").innerHTML=`
     <div class="sec reveal" id="r1"><div class="sec-label">此刻的你</div><div class="situation">${d.situation||""}</div></div>
@@ -438,7 +483,7 @@ function renderBody(d){
     <div class="sec reveal" id="r4"><div class="sec-label">今天，先做这一件</div><div class="action-card"><div class="ac-label">Today</div><div class="ac-text">${d.action||""}</div></div></div>
     <div class="read-foot reveal" id="r5">
       <div class="private"><div class="pv-t serif">想把这件事聊透？</div><div class="pv-d">加我微信，解锁更深的牌阵与 1 对 1 解读。</div><div class="pv-wx" onclick="toast('微信号已复制（演示）')">微信：Syl18268346784（点此复制）</div></div>
-      <div class="foot-actions"><button class="btn ghost" onclick="toast('已收藏（演示）')">收藏</button><button class="btn" onclick="go('ask')">再问一事</button></div>
+      <div class="foot-actions"><button class="btn ghost" onclick="sharePoster()">生成分享海报</button><button class="btn" onclick="go('ask')">再问一事</button></div>
       <div class="rf-line">塔罗是镜，不是判决。怎么走，始终由你说了算。</div>
     </div>`;
   ["r1","r2","r3","r4","r5"].forEach((id,i)=>setTimeout(()=>{const e=$("#"+id);if(e)e.classList.add("in");},i*240+60));
@@ -455,6 +500,31 @@ function renderDirect(d){
   ["r1","r2","r3","r4","r5"].forEach(id=>{const e=$("#"+id);if(e)e.classList.add("in");});
 }
 
+/* ============ 分享海报 ============ */
+function wrapText(ctx,text,xx,yy,maxW,lh){const chars=(text||'').split('');let line='',y=yy;for(const ch of chars){const t=line+ch;if(ctx.measureText(t).width>maxW){ctx.fillText(line,xx,y);line=ch;y+=lh;}else line=t;}if(line)ctx.fillText(line,xx,y);return y+lh;}
+function loadImg(src){return new Promise(res=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>res(null);im.src=src;});}
+async function sharePoster(){
+  const d=state._lastReading; if(!d){toast('没有可分享的解读');return;}
+  toast('正在生成海报…');
+  const W=620,H=980,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+  x.fillStyle='#F4F2EE';x.fillRect(0,0,W,H);
+  const g=x.createRadialGradient(W/2,150,10,W/2,150,250);g.addColorStop(0,'rgba(201,163,106,.30)');g.addColorStop(1,'rgba(201,163,106,0)');x.fillStyle=g;x.fillRect(0,0,W,340);
+  x.textAlign='center';x.fillStyle='#1A1815';x.font='600 30px "Songti SC",serif';x.fillText('FATETELL',W/2,84);
+  x.fillStyle='#A8A299';x.font='13px sans-serif';x.fillText('问一事 · 看清此刻',W/2,112);
+  if(state._lastDomain){x.fillStyle='#C9A36A';x.font='15px sans-serif';x.fillText('「'+state._lastDomain+'」',W/2,152);}
+  x.textAlign='left';x.fillStyle='#1A1815';x.font='600 27px "Songti SC",serif';
+  let yy=wrapText(x,d.situation||'',56,208,W-112,42);
+  yy+=10;x.strokeStyle='#E4E0D8';x.beginPath();x.moveTo(56,yy);x.lineTo(W-56,yy);x.stroke();
+  yy+=40;x.fillStyle='#56524C';x.font='15px sans-serif';
+  (d.cards||[]).forEach(cc=>{x.fillText('· '+cc.position+'　'+(cc.name||'')+(cc.reversed?'（逆位）':'（正位）'),56,yy);yy+=30;});
+  yy+=20;x.fillStyle='#A8A299';x.font='12px sans-serif';x.fillText('TODAY · 先做这一件',56,yy);
+  yy+=28;x.fillStyle='#1A1815';x.font='600 19px "Songti SC",serif';yy=wrapText(x,d.action||'',56,yy,W-112,30);
+  const qr=await loadImg('cs-qr.png');const qx=W/2-72,qy=H-208;
+  if(qr)x.drawImage(qr,qx,qy,144,144);else{x.strokeStyle='#E4E0D8';x.strokeRect(qx,qy,144,144);x.fillStyle='#A8A299';x.font='12px sans-serif';x.textAlign='center';x.fillText('小程序码',W/2,qy+76);}
+  x.textAlign='center';x.fillStyle='#56524C';x.font='14px sans-serif';x.fillText('扫码加我，也来问一事',W/2,qy+174);
+  try{$("#posterImg").src=c.toDataURL('image/png');$("#posterMask").style.display='flex';}catch(e){toast('海报生成失败');}
+}
+
 /* ============ 我的 ============ */
 function renderMine(){
   $("#mineBal").textContent=state.balance;
@@ -464,7 +534,7 @@ function renderMine(){
   $("#mineLedger").innerHTML=state.ledger.length?state.ledger.map(l=>`<div class="led-item"><div class="le-type">${l.type}</div><div><div class="le-amt">${l.amount}</div><div class="le-when">${l.when}</div></div></div>`).join(""):`<div class="empty">暂无积分流水。</div>`;
 }
 function switchMine(t){document.querySelectorAll(".mtab").forEach(m=>m.classList.toggle("on",m.dataset.mtab===t));$("#mineHistory").style.display=t==="history"?"block":"none";$("#mineLedger").style.display=t==="ledger"?"block":"none";}
-function openHistory(i){const it=state.history[i];if(!it)return;go("reading");renderDirect(it.data);}
+function openHistory(i){const it=state.history[i];if(!it)return;state._lastDomain=it.domain;go("reading");renderDirect(it.data);}
 
 /* ============ 充值 ============ */
 function renderRecharge(){
