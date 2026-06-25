@@ -1,0 +1,53 @@
+<view class="screen recharge">
+  <view class="rc-balance">
+    <view class="muted rc-cap">当前积分</view>
+    <view class="serif rc-num">{{balance}}</view>
+  </view>
+
+  <!-- 选套餐 -->
+  <block wx:if="{{!order}}">
+    <view class="packs">
+      <view
+        wx:for="{{packs}}"
+        wx:key="id"
+        class="pack"
+        bindtap="pick"
+        data-id="{{item.id}}"
+        hover-class="pack-hover">
+        <view class="pk-left">
+          <view class="pk-credits serif">{{item.credits}} 积分</view>
+          <view class="pk-label muted">{{item.label}}{{item.tag ? ' · ' + item.tag : ''}}</view>
+        </view>
+        <view class="pk-price serif">¥{{item.cny}}</view>
+      </view>
+    </view>
+    <view class="disclaimer">积分为虚拟内容，用于解锁深度解读等服务，一经消耗不予退还。充值即视为同意该说明。</view>
+  </block>
+
+  <!-- 下单后：收款码 + 订单号 + 客服（人工开通）-->
+  <block wx:else>
+    <view class="order-panel">
+      <view class="op-title serif">{{order.pack.label}} · 应付 ¥{{order.pack.cny}} · 到账 {{order.pack.credits}} 积分</view>
+
+      <view class="op-qr" bindtap="previewQr">
+        <image wx:if="{{payQr}}" src="{{payQr}}" mode="aspectFit" class="qr-img"></image>
+        <view wx:else class="qr-ph muted">管理员未配置收款码（在 config.js 填 payQr，图片放 images/）</view>
+      </view>
+
+      <view class="op-steps">
+        <view class="step"><text class="sn">①</text> 微信扫上方码付 <text class="hl">¥{{order.pack.cny}}</text></view>
+        <view class="step"><text class="sn">②</text> 加客服微信，发送：<text class="hl">付款截图 + 订单号</text>（手机号选填）</view>
+        <view class="op-field">订单号 <text class="code" user-select="true" selectable="true">{{order.outTradeNo}}</text></view>
+        <view class="op-btns">
+          <view class="btn ghost mini" catchtap="copyOrderNo">复制订单号</view>
+          <view class="btn ghost mini" catchtap="copyWechat">复制客服微信</view>
+        </view>
+        <view class="cs-wx">客服微信：<text user-select="true" selectable="true">{{serviceWechat}}</text></view>
+        <view class="step"><text class="sn">③</text> 客服后台开通后 <text class="hl">自动到账</text>（本页正在等待…）</view>
+      </view>
+
+      <view class="op-waiting muted">⏳ 正在等待开通到账，到账会自动弹提示。可先去做别的，回来再看。</view>
+      <view class="btn ghost block" catchtap="cancelOrder">返回套餐</view>
+    </view>
+  </block>
+</view>

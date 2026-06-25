@@ -1,0 +1,12 @@
+{
+  "name": "fatetell-tarot-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FateTell 塔罗 H5 演示后端（静态托管 + /api/tarot）",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
