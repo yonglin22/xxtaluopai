@@ -261,7 +261,7 @@
     <div class="panel" style="margin-top:30px;text-align:center;">
       <div class="pv-t serif">加我，聊得更深</div>
       <div class="pv-d">更深的牌阵与 1 对 1 解读，加微信解锁。</div>
-      <div class="pv-wx" onclick="toast('微信号已复制（演示）')">微信：fatetell_helper（点此复制）</div>
+      <div class="pv-wx" onclick="toast('微信号已复制（演示）')">微信：Syl18268346784（点此复制）</div>
     </div>
   </section>
 
@@ -413,7 +413,7 @@ function renderBody(d){
     <div class="sec reveal" id="r3"><div class="sec-label">你可以怎么选</div><div>${ins}</div></div>
     <div class="sec reveal" id="r4"><div class="sec-label">今天，先做这一件</div><div class="action-card"><div class="ac-label">Today</div><div class="ac-text">${d.action||""}</div></div></div>
     <div class="read-foot reveal" id="r5">
-      <div class="private"><div class="pv-t serif">想把这件事聊透？</div><div class="pv-d">加我微信，解锁更深的牌阵与 1 对 1 解读。</div><div class="pv-wx" onclick="toast('微信号已复制（演示）')">微信：fatetell_helper（点此复制）</div></div>
+      <div class="private"><div class="pv-t serif">想把这件事聊透？</div><div class="pv-d">加我微信，解锁更深的牌阵与 1 对 1 解读。</div><div class="pv-wx" onclick="toast('微信号已复制（演示）')">微信：Syl18268346784（点此复制）</div></div>
       <div class="foot-actions"><button class="btn ghost" onclick="toast('已收藏（演示）')">收藏</button><button class="btn" onclick="go('ask')">再问一事</button></div>
       <div class="rf-line">塔罗是镜，不是判决。怎么走，始终由你说了算。</div>
     </div>`;
@@ -460,12 +460,14 @@ function pickPack(id){
   const op=$("#orderPanel"); op.style.display="block";
   op.innerHTML=`
     <div style="font-family:var(--serif);font-size:18px;text-align:center;margin-bottom:18px">${p.label} · 应付 ¥${p.cny} · 到账 ${p.credits} 积分</div>
-    <div style="width:200px;height:200px;margin:0 auto 20px;border:1px dashed var(--line);border-radius:14px;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--ink-faint);font-size:12px;line-height:1.6;padding:16px;background:var(--bg-raise)">收款码（示意）<br>小程序里这里放<br>你的微信收款码</div>
+    <img src="pay-qr.png" alt="微信收款码" style="display:block;width:220px;height:220px;object-fit:contain;margin:0 auto 20px;border:1px solid var(--line);border-radius:14px;background:#fff;padding:8px" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+    <div style="display:none;width:200px;height:200px;margin:0 auto 20px;border:1px dashed var(--line);border-radius:14px;align-items:center;justify-content:center;text-align:center;color:var(--ink-faint);font-size:12px;line-height:1.6;padding:16px;background:var(--bg-raise)">把收款码图命名<br>pay-qr.png<br>传到 demo 文件夹</div>
     <div style="font-size:14px;line-height:2;color:var(--ink-soft)">
       <div><b style="font-family:var(--serif)">①</b> 微信扫上方码付 <span style="color:var(--amber)">¥${p.cny}</span></div>
       <div><b style="font-family:var(--serif)">②</b> 加客服微信，发：<span style="color:var(--amber)">付款截图 + 订单号</span></div>
       <div style="margin:8px 0 4px;color:var(--ink-faint);font-size:13px">订单号 <span style="color:var(--ink);background:var(--bg-raise);padding:4px 10px;border-radius:6px;border:1px solid var(--line)">${no}</span></div>
-      <div style="color:var(--amber);font-size:13px;margin-bottom:6px">客服微信：fatetell_helper</div>
+      <div style="color:var(--amber);font-size:13px;margin-bottom:6px">客服微信：Syl18268346784</div>
+      <img src="cs-qr.png" alt="客服二维码" style="display:block;width:150px;height:150px;object-fit:contain;margin:4px 0 12px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:6px" onerror="this.style.display='none'"/>
       <div><b style="font-family:var(--serif)">③</b> 客服后台开通后 <span style="color:var(--amber)">自动到账</span></div>
     </div>
     <div style="font-size:12px;color:var(--ink-faint);text-align:center;margin:18px 0 14px">⏳ 正在等待客服开通…（演示：点下面按钮模拟客服在后台开通）</div>
