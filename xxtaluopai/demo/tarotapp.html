@@ -261,8 +261,9 @@
     <div class="panel" style="margin-top:30px;text-align:center;">
       <div class="pv-t serif">加我，聊得更深</div>
       <div class="pv-d">更深的牌阵与 1 对 1 解读，加微信解锁。</div>
-      <div class="pv-wx" onclick="toast('微信号已复制（演示）')">微信：Syl18268346784（点此复制）</div>
+      <div class="pv-wx" onclick="copyText('Syl18268346784','客服微信已复制')">微信：Syl18268346784（点此复制）</div>
     </div>
+    <div style="text-align:center;margin-top:22px"><button class="btn" style="background:transparent;color:var(--ink-faint);border:1px solid var(--line);font-size:13px;padding:12px 26px" onclick="go('admin')">🛠 管理后台（演示）</button></div>
   </section>
 
   <!-- ===== RECHARGE 充值 ===== -->
@@ -272,6 +273,26 @@
     <div id="packs"></div>
     <div id="orderPanel" style="display:none;"></div>
     <div id="rcFoot" class="disclaimer">积分为虚拟内容，用于解锁深度解读等服务，一经消耗不予退还。小程序内为微信扫码付款 + 客服后台开通到账。</div>
+  </section>
+
+  <!-- ===== ADMIN 管理后台 ===== -->
+  <section class="screen" id="admin">
+    <div class="topbar"><div class="back" onclick="go('mine')">‹</div><div class="tt">管理后台</div></div>
+    <div class="panel" style="margin-bottom:20px">
+      <div class="w-label">该用户当前积分</div>
+      <div class="w-balance serif" id="adBal">0</div>
+    </div>
+    <div style="font-size:13px;color:var(--ink-faint);letter-spacing:.1em;margin:6px 0 12px">待开通订单</div>
+    <div id="adOrders"></div>
+    <div style="font-size:13px;color:var(--ink-faint);letter-spacing:.1em;margin:28px 0 12px">手动调整积分</div>
+    <div class="panel">
+      <input id="adjAmt" type="number" placeholder="积分数量，如 100" style="width:100%;box-sizing:border-box;padding:12px;border:1px solid var(--line);border-radius:8px;font-size:15px;background:var(--bg);color:var(--ink);margin-bottom:14px"/>
+      <div style="display:flex;gap:12px">
+        <button class="btn" style="flex:1" onclick="adjustAdmin(1)">＋ 加积分</button>
+        <button class="btn" style="flex:1;background:transparent;color:var(--ink);border:1px solid var(--ink)" onclick="adjustAdmin(-1)">－ 扣积分</button>
+      </div>
+    </div>
+    <div class="disclaimer">演示后台：真实产品中此操作由 admin 云函数完成（管理员鉴权 + 幂等防重复），见仓库 cloudfunctions/admin。</div>
   </section>
 
   <!-- ===== TABBAR ===== -->
@@ -305,7 +326,8 @@ const state={
     domain:"事业", when:"昨天",
     data:{cards:[{position:"现状",name:"星币八",mark:"币",reversed:true,meaning:"星币八逆位——你不是在精进，是在重复；手还在动，人已经停了。"},{position:"阻碍",name:"月亮",mark:"XVIII",reversed:false,meaning:"月亮正位——挡路的不是那份风险，是你在用半夜的恐惧、而不是白天的清醒做决定。"},{position:"指引",name:"权杖二",mark:"杖",reversed:false,meaning:"权杖二正位——退一步看你手里的地图：这是个要规划丈量的选择，不是梭哈的赌。"}],situation:"你嘴上说在权衡稳定和机会，其实心里早就待腻了——真正让你迈不动的不是这步有多险，是你还没把'险'看清楚，只剩一团模糊的怕。",perspective:"星币八逆位摆在现状，说你已在原地空转，'稳定'对你早不是安全，是温水。绊住你的月亮，是你自己想象出来的迷雾。而权杖二告诉你，出路是把那团模糊摊开成一张能看的地图。",insights:["先分清你是'奔着成长去'，还是'逃着无聊走'——前者让你挑对机会，后者只会让你逃进下一个坑。","'稳定'不是没有成本的选项，你已经在用停滞付费了。","把'风险大'翻译成'我得先搞清哪三件事，这个险才算我扛得住'。"],action:"列出你必须先弄明白的几个问题再决定：这家公司的钱能撑多久、你去了具体做什么、最坏情况能不能兜得住。"}
   }],
-  ledger:[{type:"新人赠送",amount:"+300",when:"刚刚"}]
+  ledger:[{type:"新人赠送",amount:"+300",when:"刚刚"}],
+  orders:[], _pollTimer:null
 };
 
 /* ============ 路由 ============ */
@@ -313,6 +335,7 @@ const $=s=>document.querySelector(s);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const TABS=["home","mine"];
 function go(id){
+  if(state._pollTimer){clearInterval(state._pollTimer);state._pollTimer=null;}
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   $("#"+id).classList.add("active");
   window.scrollTo(0,0);
@@ -325,6 +348,7 @@ function go(id){
   if(id==="ask")renderAsk();
   if(id==="mine")renderMine();
   if(id==="recharge")renderRecharge();
+  if(id==="admin")renderAdmin();
 }
 function doLogin(){ go("home"); }
 let toastT;
@@ -444,6 +468,7 @@ function openHistory(i){const it=state.history[i];if(!it)return;go("reading");re
 
 /* ============ 充值 ============ */
 function renderRecharge(){
+  if(state._pollTimer){clearInterval(state._pollTimer);state._pollTimer=null;}
   state._order=null;
   $("#rcBal").textContent=state.balance;
   $("#orderPanel").style.display="none";
@@ -455,6 +480,7 @@ function pickPack(id){
   const p=PACKS.find(x=>x.id===id); if(!p)return;
   const no='T'+Date.now()+Math.floor(Math.random()*1e6);
   state._order={no,p};
+  state.orders.unshift({no,credits:p.credits,label:p.label,cny:p.cny,status:'pending'});
   $("#packs").style.display="none";
   $("#rcFoot").style.display="none";
   const op=$("#orderPanel"); op.style.display="block";
@@ -464,25 +490,68 @@ function pickPack(id){
     <div style="display:none;width:200px;height:200px;margin:0 auto 20px;border:1px dashed var(--line);border-radius:14px;align-items:center;justify-content:center;text-align:center;color:var(--ink-faint);font-size:12px;line-height:1.6;padding:16px;background:var(--bg-raise)">把收款码图命名<br>pay-qr.png<br>传到 demo 文件夹</div>
     <div style="font-size:14px;line-height:2;color:var(--ink-soft)">
       <div><b style="font-family:var(--serif)">①</b> 微信扫上方码付 <span style="color:var(--amber)">¥${p.cny}</span></div>
-      <div><b style="font-family:var(--serif)">②</b> 加客服微信，发：<span style="color:var(--amber)">付款截图 + 订单号</span></div>
+      <div><b style="font-family:var(--serif)">②</b> 加客服微信，发：<span style="color:var(--amber)">付款截图 + 订单号 + 手机号</span></div>
       <div style="margin:8px 0 4px;color:var(--ink-faint);font-size:13px">订单号 <span style="color:var(--ink);background:var(--bg-raise);padding:4px 10px;border-radius:6px;border:1px solid var(--line)">${no}</span></div>
+      <input id="phoneInput" type="number" placeholder="填手机号（选填，方便客服核对）" style="width:100%;box-sizing:border-box;margin:8px 0 4px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:var(--bg-raise);color:var(--ink)"/>
+      <div style="display:flex;gap:10px;margin:10px 0 14px">
+        <button class="btn" style="flex:1;padding:12px 0;font-size:13px" onclick="copyOrderInfo('${no}')">复制订单号+手机号</button>
+        <button class="btn" style="flex:1;padding:12px 0;font-size:13px;background:transparent;color:var(--ink);border:1px solid var(--ink)" onclick="copyText('Syl18268346784','已复制客服微信号')">复制客服微信号</button>
+      </div>
       <div style="color:var(--amber);font-size:13px;margin-bottom:6px">客服微信：Syl18268346784</div>
       <img src="cs-qr.png" alt="客服二维码" style="display:block;width:150px;height:150px;object-fit:contain;margin:4px 0 12px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:6px" onerror="this.style.display='none'"/>
-      <div><b style="font-family:var(--serif)">③</b> 客服后台开通后 <span style="color:var(--amber)">自动到账</span></div>
+      <div><b style="font-family:var(--serif)">③</b> 客服核对后台开通后 <span style="color:var(--amber)">自动到账</span></div>
     </div>
-    <div style="font-size:12px;color:var(--ink-faint);text-align:center;margin:18px 0 14px">⏳ 正在等待客服开通…（演示：点下面按钮模拟客服在后台开通）</div>
-    <button class="btn block" onclick="mockConfirm()">✅ 模拟客服开通到账</button>
-    <button class="btn block" style="background:transparent;color:var(--ink);border:1px solid var(--ink);margin-top:10px" onclick="renderRecharge()">返回套餐</button>`;
+    <div id="waitNote" style="font-size:12.5px;color:var(--ink-faint);text-align:center;margin:18px 0 14px">⏳ 正在等待客服开通到账…到账后这里会自动提示</div>
+    <button class="btn block" style="background:transparent;color:var(--ink);border:1px solid var(--ink)" onclick="renderRecharge()">返回套餐</button>`;
+  if(state._pollTimer)clearInterval(state._pollTimer);
+  state._pollTimer=setInterval(()=>checkOrderPaid(no),1500);
 }
-function mockConfirm(){
-  const o=state._order; if(!o)return;
-  state.balance+=o.p.credits;
-  state.ledger.unshift({type:"充值",amount:"+"+o.p.credits,when:"刚刚"});
-  state._order=null;
-  renderRecharge();
-  toast(`到账成功 +${o.p.credits} 积分`);
+function checkOrderPaid(no){
+  const o=state.orders.find(x=>x.no===no);
+  if(o&&o.status==='paid'){
+    clearInterval(state._pollTimer);state._pollTimer=null;
+    const wn=$("#waitNote"); if(wn)wn.innerHTML='<span style="color:#1f9d55;font-size:14px">✅ 已到账 +'+o.credits+' 积分</span>';
+    $("#rcBal").textContent=state.balance;
+    toast('到账成功 +'+o.credits+' 积分');
+  }
 }
-function rechargeBack(){ if(state._order){ renderRecharge(); } else { go('mine'); } }
+function copyText(text,msg){
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(()=>toast(msg||'已复制')).catch(()=>fallbackCopy(text,msg));}
+  else fallbackCopy(text,msg);
+}
+function fallbackCopy(text,msg){const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast(msg||'已复制');}catch(e){toast('复制失败，请长按手动复制');}document.body.removeChild(ta);}
+function copyOrderInfo(no){
+  const el=document.getElementById('phoneInput');
+  const ph=el?el.value.trim():'';
+  copyText('订单号：'+no+(ph?('\n手机号：'+ph):''), ph?'已复制订单号+手机号':'已复制订单号');
+}
+function rechargeBack(){ if(state._pollTimer){clearInterval(state._pollTimer);state._pollTimer=null;} if(state._order){ renderRecharge(); } else { go('mine'); } }
+
+/* ============ 管理后台（演示）============ */
+function renderAdmin(){
+  $("#adBal").textContent=state.balance;
+  const pend=state.orders.filter(o=>o.status==='pending');
+  $("#adOrders").innerHTML=pend.length?pend.map(o=>`<div class="led-item"><div><div style="font-size:14px">${o.label} · ¥${o.cny} · ${o.credits}积分</div><div style="font-size:11px;color:var(--ink-faint);margin-top:3px">${o.no}</div></div><button class="btn" style="padding:10px 20px;font-size:13px" onclick="confirmOrderAdmin('${o.no}')">开通到账</button></div>`).join(""):`<div class="empty">暂无待开通订单（去"充值"下个单试试）</div>`;
+}
+function confirmOrderAdmin(no){
+  const o=state.orders.find(x=>x.no===no); if(!o||o.status==='paid')return;
+  o.status='paid';
+  state.balance+=o.credits;
+  state.ledger.unshift({type:"充值开通",amount:"+"+o.credits,when:"刚刚"});
+  renderAdmin();
+  toast('已为订单开通 +'+o.credits+' 积分');
+}
+function adjustAdmin(sign){
+  const el=document.getElementById('adjAmt');
+  const v=el?parseInt(el.value,10):0;
+  if(!v||v<=0){toast('请输入积分数量');return;}
+  const delta=sign*v;
+  state.balance=Math.max(0,state.balance+delta);
+  state.ledger.unshift({type:delta>=0?'管理员加分':'管理员扣分',amount:(delta>=0?'+':'')+delta,when:"刚刚"});
+  if(el)el.value='';
+  renderAdmin();
+  toast(delta>=0?('已加 '+v+' 积分'):('已扣 '+v+' 积分'));
+}
 
 /* ============ 调真实后端 ============ */
 async function interpret(dm,text,cards){
