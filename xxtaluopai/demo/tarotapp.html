@@ -92,8 +92,20 @@
   .read-head .rh-title{font-family:var(--serif);font-size:23px;letter-spacing:.04em;}
   .cards-row{display:flex;justify-content:center;gap:10px;margin-bottom:8px;perspective:1400px;}
   .card{flex:1 1 0;max-width:100px;aspect-ratio:100/166;position:relative;opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.8,.2,1);}
-  .cards-row.multi{flex-wrap:wrap;gap:8px;}
-  .cards-row.multi .card{flex:none;width:64px;max-width:64px;}
+  .cards-row.multi{flex-wrap:wrap;gap:10px;}
+  .cards-row.multi .card{flex:none;width:84px;max-width:84px;}
+  .cards-row.multi .cf-mark{font-size:34px;} .cards-row.multi .cf-name{font-size:14px;} .cards-row.multi .cf-pos{font-size:9px;} .cards-row.multi .cf-ori{font-size:9px;}
+  .pick-hint{text-align:center;font-size:13px;color:var(--ink-soft);margin:8px 0 22px;line-height:1.7}
+  .pick-slots{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-bottom:30px}
+  .slot{width:76px;height:122px;border:1px dashed var(--line);border-radius:10px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:11px;color:var(--ink-faint);padding:6px;background:var(--bg-raise)}
+  .slot.filled{border-style:solid;border-color:#1d1916;background:radial-gradient(120% 80% at 50% -10%,var(--card-back-2),var(--card-back))}
+  .slot.filled span{display:none}
+  .slot-back{display:none;width:24px;height:24px;border:1px solid rgba(232,226,216,.5);border-radius:50%}
+  .slot.filled .slot-back{display:block}
+  .pick-deck{display:flex;justify-content:center;flex-wrap:wrap;padding:0 6px}
+  .deck-card{width:48px;height:76px;border-radius:7px;background:radial-gradient(120% 80% at 50% -10%,var(--card-back-2),var(--card-back));border:1px solid #1d1916;margin:0 -7px 10px -7px;box-shadow:0 4px 12px rgba(30,26,22,.18);transition:transform .25s,opacity .45s;cursor:pointer}
+  .deck-card:active{transform:translateY(-10px)}
+  .deck-card.used{opacity:0;transform:translateY(-34px) scale(.8);pointer-events:none}
   .card.in{opacity:1;transform:translateY(0);}
   .card-inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform 1.05s cubic-bezier(.16,1,.3,1);}
   .card.flip .card-inner{transform:rotateY(180deg);}
@@ -241,6 +253,7 @@
   <section class="screen" id="reading">
     <div class="topbar"><div class="back" onclick="go('home')">‹</div><div class="tt">解读</div></div>
     <div class="read-head"><div class="rh-py" id="rhPy">chōu pái zhōng</div><div class="rh-title" id="rhTitle">正在为你抽牌</div></div>
+    <div id="pickArea" style="display:none"></div>
     <div class="cards-row" id="cardsRow"></div>
     <div class="meanings" id="meanings"></div>
     <div class="interp-wait" id="interpWait" style="display:none;">聆听你的处境，正在解读…</div>
@@ -430,16 +443,40 @@ function goReading(){
 
 /* ============ 解读（接真 /api/tarot） ============ */
 async function runReading(dm,text){
-  // 重置
-  $("#rhTitle").textContent="正在为你抽牌";$("#rhPy").textContent="chōu pái zhōng";
-  $("#cardsRow").innerHTML="";$("#meanings").innerHTML="";$("#readingBody").innerHTML="";$("#interpWait").style.display="none";
+  state._lastDomain=dm;
+  $("#cardsRow").innerHTML="";$("#cardsRow").className="cards-row";$("#meanings").innerHTML="";$("#readingBody").innerHTML="";$("#interpWait").style.display="none";
   $("#orb").classList.add("show","pulse");
+  $("#rhTitle").textContent="心中默念你的问题";$("#rhPy").textContent="píng zhí jué xuǎn pái";
   const cards=drawCards(spread.positions.length,spread.positions);
-  $("#cardsRow").className="cards-row"+(cards.length>3?" multi":"");
-  const apiPromise=interpret(dm,text,cards);
-  await renderCardBacks(cards);
-  await sleep(550);
+  const apiPromise=interpret(dm,text,cards);   // 后台先发起，等用户选完正好就绪
+  startPick(cards, ()=>revealReading(cards,dm,apiPromise));
+}
+// 铺牌 → 用户凭直觉手动选 N 张
+function startPick(cards,onDone){
+  const N=cards.length, DECK_N=13; let picked=0;
+  const slots=cards.map((c)=>`<div class="slot"><span>${c.position}</span><div class="slot-back"></div></div>`).join("");
+  const deck=Array.from({length:DECK_N}).map((_,i)=>`<div class="deck-card" onclick="window.__pick(${i})"></div>`).join("");
+  const pa=$("#pickArea"); pa.style.display="block";
+  pa.innerHTML=`<div class="pick-hint" id="pickHint">心中默念你的问题，凭直觉选 ${N} 张牌（已选 0/${N}）</div><div class="pick-slots">${slots}</div><div class="pick-deck">${deck}</div>`;
+  const slotEls=pa.querySelectorAll(".slot");
+  window.__pick=(idx)=>{
+    if(picked>=N)return;
+    const dc=pa.querySelectorAll(".deck-card")[idx];
+    if(!dc||dc.classList.contains("used"))return;
+    dc.classList.add("used");
+    if(slotEls[picked])slotEls[picked].classList.add("filled");
+    picked++;
+    const h=$("#pickHint"); if(h)h.textContent=picked<N?`再选 ${N-picked} 张（已选 ${picked}/${N}）`:'抽牌完成，正在为你解读…';
+    if(picked>=N)setTimeout(onDone,750);
+  };
+}
+// 揭示 + 解读（复用原翻牌流程）
+async function revealReading(cards,dm,apiPromise){
+  $("#pickArea").style.display="none";
   $("#rhTitle").textContent="你抽到的牌";$("#rhPy").textContent="nǐ chōu dào de pái";
+  $("#cardsRow").className="cards-row"+(cards.length>3?" multi":"");
+  await renderCardBacks(cards);
+  await sleep(300);
   await flipCards();
   await sleep(250);
   showMeaningSkeleton(cards);
@@ -452,7 +489,6 @@ async function runReading(dm,text){
     await sleep(200);
     fillMeanings(cards,data.cards);
     renderBody(data);
-    // 扣分（首单免费）+ 入账 + 记历史
     const cost=state.firstFree?0:spread.price;
     state.balance-=cost;
     state.ledger.unshift({type:cost===0?'首单免费体验':(spread.name+'解读'),amount:cost===0?'0':'-'+cost,when:'刚刚'});
@@ -483,12 +519,14 @@ function renderBody(d){
     <div class="sec reveal" id="r4"><div class="sec-label">今天，先做这一件</div><div class="action-card"><div class="ac-label">Today</div><div class="ac-text">${d.action||""}</div></div></div>
     <div class="read-foot reveal" id="r5">
       <div class="private"><div class="pv-t serif">想把这件事聊透？</div><div class="pv-d">加我微信，解锁更深的牌阵与 1 对 1 解读。</div><div class="pv-wx" onclick="toast('微信号已复制（演示）')">微信：Syl18268346784（点此复制）</div></div>
-      <div class="foot-actions"><button class="btn ghost" onclick="sharePoster()">生成分享海报</button><button class="btn" onclick="go('ask')">再问一事</button></div>
+      <button class="btn block" style="margin-bottom:12px" onclick="sharePoster()">🖼 生成分享海报转发</button>
+      <div class="foot-actions"><button class="btn ghost" onclick="toast('已收藏（演示）')">收藏</button><button class="btn" onclick="go('ask')">再问一事</button></div>
       <div class="rf-line">塔罗是镜，不是判决。怎么走，始终由你说了算。</div>
     </div>`;
   ["r1","r2","r3","r4","r5"].forEach((id,i)=>setTimeout(()=>{const e=$("#"+id);if(e)e.classList.add("in");},i*240+60));
 }
 function renderDirect(d){
+  $("#pickArea").style.display="none";
   $("#rhTitle").textContent="你抽到的牌";$("#rhPy").textContent="nǐ chōu dào de pái";
   $("#orb").classList.add("show");$("#orb").classList.remove("pulse");
   $("#interpWait").style.display="none";
