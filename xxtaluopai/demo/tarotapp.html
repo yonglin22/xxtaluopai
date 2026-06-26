@@ -56,7 +56,13 @@
   .today-head{display:flex;align-items:center;justify-content:space-between;margin:24px 0 22px;}
   .streak{font-size:12px;color:var(--amber);letter-spacing:.05em;}
   .today-card{display:flex;justify-content:center;margin-bottom:30px;}
-  .tip{text-align:center;font-family:var(--serif);font-size:21px;line-height:1.6;padding:0 6px;}
+  .tip{text-align:center;font-family:var(--serif);font-size:20px;line-height:1.6;padding:0 12px;color:var(--ink-soft);}
+  .ft-label{text-align:center;font-size:11px;letter-spacing:.28em;color:var(--ink-faint);text-transform:uppercase;margin:24px 0 12px;}
+  .ft-row{display:flex;align-items:flex-start;gap:10px;padding:13px 2px;border-top:1px solid var(--line-soft);}
+  .ft-row:first-child{border-top:none;}
+  .ft-cat{flex:none;width:62px;font-size:13px;color:var(--ink);}
+  .ft-star{flex:none;width:76px;font-size:13px;color:var(--amber);letter-spacing:1px;}
+  .ft-txt{flex:1;font-size:13px;line-height:1.65;color:var(--ink-soft);}
   .yj{display:flex;align-items:center;justify-content:center;margin:30px 0;}
   .yj-item{display:flex;flex-direction:column;align-items:center;gap:7px;min-width:80px;}
   .yj-k{font-size:11px;color:var(--ink-faint);letter-spacing:.2em;}
@@ -215,6 +221,8 @@
     <div class="today-head"><div class="eyebrow">TODAY · 今日牌</div><div class="streak" id="homeStreak"></div></div>
     <div class="today-card" id="homeCard"></div>
     <div class="tip" id="homeTip"></div>
+    <div class="ft-label">今日运势</div>
+    <div id="homeFortune"></div>
     <div class="yj" id="homeYj"></div>
     <div id="signRow" style="text-align:center;margin:4px 0 16px"></div>
     <div class="cta-line">心里有正纠结的事？</div>
@@ -376,13 +384,26 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show"
 
 /* ============ 日签 ============ */
 let todaySign=null;
+const FT_OVERALL=['整体平稳，适合把拖着的事做个了结','节奏偏快，先理清优先级别贪多','内心有点起伏，先稳住情绪再做决定','适合主动的一天，别等别人先开口','宜收不宜放，守住手里的比追新的强'];
+const FT={
+  love:[{s:5,t:'桃花在熟人里，今天一句主动的关心比沉默有用'},{s:4,t:'把没说清的话说清，别用冷战解决问题'},{s:4,t:'单身别急着定义关系，先多见几次面'},{s:3,t:'对方要的是确定感，少点试探多点直接'},{s:3,t:'情绪上头时先放一放，明天再回那条消息'}],
+  career:[{s:5,t:'手头拖着的那件事，今天收尾会很顺'},{s:4,t:'先把一个挂着的沟通处理掉，别再拖'},{s:4,t:'别等完美方案，先动起来边做边调'},{s:3,t:'今天忌贪多，专注一件最重要的事'},{s:3,t:'有分歧先听完再说，适合配合不适合硬刚'}],
+  money:[{s:4,t:'适合记一笔账复盘，看清钱去哪了'},{s:4,t:'该花的小钱别抠，别在小事上耗神'},{s:3,t:'别冲动下单，加购物车放一天再决定'},{s:3,t:'收入别指望意外，稳一点更安心'},{s:5,t:'之前的一笔账/欠款，今天适合去理清'}]
+};
+function stars(n){return '★★★★★'.slice(0,n)+'☆☆☆☆☆'.slice(0,5-n);}
+function ftRow(cat,f){return `<div class="ft-row"><div class="ft-cat">${cat}</div><div class="ft-star">${stars(f.s)}</div><div class="ft-txt">${f.t}</div></div>`;}
 function renderHome(){
-  if(!todaySign){const c=drawCards(1)[0];c.position="今日";const t=tipOf(c);todaySign={card:c,tip:t.tip,yi:t.yi,ji:t.ji,energy:40+Math.floor(Math.random()*56)};}
+  if(!todaySign){
+    const c=drawCards(1)[0];c.position="今日";const t=tipOf(c);
+    const pk=a=>a[Math.floor(Math.random()*a.length)];
+    todaySign={card:c,yi:t.yi,ji:t.ji,energy:40+Math.floor(Math.random()*56),overall:pk(FT_OVERALL),love:pk(FT.love),career:pk(FT.career),money:pk(FT.money)};
+  }
   const s=todaySign;
   $("#homeStreak").textContent=state.streak>0?("连签 "+state.streak+" 天"):"";
   $("#homeCard").innerHTML=cardHTML(s.card,true,150);
-  $("#homeTip").textContent=s.tip;
-  $("#homeYj").innerHTML=`<div class="yj-item"><div class="yj-k">宜</div><div class="yj-v">${s.yi}</div></div><div class="yj-sep"></div><div class="yj-item"><div class="yj-k">忌</div><div class="yj-v">${s.ji}</div></div><div class="yj-sep"></div><div class="yj-item"><div class="yj-k">能量</div><div class="yj-v">${s.energy}</div></div>`;
+  $("#homeTip").textContent=s.overall;
+  $("#homeFortune").innerHTML=ftRow('❤️ 爱情',s.love)+ftRow('💼 事业',s.career)+ftRow('💰 财运',s.money);
+  $("#homeYj").innerHTML=`<div class="yj-item"><div class="yj-k">宜</div><div class="yj-v">${s.yi}</div></div><div class="yj-sep"></div><div class="yj-item"><div class="yj-k">忌</div><div class="yj-v">${s.ji}</div></div><div class="yj-sep"></div><div class="yj-item"><div class="yj-k">综合</div><div class="yj-v">${s.energy}</div></div>`;
   renderSignRow();
 }
 function renderSignRow(){
