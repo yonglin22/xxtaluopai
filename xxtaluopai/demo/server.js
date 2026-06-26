@@ -29,7 +29,7 @@ const MODEL = process.env.AI_MODEL || (PROVIDER === 'openai' ? 'deepseek-chat' :
 const hits = new Map();
 function rateOk(ip) { const n = Date.now(); const e = hits.get(ip); if (!e || n > e.r) { hits.set(ip, { c: 1, r: n + 3600000 }); return true; } if (e.c >= 20) return false; e.c++; return true; }
 
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png' };
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.ico': 'image/x-icon' };
 function readBody(req) { return new Promise((res, rej) => { let d = ''; req.on('data', c => { d += c; if (d.length > 1e6) req.destroy(); }); req.on('end', () => res(d)); req.on('error', rej); }); }
 function json(res, code, obj) { res.writeHead(code, { 'content-type': 'application/json; charset=utf-8' }); res.end(JSON.stringify(obj)); }
 

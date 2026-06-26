@@ -13,9 +13,9 @@
     --sans:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,-apple-system,sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-  html,body{height:100%;}
-  body{background:#E9E6E0;color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;display:flex;justify-content:center;}
-  .phone{width:100%;max-width:430px;min-height:100vh;background:var(--bg);position:relative;overflow:hidden;}
+  html{height:auto;overflow-x:hidden;}
+  body{min-height:100%;background:#E9E6E0;color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;}
+  .phone{width:100%;max-width:430px;margin:0 auto;min-height:100vh;background:var(--bg);position:relative;}
 
   .orb{position:absolute;width:300px;height:300px;border-radius:50%;
     background:radial-gradient(circle at 50% 50%,rgba(201,163,106,.5),rgba(201,163,106,.2) 35%,rgba(201,163,106,0) 70%);
@@ -56,7 +56,13 @@
   .today-head{display:flex;align-items:center;justify-content:space-between;margin:24px 0 22px;}
   .streak{font-size:12px;color:var(--amber);letter-spacing:.05em;}
   .today-card{display:flex;justify-content:center;margin-bottom:30px;}
-  .tip{text-align:center;font-family:var(--serif);font-size:21px;line-height:1.6;padding:0 6px;}
+  .tip{text-align:center;font-family:var(--serif);font-size:20px;line-height:1.6;padding:0 12px;color:var(--ink-soft);}
+  .ft-label{text-align:center;font-size:11px;letter-spacing:.28em;color:var(--ink-faint);text-transform:uppercase;margin:24px 0 12px;}
+  .ft-row{display:flex;align-items:flex-start;gap:10px;padding:13px 2px;border-top:1px solid var(--line-soft);}
+  .ft-row:first-child{border-top:none;}
+  .ft-cat{flex:none;width:62px;font-size:13px;color:var(--ink);}
+  .ft-star{flex:none;width:76px;font-size:13px;color:var(--amber);letter-spacing:1px;}
+  .ft-txt{flex:1;font-size:13px;line-height:1.65;color:var(--ink-soft);}
   .yj{display:flex;align-items:center;justify-content:center;margin:30px 0;}
   .yj-item{display:flex;flex-direction:column;align-items:center;gap:7px;min-width:80px;}
   .yj-k{font-size:11px;color:var(--ink-faint);letter-spacing:.2em;}
@@ -90,8 +96,22 @@
   .read-head{text-align:center;margin-bottom:26px;min-height:48px;}
   .read-head .rh-py{font-size:11px;letter-spacing:.3em;color:var(--ink-faint);font-style:italic;margin-bottom:6px;}
   .read-head .rh-title{font-family:var(--serif);font-size:23px;letter-spacing:.04em;}
-  .cards-row{display:flex;justify-content:center;gap:10px;margin-bottom:8px;perspective:1400px;}
-  .card{flex:1 1 0;max-width:100px;aspect-ratio:100/166;position:relative;opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.8,.2,1);}
+  .cards-row{display:flex;justify-content:center;align-items:flex-start;flex-wrap:wrap;gap:14px;margin-bottom:8px;perspective:1400px;}
+  .cards-row.multi{gap:10px;}
+  .card-wrap{display:flex;flex-direction:column;align-items:center;gap:9px;}
+  .cw-label{font-size:12.5px;color:var(--ink-soft);text-align:center;line-height:1.35;min-height:17px;}
+  .cw-label .nm{font-family:var(--serif);color:var(--ink);}
+  .card{width:100px;aspect-ratio:100/166;position:relative;opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.8,.2,1);}
+  .cards-row.multi .cf-fallback .cf-mark{font-size:30px;}
+  .pick-hint{text-align:center;font-size:13.5px;color:var(--ink-soft);margin:20px 0 8px;line-height:1.7;}
+  .pickbar{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:430px;height:195px;z-index:15;}
+  .pickbar::before{content:"";position:absolute;inset:0;background:linear-gradient(to top,var(--bg) 32%,rgba(244,242,238,0));pointer-events:none;}
+  .fan{position:absolute;left:50%;bottom:18px;width:0;height:0;}
+  .fan-card{position:absolute;left:0;bottom:0;width:54px;height:86px;margin-left:-27px;border-radius:8px;background:radial-gradient(120% 80% at 50% -10%,var(--card-back-2),var(--card-back));border:1px solid #1d1916;box-shadow:0 7px 16px rgba(30,26,22,.26);transform-origin:50% 320px;transform:rotate(var(--r));transition:transform .5s cubic-bezier(.2,.8,.2,1),opacity .5s;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .fan-card::before{content:"";position:absolute;inset:6px;border-radius:5px;border:1px solid rgba(201,163,106,.26);}
+  .fan-card::after{content:"";width:20px;height:20px;border-radius:50%;border:1px solid rgba(232,226,216,.4);}
+  .fan-card:active:not(.taken){transform:rotate(var(--r)) translateY(-16px);z-index:3;}
+  .fan-card.taken{transform:rotate(var(--r)) translateY(-330px) scale(.32);opacity:0;pointer-events:none;}
   .card.in{opacity:1;transform:translateY(0);}
   .card-inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform 1.05s cubic-bezier(.16,1,.3,1);}
   .card.flip .card-inner{transform:rotateY(180deg);}
@@ -99,14 +119,14 @@
   .card-back{background:radial-gradient(120% 80% at 50% -10%,var(--card-back-2),var(--card-back));border:1px solid #1d1916;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 26px rgba(30,26,22,.18);}
   .card-back::before{content:"";position:absolute;inset:9px;border-radius:7px;border:1px solid rgba(201,163,106,.28);}
   .cb-mark{width:34px;height:34px;border-radius:50%;border:1px solid rgba(232,226,216,.4);}
-  .card-face{background:var(--face);transform:rotateY(180deg);border:1px solid var(--line);box-shadow:0 12px 30px rgba(30,26,22,.13);display:flex;flex-direction:column;align-items:center;padding:14px 8px 12px;}
-  .cf-pos{font-size:10px;letter-spacing:.22em;color:var(--ink-faint);}
-  .cf-mark{font-family:var(--serif);font-size:44px;line-height:1;color:var(--line);margin-top:12px;margin-bottom:auto;}
-  .card-face.rev .cf-glyphwrap{transform:rotate(180deg);}
-  .cf-name{font-family:var(--serif);font-size:18px;letter-spacing:.06em;margin-bottom:5px;}
-  .cf-ori{font-size:10.5px;letter-spacing:.12em;color:var(--ink-soft);display:flex;align-items:center;gap:4px;}
-  .cf-ori .dot{width:3px;height:3px;border-radius:50%;background:var(--amber);}
-  .card-face.rev .cf-ori .dot{background:var(--ink-faint);}
+  .card-face{background:var(--face);transform:rotateY(180deg);border:1px solid var(--line);box-shadow:0 12px 30px rgba(30,26,22,.13);overflow:hidden;}
+  .cf-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
+  .card-face.rev .cf-img{transform:rotate(180deg);}
+  .cf-fallback{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:var(--face);text-align:center;padding:8px;}
+  .card-face.noimg .cf-fallback{display:flex;}
+  .card-face.rev.noimg .cf-fallback{transform:rotate(180deg);}
+  .cf-fallback .cf-mark{font-family:var(--serif);font-size:40px;line-height:1;color:var(--ink-faint);}
+  .cf-fallback .cf-fbname{font-family:var(--serif);font-size:13px;color:var(--ink-soft);}
   .meanings{margin-top:24px;}
   .meaning{display:flex;gap:14px;padding:14px 0;border-top:1px solid var(--line-soft);opacity:0;transform:translateY(8px);transition:opacity .6s,transform .6s;}
   .meaning.in{opacity:1;transform:translateY(0);}
@@ -201,7 +221,10 @@
     <div class="today-head"><div class="eyebrow">TODAY · 今日牌</div><div class="streak" id="homeStreak"></div></div>
     <div class="today-card" id="homeCard"></div>
     <div class="tip" id="homeTip"></div>
+    <div class="ft-label">今日运势</div>
+    <div id="homeFortune"></div>
     <div class="yj" id="homeYj"></div>
+    <div id="signRow" style="text-align:center;margin:4px 0 16px"></div>
     <div class="cta-line">心里有正纠结的事？</div>
     <button class="btn block" onclick="go('ask')">问一事，看清此刻 →</button>
     <div class="disclaimer">每日一签仅供自我觉察与提点，不构成确定性预测。</div>
@@ -218,12 +241,14 @@
       <div class="domain" data-domain="事业"><div class="d-char">事业</div><div class="d-en">Career</div></div>
       <div class="domain" data-domain="财运"><div class="d-char">财运</div><div class="d-en">Fortune</div></div>
     </div>
+    <div class="label" style="margin-top:22px">选个牌阵</div>
+    <div class="domains" id="spreadSel"></div>
     <div class="field-wrap">
       <textarea class="field" id="situation" rows="3" maxlength="200" placeholder="比如：和对象在一起三年，最近总吵架，不知道该不该继续…"></textarea>
       <div class="count"><span id="cc">0</span>/200</div>
     </div>
     <div class="go-row">
-      <div class="go-hint">默契抽三张牌：<br>现状 · 阻碍 · 指引</div>
+      <div class="go-hint" id="goHint">默契抽三张牌：<br>现状 · 阻碍 · 指引</div>
       <button class="go-btn" id="goBtn" disabled onclick="goReading()">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
       </button>
@@ -237,9 +262,11 @@
     <div class="topbar"><div class="back" onclick="go('home')">‹</div><div class="tt">解读</div></div>
     <div class="read-head"><div class="rh-py" id="rhPy">chōu pái zhōng</div><div class="rh-title" id="rhTitle">正在为你抽牌</div></div>
     <div class="cards-row" id="cardsRow"></div>
+    <div class="pick-hint" id="pickHint" style="display:none"></div>
     <div class="meanings" id="meanings"></div>
     <div class="interp-wait" id="interpWait" style="display:none;">聆听你的处境，正在解读…</div>
     <div id="readingBody"></div>
+    <div id="pickArea" style="display:none"></div>
   </section>
 
   <!-- ===== MINE 我的 ===== -->
@@ -261,17 +288,38 @@
     <div class="panel" style="margin-top:30px;text-align:center;">
       <div class="pv-t serif">加我，聊得更深</div>
       <div class="pv-d">更深的牌阵与 1 对 1 解读，加微信解锁。</div>
-      <div class="pv-wx" onclick="toast('微信号已复制（演示）')">微信：fatetell_helper（点此复制）</div>
+      <div class="pv-wx" onclick="copyText('Syl18268346784','客服微信已复制')">微信：Syl18268346784（点此复制）</div>
     </div>
+    <div style="text-align:center;margin-top:22px"><button class="btn" style="background:transparent;color:var(--ink-faint);border:1px solid var(--line);font-size:13px;padding:12px 26px" onclick="go('admin')">🛠 管理后台（演示）</button></div>
   </section>
 
   <!-- ===== RECHARGE 充值 ===== -->
   <section class="screen" id="recharge">
-    <div class="topbar"><div class="back" onclick="go('mine')">‹</div><div class="tt">充值</div></div>
+    <div class="topbar"><div class="back" onclick="rechargeBack()">‹</div><div class="tt">充值</div></div>
     <div class="rc-balance"><div class="w-label">当前积分</div><div class="serif" style="font-size:36px;" id="rcBal">0</div></div>
     <div id="packs"></div>
-    <div class="mock-note">演示为「模拟支付」：点击即到账，不走真实扣款。小程序内走微信支付。</div>
-    <div class="disclaimer">积分为虚拟内容，用于解锁深度解读等服务，一经消耗不予退还。</div>
+    <div id="orderPanel" style="display:none;"></div>
+    <div id="rcFoot" class="disclaimer">积分为虚拟内容，用于解锁深度解读等服务，一经消耗不予退还。小程序内为微信扫码付款 + 客服后台开通到账。</div>
+  </section>
+
+  <!-- ===== ADMIN 管理后台 ===== -->
+  <section class="screen" id="admin">
+    <div class="topbar"><div class="back" onclick="go('mine')">‹</div><div class="tt">管理后台</div></div>
+    <div class="panel" style="margin-bottom:20px">
+      <div class="w-label">该用户当前积分</div>
+      <div class="w-balance serif" id="adBal">0</div>
+    </div>
+    <div style="font-size:13px;color:var(--ink-faint);letter-spacing:.1em;margin:6px 0 12px">待开通订单</div>
+    <div id="adOrders"></div>
+    <div style="font-size:13px;color:var(--ink-faint);letter-spacing:.1em;margin:28px 0 12px">手动调整积分</div>
+    <div class="panel">
+      <input id="adjAmt" type="number" placeholder="积分数量，如 100" style="width:100%;box-sizing:border-box;padding:12px;border:1px solid var(--line);border-radius:8px;font-size:15px;background:var(--bg);color:var(--ink);margin-bottom:14px"/>
+      <div style="display:flex;gap:12px">
+        <button class="btn" style="flex:1" onclick="adjustAdmin(1)">＋ 加积分</button>
+        <button class="btn" style="flex:1;background:transparent;color:var(--ink);border:1px solid var(--ink)" onclick="adjustAdmin(-1)">－ 扣积分</button>
+      </div>
+    </div>
+    <div class="disclaimer">演示后台：真实产品中此操作由 admin 云函数完成（管理员鉴权 + 幂等防重复），见仓库 cloudfunctions/admin。</div>
   </section>
 
   <!-- ===== TABBAR ===== -->
@@ -282,15 +330,20 @@
 </div>
 
 <div class="toast" id="toast"></div>
+<div id="posterMask" onclick="this.style.display='none'" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:60;align-items:center;justify-content:center;flex-direction:column;padding:30px"><img id="posterImg" style="max-width:90%;max-height:78%;border-radius:12px;box-shadow:0 12px 44px rgba(0,0,0,.45)"/><div style="color:#fff;font-size:13px;margin-top:16px;text-align:center">长按图片保存 / 转发 · 点空白处关闭</div></div>
 
 <script>
 /* ============ 牌库 ============ */
 const MAJOR=[["愚人","0"],["魔术师","I"],["女祭司","II"],["皇后","III"],["皇帝","IV"],["教皇","V"],["恋人","VI"],["战车","VII"],["力量","VIII"],["隐士","IX"],["命运之轮","X"],["正义","XI"],["倒吊人","XII"],["死神","XIII"],["节制","XIV"],["恶魔","XV"],["高塔","XVI"],["星星","XVII"],["月亮","XVIII"],["太阳","XIX"],["审判","XX"],["世界","XXI"]];
 const SUITS=[["权杖","杖"],["圣杯","杯"],["宝剑","剑"],["星币","币"]];
+const SUITCODE=["w","c","s","p"];
 const RANKS=["王牌","二","三","四","五","六","七","八","九","十","侍从","骑士","皇后","国王"];
-const DECK=[];MAJOR.forEach(([n,m])=>DECK.push({name:n,mark:m}));SUITS.forEach(([s,g])=>RANKS.forEach(r=>DECK.push({name:s+r,mark:g})));
+const pad2=n=>String(n).padStart(2,"0");
+const DECK=[];
+MAJOR.forEach(([n,m],i)=>DECK.push({name:n,mark:m,img:"cards/m"+pad2(i)+".jpg"}));
+SUITS.forEach(([s,g],si)=>RANKS.forEach((r,ri)=>DECK.push({name:s+r,mark:g,img:"cards/"+SUITCODE[si]+pad2(ri+1)+".jpg"})));
 const POSITIONS=["现状","阻碍","指引"];
-function drawCards(n){const d=DECK.slice();for(let i=d.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[d[i],d[j]]=[d[j],d[i]];}return d.slice(0,n).map((c,i)=>({position:POSITIONS[i],name:c.name,mark:c.mark,reversed:Math.random()<0.5}));}
+function drawCards(n,positions){const d=DECK.slice();for(let i=d.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[d[i],d[j]]=[d[j],d[i]];}return d.slice(0,n).map((c,i)=>({position:(positions&&positions[i])||POSITIONS[i]||('位置'+(i+1)),name:c.name,mark:c.mark,img:c.img,reversed:Math.random()<0.5}));}
 
 const SUITTIP={"权杖":{tip:"心里那点火还在，今天让它带你迈出一小步。",yi:"行动",ji:"空想"},"圣杯":{tip:"照顾一下自己的感受，它在跟你说真话。",yi:"倾听",ji:"压抑"},"宝剑":{tip:"想清楚比想得多更重要，给念头一点秩序。",yi:"梳理",ji:"钻牛角"},"星币":{tip:"把注意力放回手边能落地的小事上。",yi:"务实",ji:"攀比"}};
 const MAJORTIP={tip:"今天适合慢下来，听听自己真正想要什么。",yi:"觉察",ji:"勉强"};
@@ -303,9 +356,11 @@ const state={
   balance:300, streak:3,
   history:[{
     domain:"事业", when:"昨天",
-    data:{cards:[{position:"现状",name:"星币八",mark:"币",reversed:true,meaning:"星币八逆位——你不是在精进，是在重复；手还在动，人已经停了。"},{position:"阻碍",name:"月亮",mark:"XVIII",reversed:false,meaning:"月亮正位——挡路的不是那份风险，是你在用半夜的恐惧、而不是白天的清醒做决定。"},{position:"指引",name:"权杖二",mark:"杖",reversed:false,meaning:"权杖二正位——退一步看你手里的地图：这是个要规划丈量的选择，不是梭哈的赌。"}],situation:"你嘴上说在权衡稳定和机会，其实心里早就待腻了——真正让你迈不动的不是这步有多险，是你还没把'险'看清楚，只剩一团模糊的怕。",perspective:"星币八逆位摆在现状，说你已在原地空转，'稳定'对你早不是安全，是温水。绊住你的月亮，是你自己想象出来的迷雾。而权杖二告诉你，出路是把那团模糊摊开成一张能看的地图。",insights:["先分清你是'奔着成长去'，还是'逃着无聊走'——前者让你挑对机会，后者只会让你逃进下一个坑。","'稳定'不是没有成本的选项，你已经在用停滞付费了。","把'风险大'翻译成'我得先搞清哪三件事，这个险才算我扛得住'。"],action:"列出你必须先弄明白的几个问题再决定：这家公司的钱能撑多久、你去了具体做什么、最坏情况能不能兜得住。"}
+    data:{cards:[{position:"现状",name:"星币八",mark:"币",img:"cards/p08.jpg",reversed:true,meaning:"星币八逆位——你不是在精进，是在重复；手还在动，人已经停了。"},{position:"阻碍",name:"月亮",mark:"XVIII",img:"cards/m18.jpg",reversed:false,meaning:"月亮正位——挡路的不是那份风险，是你在用半夜的恐惧、而不是白天的清醒做决定。"},{position:"指引",name:"权杖二",mark:"杖",img:"cards/w02.jpg",reversed:false,meaning:"权杖二正位——退一步看你手里的地图：这是个要规划丈量的选择，不是梭哈的赌。"}],situation:"你嘴上说在权衡稳定和机会，其实心里早就待腻了——真正让你迈不动的不是这步有多险，是你还没把'险'看清楚，只剩一团模糊的怕。",perspective:"星币八逆位摆在现状，说你已在原地空转，'稳定'对你早不是安全，是温水。绊住你的月亮，是你自己想象出来的迷雾。而权杖二告诉你，出路是把那团模糊摊开成一张能看的地图。",insights:["先分清你是'奔着成长去'，还是'逃着无聊走'——前者让你挑对机会，后者只会让你逃进下一个坑。","'稳定'不是没有成本的选项，你已经在用停滞付费了。","把'风险大'翻译成'我得先搞清哪三件事，这个险才算我扛得住'。"],action:"列出你必须先弄明白的几个问题再决定：这家公司的钱能撑多久、你去了具体做什么、最坏情况能不能兜得住。"}
   }],
-  ledger:[{type:"新人赠送",amount:"+300",when:"刚刚"}]
+  ledger:[{type:"新人赠送",amount:"+300",when:"刚刚"}],
+  orders:[], _pollTimer:null,
+  firstFree:true, signedToday:false, _lastReading:null, _lastDomain:""
 };
 
 /* ============ 路由 ============ */
@@ -313,6 +368,7 @@ const $=s=>document.querySelector(s);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const TABS=["home","mine"];
 function go(id){
+  if(state._pollTimer){clearInterval(state._pollTimer);state._pollTimer=null;}
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   $("#"+id).classList.add("active");
   window.scrollTo(0,0);
@@ -325,6 +381,7 @@ function go(id){
   if(id==="ask")renderAsk();
   if(id==="mine")renderMine();
   if(id==="recharge")renderRecharge();
+  if(id==="admin")renderAdmin();
 }
 function doLogin(){ go("home"); }
 let toastT;
@@ -332,32 +389,81 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show"
 
 /* ============ 日签 ============ */
 let todaySign=null;
+const FT_OVERALL=['整体平稳，适合把拖着的事做个了结','节奏偏快，先理清优先级别贪多','内心有点起伏，先稳住情绪再做决定','适合主动的一天，别等别人先开口','宜收不宜放，守住手里的比追新的强'];
+const FT={
+  love:[{s:5,t:'桃花在熟人里，今天一句主动的关心比沉默有用'},{s:4,t:'把没说清的话说清，别用冷战解决问题'},{s:4,t:'单身别急着定义关系，先多见几次面'},{s:3,t:'对方要的是确定感，少点试探多点直接'},{s:3,t:'情绪上头时先放一放，明天再回那条消息'}],
+  career:[{s:5,t:'手头拖着的那件事，今天收尾会很顺'},{s:4,t:'先把一个挂着的沟通处理掉，别再拖'},{s:4,t:'别等完美方案，先动起来边做边调'},{s:3,t:'今天忌贪多，专注一件最重要的事'},{s:3,t:'有分歧先听完再说，适合配合不适合硬刚'}],
+  money:[{s:4,t:'适合记一笔账复盘，看清钱去哪了'},{s:4,t:'该花的小钱别抠，别在小事上耗神'},{s:3,t:'别冲动下单，加购物车放一天再决定'},{s:3,t:'收入别指望意外，稳一点更安心'},{s:5,t:'之前的一笔账/欠款，今天适合去理清'}]
+};
+function stars(n){return '★★★★★'.slice(0,n)+'☆☆☆☆☆'.slice(0,5-n);}
+function ftRow(cat,f){return `<div class="ft-row"><div class="ft-cat">${cat}</div><div class="ft-star">${stars(f.s)}</div><div class="ft-txt">${f.t}</div></div>`;}
 function renderHome(){
-  if(!todaySign){const c=drawCards(1)[0];c.position="今日";const t=tipOf(c);todaySign={card:c,tip:t.tip,yi:t.yi,ji:t.ji,energy:40+Math.floor(Math.random()*56)};}
+  if(!todaySign){
+    const c=drawCards(1)[0];c.position="今日";const t=tipOf(c);
+    const pk=a=>a[Math.floor(Math.random()*a.length)];
+    todaySign={card:c,yi:t.yi,ji:t.ji,energy:40+Math.floor(Math.random()*56),overall:pk(FT_OVERALL),love:pk(FT.love),career:pk(FT.career),money:pk(FT.money)};
+  }
   const s=todaySign;
   $("#homeStreak").textContent=state.streak>0?("连签 "+state.streak+" 天"):"";
-  $("#homeCard").innerHTML=cardHTML(s.card,true,150);
-  $("#homeTip").textContent=s.tip;
-  $("#homeYj").innerHTML=`<div class="yj-item"><div class="yj-k">宜</div><div class="yj-v">${s.yi}</div></div><div class="yj-sep"></div><div class="yj-item"><div class="yj-k">忌</div><div class="yj-v">${s.ji}</div></div><div class="yj-sep"></div><div class="yj-item"><div class="yj-k">能量</div><div class="yj-v">${s.energy}</div></div>`;
+  $("#homeCard").innerHTML=cardEl(s.card,{flipped:true,w:148,label:s.card.name});
+  $("#homeTip").textContent=s.overall;
+  $("#homeFortune").innerHTML=ftRow('❤️ 爱情',s.love)+ftRow('💼 事业',s.career)+ftRow('💰 财运',s.money);
+  $("#homeYj").innerHTML=`<div class="yj-item"><div class="yj-k">宜</div><div class="yj-v">${s.yi}</div></div><div class="yj-sep"></div><div class="yj-item"><div class="yj-k">忌</div><div class="yj-v">${s.ji}</div></div><div class="yj-sep"></div><div class="yj-item"><div class="yj-k">综合</div><div class="yj-v">${s.energy}</div></div>`;
+  renderSignRow();
 }
-function cardHTML(c,flipped,w){
-  const width=w||100;
-  return `<div class="card in ${flipped?'flip':''}" style="max-width:${width}px;width:${width}px;flex:none;">
-    <div class="card-inner"><div class="card-back"><div class="cb-mark"></div></div>
-    <div class="card-face ${c.reversed?'rev':''}"><div class="cf-pos">${c.position}</div><div class="cf-glyphwrap"><div class="cf-mark">${c.mark}</div></div><div class="cf-name">${c.name}</div><div class="cf-ori"><span class="dot"></span>${c.reversed?'逆位':'正位'}</div></div></div></div>`;
+function renderSignRow(){
+  const MS={3:50,7:290};
+  const next=Object.keys(MS).map(Number).find(d=>d>state.streak);
+  const sr=$("#signRow"); if(!sr)return;
+  const tip=next?(' · 再签 '+(next-state.streak)+' 天得 '+(MS[next]===290?'1次深读':MS[next]+'积分')):'';
+  sr.innerHTML=state.signedToday
+    ? `<div style="font-size:12.5px;color:var(--ink-faint)">✓ 今日已签 · 连签 ${state.streak} 天${tip}</div>`
+    : `<button class="btn" style="padding:12px 34px;font-size:14px" onclick="signIn()">📅 今日签到${tip}</button>`;
 }
+function signIn(){
+  if(state.signedToday)return;
+  state.signedToday=true;state.streak++;
+  const MS={3:50,7:290};
+  let reward=10,msg='签到成功 +10 积分';
+  if(MS[state.streak]){reward=MS[state.streak];msg=state.streak===7?'🎉 连签7天！送 1 次深度解读（+290 积分）':('🎉 连签'+state.streak+'天！奖励 +'+reward+' 积分');}
+  state.balance+=reward;
+  state.ledger.unshift({type:'签到奖励',amount:'+'+reward,when:'刚刚'});
+  renderHome();
+  toast(msg);
+}
+function cardFaceHTML(c){
+  const noimg=c.img?'':' noimg';
+  const im=c.img?`<img class="cf-img" src="${c.img}" alt="${c.name}" loading="lazy" onerror="this.closest('.card-face').classList.add('noimg')">`:'';
+  return `<div class="card-face ${c.reversed?'rev':''}${noimg}">${im}<div class="cf-fallback"><div class="cf-mark">${c.mark}</div><div class="cf-fbname">${c.name}</div></div></div>`;
+}
+function cardEl(c,o){
+  o=o||{};const w=o.w||100;
+  return `<div class="card-wrap"><div class="card in ${o.flipped?'flip':''}" style="width:${w}px"><div class="card-inner"><div class="card-back"><div class="cb-mark"></div></div>${cardFaceHTML(c)}</div></div>${o.label!==undefined?`<div class="cw-label">${o.label}</div>`:''}</div>`;
+}
+function cardHTML(c,flipped,w){return cardEl(c,{flipped:flipped,w:w});}
 
 /* ============ 问事 ============ */
 let domain="姻缘";
+const SPREADS=[
+  {id:'three',name:'三牌阵',sub:'现状·阻碍·指引',positions:['现状','阻碍','指引'],price:290},
+  {id:'choice',name:'关系抉择',sub:'5张·进阶',positions:['你的处境','对方/阻力','你真正要的','现实考量','指引'],price:590}
+];
+let spread=SPREADS[0];
+function pickSpread(id){const s=SPREADS.find(x=>x.id===id);if(s){spread=s;renderAsk();}}
 document.querySelectorAll("#domains .domain").forEach(d=>d.addEventListener("click",()=>{document.querySelectorAll("#domains .domain").forEach(x=>x.classList.remove("sel"));d.classList.add("sel");domain=d.dataset.domain;}));
 const field=$("#situation"),goBtn=$("#goBtn"),cc=$("#cc");
 field.addEventListener("input",()=>{cc.textContent=field.value.length;goBtn.disabled=field.value.trim().length<4;});
-function renderAsk(){$("#askBal").textContent=`当前积分 ${state.balance} · 深度解读 ${PRICE}/次`;}
+function renderAsk(){
+  $("#spreadSel").innerHTML=SPREADS.map(s=>`<div class="domain ${s.id===spread.id?'sel':''}" style="padding:14px 0 12px" onclick="pickSpread('${s.id}')"><div class="d-char" style="font-size:18px">${s.name}</div><div class="d-en" style="text-transform:none;letter-spacing:0;font-size:11px">${s.sub} · ${s.price}积分</div></div>`).join("");
+  const gh=$("#goHint"); if(gh)gh.innerHTML='抽 '+spread.positions.length+' 张牌：<br>'+spread.positions.slice(0,3).join(' · ')+(spread.positions.length>3?' …':'');
+  $("#askBal").innerHTML=state.firstFree?`<span style="color:var(--amber)">✨ 新人首单免费</span> · 当前积分 ${state.balance}`:`当前积分 ${state.balance} · ${spread.name} ${spread.price}/次`;
+}
 
 function goReading(){
   if(field.value.trim().length<4)return;
-  if(state.balance<PRICE){
-    if(confirm(`深度解读需 ${PRICE} 积分，当前 ${state.balance}，去充值？`))go("recharge");
+  const cost=state.firstFree?0:spread.price;
+  if(state.balance<cost){
+    if(confirm(`${spread.name}需 ${spread.price} 积分，当前 ${state.balance}，去充值？`))go("recharge");
     return;
   }
   const text=field.value.trim();
@@ -367,16 +473,47 @@ function goReading(){
 
 /* ============ 解读（接真 /api/tarot） ============ */
 async function runReading(dm,text){
-  // 重置
-  $("#rhTitle").textContent="正在为你抽牌";$("#rhPy").textContent="chōu pái zhōng";
-  $("#cardsRow").innerHTML="";$("#meanings").innerHTML="";$("#readingBody").innerHTML="";$("#interpWait").style.display="none";
+  state._lastDomain=dm;
+  $("#cardsRow").innerHTML="";$("#cardsRow").className="cards-row";$("#meanings").innerHTML="";$("#readingBody").innerHTML="";$("#interpWait").style.display="none";$("#pickHint").style.display="none";
   $("#orb").classList.add("show","pulse");
-  const cards=drawCards(3);
-  const apiPromise=interpret(dm,text,cards);
-  await renderCardBacks(cards);
-  await sleep(550);
+  const cards=drawCards(spread.positions.length,spread.positions);
+  const apiPromise=interpret(dm,text,cards);   // 后台先发起，等用户选完正好就绪
+  startPick(cards, ()=>afterPick(cards,dm,apiPromise));
+}
+// 顶部牌位：初始背面，抽中后翻开真图
+function cardSlotEl(c,i,w){
+  return `<div class="card-wrap"><div class="card in" id="rc${i}" style="width:${w}px"><div class="card-inner"><div class="card-back"><div class="cb-mark"></div></div>${cardFaceHTML(c)}</div></div><div class="cw-label" id="cl${i}">${c.position}</div></div>`;
+}
+function revealSlot(i,c){
+  const card=$("#rc"+i); if(card)card.classList.add("flip");
+  const lab=$("#cl"+i); if(lab)lab.innerHTML=`<span class="nm">${c.name}</span> · ${c.reversed?'逆位':'正位'}`;
+}
+// 底部扇形铺牌 → 凭直觉点选 N 张，逐张飞起翻开
+function startPick(cards,onDone){
+  const N=cards.length, w=N>3?84:100;
+  $("#rhTitle").textContent="凭直觉抽 "+N+" 张牌";$("#rhPy").textContent="píng zhí jué chōu pái";
+  $("#cardsRow").className="cards-row"+(N>3?" multi":"");
+  $("#cardsRow").innerHTML=cards.map((c,i)=>cardSlotEl(c,i,w)).join("");
+  const hint=$("#pickHint"); hint.style.display="block"; hint.textContent=`心中默念你的问题，凭直觉选 ${N} 张牌（0/${N}）`;
+  const FN=15, center=(FN-1)/2, step=Math.min(7.5,66/(FN-1));
+  const fan=Array.from({length:FN}).map((_,i)=>{const ang=((i-center)*step).toFixed(1);return `<div class="fan-card" style="--r:${ang}deg" onclick="window.__pick(${i})"></div>`;}).join("");
+  const pa=$("#pickArea"); pa.className="pickbar"; pa.style.display="block"; pa.innerHTML=`<div class="fan">${fan}</div>`;
+  let picked=0;
+  window.__pick=(idx)=>{
+    if(picked>=N)return;
+    const dc=pa.querySelectorAll(".fan-card")[idx];
+    if(!dc||dc.classList.contains("taken"))return;
+    dc.classList.add("taken");
+    revealSlot(picked,cards[picked]);
+    picked++;
+    const h=$("#pickHint"); if(h)h.textContent=picked<N?`再选 ${N-picked} 张（${picked}/${N}）`:'抽牌完成，正在为你解读…';
+    if(picked>=N)setTimeout(()=>{pa.style.display="none";pa.className="";pa.innerHTML="";onDone();},900);
+  };
+}
+// 抽完牌 → 出意义骨架 → 等真解读填充
+async function afterPick(cards,dm,apiPromise){
   $("#rhTitle").textContent="你抽到的牌";$("#rhPy").textContent="nǐ chōu dào de pái";
-  await flipCards();
+  $("#pickHint").style.display="none";
   await sleep(250);
   showMeaningSkeleton(cards);
   await sleep(150);
@@ -388,24 +525,22 @@ async function runReading(dm,text){
     await sleep(200);
     fillMeanings(cards,data.cards);
     renderBody(data);
-    // 扣分 + 入账 + 记历史
-    state.balance-=PRICE;
-    state.ledger.unshift({type:"深度解读",amount:"-"+PRICE,when:"刚刚"});
-    state.history.unshift({domain:dm,when:"刚刚",data:{cards:cards.map((c,i)=>({...c,meaning:(data.cards[i]||{}).meaning||""})),situation:data.situation,perspective:data.perspective,insights:data.insights,action:data.action}});
+    const cost=state.firstFree?0:spread.price;
+    state.balance-=cost;
+    state.ledger.unshift({type:cost===0?'首单免费体验':(spread.name+'解读'),amount:cost===0?'0':'-'+cost,when:'刚刚'});
+    if(cost===0)state.firstFree=false;
+    const rdData={cards:cards.map((c,i)=>({...c,meaning:(data.cards[i]||{}).meaning||""})),situation:data.situation,perspective:data.perspective,insights:data.insights,action:data.action};
+    state.history.unshift({domain:dm,when:"刚刚",data:rdData});
+    state._lastReading=rdData;
   }catch(e){
     $("#interpWait").style.display="none";
     $("#readingBody").innerHTML=`<div class="panel" style="text-align:center;"><div style="font-size:14px;line-height:1.7;color:var(--ink-soft);margin-bottom:14px;">牌已摊开，但解读没接上——可能网络晃了一下或体验太频繁。积分未扣，再试一次。</div><button class="btn ghost" onclick="go('ask')">重新抽牌</button></div>`;
   }
 }
-async function renderCardBacks(cards){
-  const row=$("#cardsRow");row.innerHTML="";
-  cards.forEach(c=>{const el=document.createElement("div");el.className="card";el.innerHTML=`<div class="card-inner"><div class="card-back"><div class="cb-mark"></div></div><div class="card-face ${c.reversed?'rev':''}"><div class="cf-pos">${c.position}</div><div class="cf-glyphwrap"><div class="cf-mark">${c.mark}</div></div><div class="cf-name">${c.name}</div><div class="cf-ori"><span class="dot"></span>${c.reversed?'逆位':'正位'}</div></div></div>`;row.appendChild(el);});
-  const els=row.querySelectorAll(".card");for(let i=0;i<els.length;i++){await sleep(130);els[i].classList.add("in");}
-}
-async function flipCards(){const els=$("#cardsRow").querySelectorAll(".card");for(let i=0;i<els.length;i++){els[i].classList.add("flip");await sleep(430);}}
 function showMeaningSkeleton(cards){const box=$("#meanings");box.innerHTML="";cards.forEach((c,i)=>{const el=document.createElement("div");el.className="meaning";el.id="mn"+i;el.innerHTML=`<div class="m-pos">${c.position}</div><div class="m-text"><span class="m-card">${c.name}·${c.reversed?'逆位':'正位'}</span></div>`;box.appendChild(el);setTimeout(()=>el.classList.add("in"),120*i);});}
 function fillMeanings(cards,aiCards){cards.forEach((c,i)=>{const el=$("#mn"+i);if(!el)return;const m=(aiCards&&aiCards[i]&&aiCards[i].meaning)||"";el.querySelector(".m-text").innerHTML=`<span class="m-card">${c.name}·${c.reversed?'逆位':'正位'}</span>　${m}`;});}
 function renderBody(d){
+  state._lastReading=d;
   const ins=(d.insights||[]).map((t,i)=>`<div class="ins"><div class="ins-n">${i+1}</div><div class="ins-t">${t}</div></div>`).join("");
   $("#readingBody").innerHTML=`
     <div class="sec reveal" id="r1"><div class="sec-label">此刻的你</div><div class="situation">${d.situation||""}</div></div>
@@ -413,22 +548,63 @@ function renderBody(d){
     <div class="sec reveal" id="r3"><div class="sec-label">你可以怎么选</div><div>${ins}</div></div>
     <div class="sec reveal" id="r4"><div class="sec-label">今天，先做这一件</div><div class="action-card"><div class="ac-label">Today</div><div class="ac-text">${d.action||""}</div></div></div>
     <div class="read-foot reveal" id="r5">
-      <div class="private"><div class="pv-t serif">想把这件事聊透？</div><div class="pv-d">加我微信，解锁更深的牌阵与 1 对 1 解读。</div><div class="pv-wx" onclick="toast('微信号已复制（演示）')">微信：fatetell_helper（点此复制）</div></div>
+      <div class="private"><div class="pv-t serif">想把这件事聊透？</div><div class="pv-d">加我微信，解锁更深的牌阵与 1 对 1 解读。</div><div class="pv-wx" onclick="toast('微信号已复制（演示）')">微信：Syl18268346784（点此复制）</div></div>
+      <button class="btn block" style="margin-bottom:12px" onclick="sharePoster()">🖼 生成分享海报转发</button>
       <div class="foot-actions"><button class="btn ghost" onclick="toast('已收藏（演示）')">收藏</button><button class="btn" onclick="go('ask')">再问一事</button></div>
       <div class="rf-line">塔罗是镜，不是判决。怎么走，始终由你说了算。</div>
     </div>`;
   ["r1","r2","r3","r4","r5"].forEach((id,i)=>setTimeout(()=>{const e=$("#"+id);if(e)e.classList.add("in");},i*240+60));
 }
 function renderDirect(d){
+  $("#pickArea").style.display="none";$("#pickHint").style.display="none";
   $("#rhTitle").textContent="你抽到的牌";$("#rhPy").textContent="nǐ chōu dào de pái";
   $("#orb").classList.add("show");$("#orb").classList.remove("pulse");
   $("#interpWait").style.display="none";
-  const row=$("#cardsRow");row.innerHTML="";
-  d.cards.forEach(c=>{row.insertAdjacentHTML("beforeend",cardHTML(c,true,100).replace('style="max-width:100px;width:100px;flex:none;"',''));});
+  const N=d.cards.length, w=N>3?84:100;
+  $("#cardsRow").className="cards-row"+(N>3?" multi":"");
+  $("#cardsRow").innerHTML=d.cards.map(c=>cardEl(c,{flipped:true,w:w,label:`<span class="nm">${c.name}</span> · ${c.reversed?'逆位':'正位'}`})).join("");
   const box=$("#meanings");box.innerHTML="";
   d.cards.forEach(c=>{box.insertAdjacentHTML("beforeend",`<div class="meaning in"><div class="m-pos">${c.position}</div><div class="m-text"><span class="m-card">${c.name}·${c.reversed?'逆位':'正位'}</span>　${c.meaning||""}</div></div>`);});
   renderBody(d);
   ["r1","r2","r3","r4","r5"].forEach(id=>{const e=$("#"+id);if(e)e.classList.add("in");});
+}
+
+/* ============ 分享海报 ============ */
+function wrapText(ctx,text,xx,yy,maxW,lh){const chars=(text||'').split('');let line='',y=yy;for(const ch of chars){const t=line+ch;if(ctx.measureText(t).width>maxW){ctx.fillText(line,xx,y);line=ch;y+=lh;}else line=t;}if(line)ctx.fillText(line,xx,y);return y+lh;}
+function loadImg(src){return new Promise(res=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>res(null);im.src=src;});}
+async function sharePoster(){
+  const d=state._lastReading; if(!d){toast('没有可分享的解读');return;}
+  toast('正在生成海报…');
+  const W=640,H=1120,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+  x.fillStyle='#F4F2EE';x.fillRect(0,0,W,H);
+  const g=x.createRadialGradient(W/2,150,10,W/2,150,270);g.addColorStop(0,'rgba(201,163,106,.30)');g.addColorStop(1,'rgba(201,163,106,0)');x.fillStyle=g;x.fillRect(0,0,W,380);
+  x.textAlign='center';x.fillStyle='#1A1815';x.font='600 32px "Songti SC",serif';x.fillText('FATETELL',W/2,86);
+  x.fillStyle='#A8A299';x.font='13px sans-serif';x.fillText('问一事 · 看清此刻',W/2,114);
+  if(state._lastDomain){x.fillStyle='#C9A36A';x.font='15px sans-serif';x.fillText('「'+state._lastDomain+'」',W/2,150);}
+  // 牌图一排（真图）
+  const cards=(d.cards||[]).slice(0,5);
+  const imgs=await Promise.all(cards.map(cc=>loadImg(cc.img)));
+  const n=imgs.length||1, cw=n>3?86:104, ch=Math.round(cw*166/100), gap=n>3?14:22;
+  const tw=n*cw+(n-1)*gap; let cx=(W-tw)/2; const cy=180;
+  imgs.forEach((im,k)=>{
+    const cc=cards[k];
+    if(im){x.save();x.beginPath();x.rect(cx,cy,cw,ch);x.clip();
+      if(cc.reversed){x.translate(cx+cw/2,cy+ch/2);x.rotate(Math.PI);x.drawImage(im,-cw/2,-ch/2,cw,ch);}else{x.drawImage(im,cx,cy,cw,ch);}x.restore();}
+    else{x.fillStyle='#EDEAE3';x.fillRect(cx,cy,cw,ch);x.fillStyle='#A8A299';x.font='30px "Songti SC",serif';x.textAlign='center';x.fillText(cc.mark||'',cx+cw/2,cy+ch/2+10);}
+    x.strokeStyle='rgba(201,163,106,.55)';x.lineWidth=2;x.strokeRect(cx,cy,cw,ch);
+    x.fillStyle='#56524C';x.font='12px sans-serif';x.textAlign='center';x.fillText((cc.name||'')+(cc.reversed?'(逆)':''),cx+cw/2,cy+ch+20);
+    cx+=cw+gap;
+  });
+  let yy=cy+ch+60;
+  x.textAlign='left';x.fillStyle='#1A1815';x.font='600 27px "Songti SC",serif';
+  yy=wrapText(x,d.situation||'',56,yy,W-112,42);
+  yy+=14;x.strokeStyle='#E4E0D8';x.beginPath();x.moveTo(56,yy);x.lineTo(W-56,yy);x.stroke();
+  yy+=42;x.fillStyle='#A8A299';x.font='12px sans-serif';x.fillText('TODAY · 先做这一件',56,yy);
+  yy+=30;x.fillStyle='#1A1815';x.font='600 19px "Songti SC",serif';yy=wrapText(x,d.action||'',56,yy,W-112,30);
+  const qr=await loadImg('cs-qr.png');const qx=W/2-72,qy=H-198;
+  if(qr)x.drawImage(qr,qx,qy,144,144);else{x.strokeStyle='#E4E0D8';x.strokeRect(qx,qy,144,144);x.fillStyle='#A8A299';x.font='12px sans-serif';x.textAlign='center';x.fillText('小程序码',W/2,qy+76);}
+  x.textAlign='center';x.fillStyle='#56524C';x.font='14px sans-serif';x.fillText('扫码加我，也来问一事',W/2,qy+170);
+  try{$("#posterImg").src=c.toDataURL('image/png');$("#posterMask").style.display='flex';}catch(e){toast('海报生成失败');}
 }
 
 /* ============ 我的 ============ */
@@ -440,14 +616,94 @@ function renderMine(){
   $("#mineLedger").innerHTML=state.ledger.length?state.ledger.map(l=>`<div class="led-item"><div class="le-type">${l.type}</div><div><div class="le-amt">${l.amount}</div><div class="le-when">${l.when}</div></div></div>`).join(""):`<div class="empty">暂无积分流水。</div>`;
 }
 function switchMine(t){document.querySelectorAll(".mtab").forEach(m=>m.classList.toggle("on",m.dataset.mtab===t));$("#mineHistory").style.display=t==="history"?"block":"none";$("#mineLedger").style.display=t==="ledger"?"block":"none";}
-function openHistory(i){const it=state.history[i];if(!it)return;go("reading");renderDirect(it.data);}
+function openHistory(i){const it=state.history[i];if(!it)return;state._lastDomain=it.domain;go("reading");renderDirect(it.data);}
 
 /* ============ 充值 ============ */
 function renderRecharge(){
+  if(state._pollTimer){clearInterval(state._pollTimer);state._pollTimer=null;}
+  state._order=null;
   $("#rcBal").textContent=state.balance;
-  $("#packs").innerHTML=PACKS.map(p=>`<div class="pack" onclick="buy('${p.id}')"><div><div class="pk-credits">${p.credits} 积分</div><div class="pk-label">${p.label}${p.tag?(' · '+p.tag):''}</div></div><div class="pk-price">¥${p.cny}</div></div>`).join("");
+  $("#orderPanel").style.display="none";
+  $("#rcFoot").style.display="block";
+  const packs=$("#packs"); packs.style.display="block";
+  packs.innerHTML=PACKS.map(p=>`<div class="pack" onclick="pickPack('${p.id}')"><div><div class="pk-credits">${p.credits} 积分</div><div class="pk-label">${p.label}${p.tag?(' · '+p.tag):''}</div></div><div class="pk-price">¥${p.cny}</div></div>`).join("");
 }
-function buy(id){const p=PACKS.find(x=>x.id===id);if(!p)return;state.balance+=p.credits;state.ledger.unshift({type:"充值",amount:"+"+p.credits,when:"刚刚"});renderRecharge();toast(`充值成功（模拟）+${p.credits}`);}
+function pickPack(id){
+  const p=PACKS.find(x=>x.id===id); if(!p)return;
+  const no='T'+Date.now()+Math.floor(Math.random()*1e6);
+  state._order={no,p};
+  state.orders.unshift({no,credits:p.credits,label:p.label,cny:p.cny,status:'pending'});
+  $("#packs").style.display="none";
+  $("#rcFoot").style.display="none";
+  const op=$("#orderPanel"); op.style.display="block";
+  op.innerHTML=`
+    <div style="font-family:var(--serif);font-size:18px;text-align:center;margin-bottom:18px">${p.label} · 应付 ¥${p.cny} · 到账 ${p.credits} 积分</div>
+    <img src="pay-qr.png" alt="微信收款码" style="display:block;width:220px;height:220px;object-fit:contain;margin:0 auto 20px;border:1px solid var(--line);border-radius:14px;background:#fff;padding:8px" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+    <div style="display:none;width:200px;height:200px;margin:0 auto 20px;border:1px dashed var(--line);border-radius:14px;align-items:center;justify-content:center;text-align:center;color:var(--ink-faint);font-size:12px;line-height:1.6;padding:16px;background:var(--bg-raise)">把收款码图命名<br>pay-qr.png<br>传到 demo 文件夹</div>
+    <div style="font-size:14px;line-height:2;color:var(--ink-soft)">
+      <div><b style="font-family:var(--serif)">①</b> 微信扫上方码付 <span style="color:var(--amber)">¥${p.cny}</span></div>
+      <div><b style="font-family:var(--serif)">②</b> 加客服微信，发：<span style="color:var(--amber)">付款截图 + 订单号 + 手机号</span></div>
+      <div style="margin:8px 0 4px;color:var(--ink-faint);font-size:13px">订单号 <span style="color:var(--ink);background:var(--bg-raise);padding:4px 10px;border-radius:6px;border:1px solid var(--line)">${no}</span></div>
+      <input id="phoneInput" type="number" placeholder="填手机号（选填，方便客服核对）" style="width:100%;box-sizing:border-box;margin:8px 0 4px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:var(--bg-raise);color:var(--ink)"/>
+      <div style="display:flex;gap:10px;margin:10px 0 14px">
+        <button class="btn" style="flex:1;padding:12px 0;font-size:13px" onclick="copyOrderInfo('${no}')">复制订单号+手机号</button>
+        <button class="btn" style="flex:1;padding:12px 0;font-size:13px;background:transparent;color:var(--ink);border:1px solid var(--ink)" onclick="copyText('Syl18268346784','已复制客服微信号')">复制客服微信号</button>
+      </div>
+      <div style="color:var(--amber);font-size:13px;margin-bottom:6px">客服微信：Syl18268346784</div>
+      <img src="cs-qr.png" alt="客服二维码" style="display:block;width:150px;height:150px;object-fit:contain;margin:4px 0 12px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:6px" onerror="this.style.display='none'"/>
+      <div><b style="font-family:var(--serif)">③</b> 客服核对后台开通后 <span style="color:var(--amber)">自动到账</span></div>
+    </div>
+    <div id="waitNote" style="font-size:12.5px;color:var(--ink-faint);text-align:center;margin:18px 0 14px">⏳ 正在等待客服开通到账…到账后这里会自动提示</div>
+    <button class="btn block" style="background:transparent;color:var(--ink);border:1px solid var(--ink)" onclick="renderRecharge()">返回套餐</button>`;
+  if(state._pollTimer)clearInterval(state._pollTimer);
+  state._pollTimer=setInterval(()=>checkOrderPaid(no),1500);
+}
+function checkOrderPaid(no){
+  const o=state.orders.find(x=>x.no===no);
+  if(o&&o.status==='paid'){
+    clearInterval(state._pollTimer);state._pollTimer=null;
+    const wn=$("#waitNote"); if(wn)wn.innerHTML='<span style="color:#1f9d55;font-size:14px">✅ 已到账 +'+o.credits+' 积分</span>';
+    $("#rcBal").textContent=state.balance;
+    toast('到账成功 +'+o.credits+' 积分');
+  }
+}
+function copyText(text,msg){
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(()=>toast(msg||'已复制')).catch(()=>fallbackCopy(text,msg));}
+  else fallbackCopy(text,msg);
+}
+function fallbackCopy(text,msg){const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast(msg||'已复制');}catch(e){toast('复制失败，请长按手动复制');}document.body.removeChild(ta);}
+function copyOrderInfo(no){
+  const el=document.getElementById('phoneInput');
+  const ph=el?el.value.trim():'';
+  copyText('订单号：'+no+(ph?('\n手机号：'+ph):''), ph?'已复制订单号+手机号':'已复制订单号');
+}
+function rechargeBack(){ if(state._pollTimer){clearInterval(state._pollTimer);state._pollTimer=null;} if(state._order){ renderRecharge(); } else { go('mine'); } }
+
+/* ============ 管理后台（演示）============ */
+function renderAdmin(){
+  $("#adBal").textContent=state.balance;
+  const pend=state.orders.filter(o=>o.status==='pending');
+  $("#adOrders").innerHTML=pend.length?pend.map(o=>`<div class="led-item"><div><div style="font-size:14px">${o.label} · ¥${o.cny} · ${o.credits}积分</div><div style="font-size:11px;color:var(--ink-faint);margin-top:3px">${o.no}</div></div><button class="btn" style="padding:10px 20px;font-size:13px" onclick="confirmOrderAdmin('${o.no}')">开通到账</button></div>`).join(""):`<div class="empty">暂无待开通订单（去"充值"下个单试试）</div>`;
+}
+function confirmOrderAdmin(no){
+  const o=state.orders.find(x=>x.no===no); if(!o||o.status==='paid')return;
+  o.status='paid';
+  state.balance+=o.credits;
+  state.ledger.unshift({type:"充值开通",amount:"+"+o.credits,when:"刚刚"});
+  renderAdmin();
+  toast('已为订单开通 +'+o.credits+' 积分');
+}
+function adjustAdmin(sign){
+  const el=document.getElementById('adjAmt');
+  const v=el?parseInt(el.value,10):0;
+  if(!v||v<=0){toast('请输入积分数量');return;}
+  const delta=sign*v;
+  state.balance=Math.max(0,state.balance+delta);
+  state.ledger.unshift({type:delta>=0?'管理员加分':'管理员扣分',amount:(delta>=0?'+':'')+delta,when:"刚刚"});
+  if(el)el.value='';
+  renderAdmin();
+  toast(delta>=0?('已加 '+v+' 积分'):('已扣 '+v+' 积分'));
+}
 
 /* ============ 调真实后端 ============ */
 async function interpret(dm,text,cards){
