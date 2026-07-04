@@ -1014,7 +1014,7 @@
       <div class="home-greet"><div class="hg-hi serif" id="homeGreet">你好</div><div class="hg-date" id="homeDate"></div></div>
       <div class="home-tr">
         <button class="hp-bal" id="signinBtn" onclick="go('mine')"><span class="brand-mark" data-size="15" style="margin-right:5px"></span><span id="homeTopBal">300</span></button>
-        <div class="hp-av" onclick="go('mine')"><span class="brand-mark" data-size="24"></span></div>
+        <div class="hp-av" id="homeAv" onclick="go('mine')"><span class="brand-mark" data-size="24"></span></div>
       </div>
     </div>
     <div class="prof-line" id="profLine"></div>
@@ -5747,6 +5747,13 @@ function paintBrandMarks(){document.querySelectorAll('.brand-mark').forEach(el=>
    +'<div class="vc-row"><b>体质·中医</b><span>'+tz+'</span></div>'
    +'<div class="vc-note">命理选品只依据这一个能量向量为你排石——换五行 / 换议题 / 换合盘对象，串也随之变。</div></div>';
  };
+})();
+</script>
+<script>
+(function(){
+ var ZE={鼠:'🐭',牛:'🐮',虎:'🐯',兔:'🐰',龙:'🐲',蛇:'🐍',马:'🐴',羊:'🐑',猴:'🐵',鸡:'🐔',狗:'🐶',猪:'🐷'};
+ window.setHomeZodiac=function(){var av=document.getElementById('homeAv');if(!av)return;var p=state.profile;var zc=(p&&(p.zodiac||(typeof zodiacOf==='function'&&zodiacOf(p.sy||p.by))))||'';var e=ZE[zc];if(e){av.innerHTML='<span style="font-size:23px;line-height:1" title="属'+zc+'">'+e+'</span>';}else{av.innerHTML='<span class="brand-mark" data-size="24"></span>';if(typeof paintBrandMarks==='function')paintBrandMarks();}};
+ if(typeof renderHome==='function'){var _rh=window.renderHome;window.renderHome=function(){var r=_rh.apply(this,arguments);try{setHomeZodiac();}catch(e){}return r;};}
 })();
 </script>
 </body>
