@@ -1168,6 +1168,7 @@
     </div>
     <div style="font-size:12px;color:var(--ink-faint);letter-spacing:.18em;margin:18px 2px 10px">探 索 · 自 我 与 关 系</div>
     <div class="exlist">
+      <div class="exrow" onclick="goFateFrom('shop')"><div class="ex-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.6"/><circle cx="12" cy="4.4" r="1.5"/><circle cx="19.6" cy="12" r="1.5"/><circle cx="12" cy="19.6" r="1.5"/><circle cx="4.4" cy="12" r="1.5"/></svg></div><div class="ex-main"><div class="ex-t">命理选品 · 为你排的珠串</div><div class="ex-d">按你的八字五行 + 此刻议题，为你而选</div></div><div class="ex-chev">›</div></div>
       <div class="exrow" onclick="go('invite')"><div class="ex-ic"><svg viewBox="0 0 24 24"><rect x="4" y="9.5" width="16" height="10.5" rx="1.2"/><path d="M4 13.5h16M12 9.5V20"/><path d="M12 9.5C10.8 6.4 6 6.7 6.4 9.5M12 9.5C13.2 6.4 18 6.7 17.6 9.5"/></svg></div><div class="ex-main"><div class="ex-t">邀请好友 · 得积分</div><div class="ex-d">拉一个好友，双方各得积分</div></div><div class="ex-chev">›</div></div>
       <div class="exrow" onclick="go('myorb')"><div class="ex-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M8.2 9.4a4.2 4.2 0 0 1 3.4-1.6"/></svg></div><div class="ex-main"><div class="ex-t">我的心光球</div><div class="ex-d">每天陪它说一句话，看它一点点长亮</div></div><div class="ex-chev">›</div></div>
       <div class="exrow" onclick="go('skinshop')"><div class="ex-ic"><svg viewBox="0 0 24 24"><path d="M6 4.5h12l3 5.2-9 9.8-9-9.8z"/><path d="M3 9.7h18M9 4.5 6 9.7l6 9.8 6-9.8-3-5.2"/></svg></div><div class="ex-main"><div class="ex-t">心光球皮肤 · 图鉴</div><div class="ex-d">按星座/情绪收集皮肤，实体卡可兑换</div></div><div class="ex-chev">›</div></div>
@@ -2435,7 +2436,7 @@ function renderShopFateCard(){
 /* ---- 漏斗钩子卡（星盘/合盘/树洞 读完 → 为你排了一串 →）---- */
 function fateHookCard(source){
   if(!state.phone)return '';
-  const cop={natal:'读懂了你的人格图谱，也为你排了一串——补你命里最缺的那口气 →',synastry:'按你俩的盘，我给你们各排了一串·共嵌一颗关系锚珠 →',emotion:'此刻这份情绪，我为你选了一串安着心的珠 →',tarot:'顺着这次牌意，为你排一串把方向戴在手上的珠 →'};
+  const cop={natal:'读懂了你的人格图谱，也为你排了一串——补你命里最缺的那口气 →',synastry:'按你俩的盘，我给你们各排了一串·共嵌一颗关系锚珠 →',emotion:'此刻这份情绪，我为你选了一串安着心的珠 →',tarot:'顺着这次牌意，为你排一串把方向戴在手上的珠 →',decide:'定住这个方向 · 为你排一串把决心戴在手上的珠 →',sos:'撑过来了 · 为你选一串安神定心的珠，陪你稳住 →'};
   return `<div onclick="goFateFrom('${source}')" style="display:flex;align-items:center;gap:12px;background:linear-gradient(160deg,#2a2216,#191207);border:1px solid rgba(201,162,78,.3);border-radius:14px;padding:14px 16px;margin-top:14px;cursor:pointer;color:#efe6d2">
     <div style="font-size:24px">📿</div>
     <div style="flex:1"><div style="font-size:14px;color:#f4ecd8;line-height:1.55">${cop[source]||cop.natal}</div><div style="font-size:11.5px;color:#b8ad91;margin-top:3px">命理选品 · 为你而选的意义，戴在手上</div></div>
@@ -2801,6 +2802,7 @@ const FEATURES=[
   {emoji:'🕰️',title:'时光胶囊 · 给未来的自己',desc:'封存此刻的心事与一张牌，让未来的你收到',go:'capsule',bg:'radial-gradient(120% 120% at 80% 0%,#2a2417,#19130b)',c2:'#c7b187',gc:'var(--amber)',cta:'去写 →',badge:1},
   {emoji:'📈',title:'情绪轨迹 · 你的成长曲线',desc:'看见这段时间，你的情绪与成长',go:'trajectory',bg:'radial-gradient(120% 120% at 80% 0%,#1f2330,#12141c)',c2:'#a8b6cc',gc:'#9fb0d0',cta:'去看看 →'},
   {emoji:'⚖️',title:'两难天平 · 帮你做决定',desc:'去留、选 A 还是 B？听见心里的答案',go:'decide',bg:'radial-gradient(120% 120% at 80% 0%,#2a2417,#19130b)',c2:'#c7b187',gc:'var(--amber)',cta:'去理清 →'},
+  {emoji:'📿',title:'命理选品 · 为你排的珠串',desc:'按你的八字五行与此刻议题，为你而选',go:'skinshop',bg:'radial-gradient(120% 120% at 80% 0%,#2a2216,#191207)',c2:'#c7b187',gc:'var(--amber)',cta:'去看看 →'},
 ];
 function renderFeatCarousel(){
   const wrap=$("#featCarouselWrap");if(!wrap)return;
@@ -2956,6 +2958,7 @@ function renderReportResult(d,card){
     `<div class="sec reveal in"><div class="sec-label">四大维度</div>${secs}</div>`+
     `<div class="sec reveal in"><div class="sec-label">四季流转</div><div class="rr-seasons">${seas}</div></div>`+
     `<div class="sec reveal in"><div class="sec-label">年度锦囊</div><div class="action-card"><div class="ac-label">丙午年</div><div class="ac-text">${d.advice||''}</div></div></div>`+
+    fateHookCard('natal')+
     `<div class="read-foot reveal in" style="margin-top:30px"><div class="private"><div class="pv-t serif">想把某一项聊透？</div><div class="pv-d">加我微信，1 对 1 帮你拆这一年怎么走。</div><div class="pv-wx" onclick="copyText('Syl18268346784','已复制客服微信')">微信：Syl18268346784（点此复制）</div></div></div>`;
 }
 function premiumCardFan(){const idx=[2,10,18],rot=[-14,0,14],dx=[-72,0,72];return idx.map((n,i)=>{const c=DECK[n]||DECK[0];return `<div class="apr-card" style="transform:translateX(-50%) translateX(${dx[i]}px) rotate(${rot[i]}deg);z-index:${i===1?3:2-Math.abs(i-1)}"><img src="${c.img}" alt=""></div>`;}).join('')+'<div class="apr-cap"></div>';}
@@ -3141,7 +3144,8 @@ function renderBody(d){
     ${hasMore?`<div class="reveal" id="r3" style="margin-top:18px"><div onclick="rdToggleMore()" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1px solid var(--line);border-radius:14px;cursor:pointer;background:var(--bg-raise)"><span style="font-size:13.5px;color:var(--ink)">展开更多 · 你的处境与 ${nOpt} 个选择方向</span><span id="rdMoreChev" style="color:var(--ink-faint);transition:transform .3s">▾</span></div><div id="rdMore" style="display:none">${more}</div></div>`:''}
     <div class="read-foot reveal" id="r4" style="margin-top:34px">
       <div onclick="copyText('Syl18268346784','已复制客服微信')" style="text-align:center;font-size:12.5px;color:var(--ink-faint);cursor:pointer;margin-bottom:18px;line-height:1.7">想把这件事聊透？<span style="color:var(--gold-deep)">加微信 1 对 1 解读 →</span></div>
-      <div class="foot-actions"><button class="btn ghost" onclick="toast('已收藏（演示）')">收藏</button><button class="btn" onclick="go('ask')">再问一事</button></div>
+      ${fateHookCard('tarot')}
+      <div class="foot-actions" style="margin-top:16px"><button class="btn ghost" onclick="toast('已收藏（演示）')">收藏</button><button class="btn" onclick="go('ask')">再问一事</button></div>
       <div class="rf-line">这是一面镜子，照见此刻、不是判决；怎么走，始终由你说了算。</div>
     </div>`;
   ["r0","r1","r2","r3","r4"].forEach((id,i)=>setTimeout(()=>{const e=$("#"+id);if(e)e.classList.add("in");},i*240+120));
@@ -4342,7 +4346,7 @@ function sosStep(n){
   if(n===2){box.innerHTML=wrap(`<div style="text-align:center"><div style="font-size:12px;color:${SP};letter-spacing:.2em">第 2 步 · 跟着呼吸</div><div style="position:relative;width:200px;height:200px;margin:30px auto 10px;display:flex;align-items:center;justify-content:center"><div id="sosCircle" style="width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#9a8bd0,#5f4f96);box-shadow:0 0 50px rgba(138,123,191,.45);transform:scale(.85)"></div><div id="sosBreathLabel" style="position:absolute;font-size:17px;color:#fff;font-family:var(--serif)">准备…</div></div><div style="font-size:12px;color:#9a8f7e;margin-top:10px">让圆圈带着你，吸气 4 秒、呼气 6 秒</div><button class="btn block" id="sosBreathNext" style="margin-top:24px;max-width:260px;margin-left:auto;margin-right:auto;background:linear-gradient(135deg,#8a7bbf,#5f4f96);color:#fff;border:none;opacity:.4;transition:opacity .5s" onclick="sosStep(3)">继续</button></div>`);setTimeout(sosBreathe,400);return;}
   if(n===3){_sosCard=drawCards(1)[0];_sosG=SOS_GROUND[Math.floor(Math.random()*SOS_GROUND.length)];box.innerHTML=wrap(`<div style="text-align:center"><div style="font-size:12px;color:${SP};letter-spacing:.2em">第 3 步 · 一张定心牌</div><div style="margin:18px auto 4px;width:120px">${cardEl(_sosCard,{flipped:true,w:120,label:''})}</div><div style="font-size:13px;color:${SP};margin-top:8px">${esc(_sosCard.name)}·${_sosCard.reversed?'逆位':'正位'}</div><div class="panel" style="margin-top:16px;${PPANEL};text-align:left"><div class="pv-d" style="color:var(--ink-soft);line-height:1.95">${_sosG}</div></div><button class="btn block" style="margin-top:22px;background:linear-gradient(135deg,#8a7bbf,#5f4f96);color:#fff;border:none" onclick="sosStep(4)">最后一步</button></div>`);return;}
   if(n===4){_sosA=SOS_ACTION[Math.floor(Math.random()*SOS_ACTION.length)];box.innerHTML=wrap(`<div style="text-align:center"><div style="font-size:12px;color:${SP};letter-spacing:.2em">第 4 步 · 一个小动作</div><div class="serif" style="font-size:20px;color:#282016;margin:12px 0 14px">把注意力，轻轻拉回身体</div><div class="panel" style="${PPANEL};text-align:left"><div class="pv-d" style="color:var(--ink-soft);line-height:2.1;font-size:15px">${_sosA}</div></div><button class="btn block" style="margin-top:24px;background:linear-gradient(135deg,#8a7bbf,#5f4f96);color:#fff;border:none" onclick="sosStep(5)">做完了</button></div>`);return;}
-  if(n===5){if(state.phone&&_sosMood){try{apiPost('/api/mood',{action:'log',phone:state.phone,mood:_sosMood,text:'[情绪急救]'});}catch(e){}}rewardFeat('sos','深夜急救');box.innerHTML=wrap(`<div style="text-align:center"><div style="font-size:40px">🌿</div><div class="serif" style="font-size:22px;color:#282016;margin:14px 0 8px">这一关，你又过来了</div><div style="font-size:13px;color:#9a8f7e;line-height:1.95;max-width:280px;margin:0 auto">情绪像潮水，会涨也会退。你刚刚没有逃，陪自己稳了下来——这很了不起。</div><button class="btn block" style="margin-top:26px;background:linear-gradient(135deg,#8a7bbf,#5f4f96);color:#fff;border:none" onclick="go('treehole')">🌙 还想说说，去树洞</button><button class="btn block ghost" style="margin-top:10px" onclick="go('home')">我好点了，回首页</button></div>`);return;}
+  if(n===5){if(state.phone&&_sosMood){try{apiPost('/api/mood',{action:'log',phone:state.phone,mood:_sosMood,text:'[情绪急救]'});}catch(e){}}rewardFeat('sos','深夜急救');box.innerHTML=wrap(`<div style="text-align:center"><div style="font-size:40px">🌿</div><div class="serif" style="font-size:22px;color:#282016;margin:14px 0 8px">这一关，你又过来了</div><div style="font-size:13px;color:#9a8f7e;line-height:1.95;max-width:280px;margin:0 auto">情绪像潮水，会涨也会退。你刚刚没有逃，陪自己稳了下来——这很了不起。</div><div style="max-width:300px;margin:20px auto 0;text-align:left">${fateHookCard('sos')}</div><button class="btn block" style="margin-top:14px;background:linear-gradient(135deg,#8a7bbf,#5f4f96);color:#fff;border:none" onclick="go('treehole')">🌙 还想说说，去树洞</button><button class="btn block ghost" style="margin-top:10px" onclick="go('home')">我好点了，回首页</button></div>`);return;}
 }
 function sosPickMood(el,m){document.querySelectorAll('#sosBody .th-mood').forEach(x=>x.classList.remove('on'));el.classList.add('on');_sosMood=m;const btn=document.getElementById('sosMoodNext');if(btn)btn.style.opacity='1';}
 function sosBreathe(){
@@ -4379,6 +4383,7 @@ function decideStep(n){
   if(n===3){box.innerHTML=`<div class="panel" style="background:linear-gradient(180deg,#fcf9f4,#f3ecdf);border:1px solid rgba(201,162,78,.2);text-align:center"><div style="font-size:28px">⚖️</div><div class="serif" style="font-size:18px;color:#282016;margin:8px 0 6px">心里的天平</div><div class="pv-d" style="color:var(--ink-soft);line-height:1.95">${decideVerdict()}</div></div>
     <div class="panel" style="margin-top:12px"><div class="pv-d" style="line-height:1.85">这只是一面镜子。真正的决定权，永远在你手里——你已经比刚才，更清楚自己想要什么了。</div></div>
     ${readerHookHTML('decToReader()','想把这个决定聊透？找 {nick} 陪你拆一拆 →')}
+    ${fateHookCard('decide')}
     <button class="btn block ghost" style="margin-top:12px" onclick="renderDecide()">换个问题，再来一次</button>
     <button class="btn block ghost" style="margin-top:10px" onclick="go('home')">回首页</button>`;return;}
 }
