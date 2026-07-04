@@ -2443,7 +2443,8 @@ function fateSelfBirth(){const p=state.profile;return (p&&p.sy)?{sy:p.sy,sm:p.sm
 function fateCurrentPlans(){
   const src=state._fateSource||'shop';const self=fateSelfBirth();
   if(src==='synastry'&&state._synTaBirth){
-    const low=(state._synLast?state._synLast.s.dims.slice().sort((a,b)=>a.v-b.v).slice(0,2):[]).map(d=>FATE_SYN_DIM_THEME[d.k]).filter(Boolean);
+    const _sl=state._synLast&&state._synLast.s;const _dims=(_sl&&_sl.dims)?_sl.dims:[];
+    const low=_dims.slice().sort((a,b)=>a.v-b.v).slice(0,2).map(d=>FATE_SYN_DIM_THEME[d.k]).filter(Boolean);
     const anchor='情绪安定';
     const mk=()=>low.concat(['情绪安定']).map((t,i)=>({theme:t,weight:0.7-i*0.12,source:'synastry'}));
     const her=fatePlanFor(self,mk().concat(fateSelfTags()),{wristCm:state._fateWrist||15,anchorTheme:anchor});
@@ -2590,11 +2591,21 @@ function studioPrice(id,mm){const b=STUDIO_BEADS[id];if(!b)return 0;const base=b
 function studioBeadImg(id){const b=STUDIO_BEADS[id];return (b&&b.img)?FATE_IMG[b.img]:null;}
 /* ---- 工作室状态：beads=[{id,mm,x,y}] 归一化坐标(-1..1) ---- */
 function studioState(){if(!state._studio)state._studio={beads:[],gathered:true,wristCm:null,cat:'水晶',sub:'all',q:''};return state._studio;}
-function studioSeedFromFate(){ // 用八字五行推荐预填初始串
-  try{const r=fateCurrentPlans();const plan=(r.mode==='pair')?r.her:r.plan;const map={clear:'clear',moonstone:'moonstone',bluelace:'bluelace',citrine:'citrine',nanhong:'nanhong',obsidian:'obsidian',silver:'silver',incense:'incense'};
-    const ids=plan.seq.map(id=>map[id]||'clear');const S=studioState();S.beads=ids.map(id=>({id,mm:STUDIO_BEADS[id]?STUDIO_BEADS[id].mm:8,x:0,y:0}));S.gathered=true;studioGather(true);
-  }catch(e){const S=studioState();if(!S.beads.length){['nanhong','clear','bluelace','clear','citrine','silver','incense','silver','moonstone','clear'].forEach(id=>S.beads.push({id,mm:STUDIO_BEADS[id].mm,x:0,y:0}));studioGather(true);}}
+function studioSeedFromFate(){ // 用八字五行推荐预填初始串；关系合盘=你/TA 各一串
+  const map={clear:'clear',moonstone:'moonstone',bluelace:'bluelace',citrine:'citrine',nanhong:'nanhong',obsidian:'obsidian',silver:'silver',incense:'incense'};
+  const toBeads=(plan)=>plan.seq.map(id=>{const bid=map[id]||'clear';return {id:bid,mm:STUDIO_BEADS[bid]?STUDIO_BEADS[bid].mm:8,x:0,y:0};});
+  try{const r=fateCurrentPlans();const S=studioState();
+    if(r.mode==='pair'&&r.her&&r.ta){
+      S._pairMode=true;if(S._side!=='her'&&S._side!=='ta')S._side='her';
+      S._pair={her:toBeads(r.her),ta:toBeads(r.ta)};
+      S.beads=S._pair[S._side];S.gathered=true;studioGather(true);return;
+    }
+    S._pairMode=false;S._pair=null;
+    S.beads=toBeads(r.plan);S.gathered=true;studioGather(true);
+  }catch(e){const S=studioState();S._pairMode=false;if(!S.beads.length){['nanhong','clear','bluelace','clear','citrine','silver','incense','silver','moonstone','clear'].forEach(id=>S.beads.push({id,mm:STUDIO_BEADS[id].mm,x:0,y:0}));studioGather(true);}}
 }
+/* ---- 关系合盘：你的串 / TA的串 切换 ---- */
+function studioSetSide(side){const S=studioState();if(!S._pairMode||S._side===side||!S._pair)return;S._pair[S._side]=S.beads;S._side=side;S.beads=S._pair[side]||[];STUDIO_SEL=null;if(S.gathered)studioGather(true);renderBeadshop();}
 function studioTotal(){const S=studioState();return S.beads.reduce((s,b)=>s+studioPrice(b.id,b.mm),0);}
 function studioWristCm(){const S=studioState();const sum=S.beads.reduce((a,b)=>a+(b.mm||8),0);return (sum/10).toFixed(1);} // 珠径累计≈手围
 /* ---- 收拢成串：把珠子按尺寸弧长排成椭圆环（归一化坐标）---- */
@@ -5275,10 +5286,11 @@ function paintBrandMarks(){document.querySelectorAll('.brand-mark').forEach(el=>
  window.renderBeadshop=function(){var box=document.getElementById('beadBody');if(!box)return;var back=state._fateBack||'skinshop';
   if(!state.phone){box.innerHTML='<span class="st-back" onclick="go(\''+back+'\')">‹ 返回</span><div class="st-blank">登录后进入灵感石验室<br><button class="st-cart" style="margin-top:14px" onclick="go(\'login\')">去登录</button></div>';return;}
   if(!fateSelfBirth()){box.innerHTML='<span class="st-back" onclick="go(\''+back+'\')">‹ 返回</span><div class="st-blank">先补出生信息，为你的八字预排一串<br><button class="st-cart" style="margin-top:14px" onclick="state._pendingFate=true;go(\'profile\')">去补出生信息 →</button></div>';return;}
-  var S=studioState();if(!S._seeded){S._seeded=true;studioSeedFromFate();}
+  var S=studioState();var _src=(state._fateSource||'shop');if(!S._seeded||S._seedSrc!==_src){S._seeded=true;S._seedSrc=_src;studioSeedFromFate();}
   var total=studioTotal(),n=S.beads.length,wrist=(S.wristCm||studioWristCm());var G=studioGrid(),shown=G.shown,subs=G.subs,pd=studioPlateDef();
   box.innerHTML='<div class="st-topbar"><span class="st-back" onclick="go(\''+back+'\')">‹ 返回</span><span class="st-title">灵感石验室</span><span class="st-guide" onclick="studioGuide()">指南 ?</span></div>'
    +'<div class="st-headrow"><span class="st-price">¥ '+total+'.0</span><span class="st-cnt">'+n+' 颗</span><span class="st-sugg">建议净手围 '+wrist+'cm</span></div>'
+   +(S._pairMode?('<div class="st-side-tog"><b class="'+(S._side==='her'?'on':'')+'" onclick="studioSetSide(\'her\')">你的串</b><b class="'+(S._side==='ta'?'on':'')+'" onclick="studioSetSide(\'ta\')">TA的串</b><span class="st-side-hint">你俩各一串·共嵌关系锚珠</span></div>'):'')
    +'<div class="st-stage"><canvas id="studioPlate" data-h="300"></canvas>'
      +'<div class="st-plate" onclick="studioSetPlate()">'+CUBE+'<span class="st-plate-nm">'+pd.n+'</span></div>'
      +'<div class="st-undo" onclick="studioUndo()">↩</div>'
@@ -5760,21 +5772,35 @@ window.fpSync=function(el){try{var c=el.children[0];if(!c)return;var step=c.offs
 #beadshop .st-vec .vc-row b{flex:none;width:58px;color:var(--soft2);font-weight:600}
 #beadshop .st-vec .vc-row span{flex:1;color:var(--ink)}
 #beadshop .st-vec .vc-note{font-size:10px;color:var(--faint2);margin-top:8px;line-height:1.6}
+#beadshop .st-side-tog{display:flex;align-items:center;gap:8px;margin:2px 0 8px}
+#beadshop .st-side-tog b{padding:7px 16px;border-radius:20px;font-size:12.5px;font-weight:600;color:var(--soft2);background:var(--card2);border:1px solid var(--line3);cursor:pointer;transition:.2s}
+#beadshop .st-side-tog b.on{color:#2a1f10;background:linear-gradient(135deg,#F0D79B,#D9A84E);border-color:transparent;box-shadow:0 6px 16px rgba(201,162,78,.28)}
+#beadshop .st-side-tog .st-side-hint{flex:1;text-align:right;font-size:10.5px;color:var(--faint2)}
 .ledger-sheet .ls-note{font-size:11px;color:var(--ink-soft);line-height:1.7;padding:10px 2px;border-bottom:1px solid var(--line-soft);margin-bottom:4px}
 </style>
 <script>
 (function(){
- window.studioVec=function(){try{var r=fateCurrentPlans();var plan=(r.mode==='pair')?r.her:r.plan;var tags=[];try{tags=fateSelfTags();}catch(e){}var top=tags.slice().sort(function(a,b){return b.weight-a.weight;}).slice(0,4);return {wx:plan.wx,tizhi:plan.tizhi,xf:plan.xiangfang,mode:r.mode,anchor:r.anchor,themes:top};}catch(e){return null;}};
+ window.studioVec=function(){try{var r=fateCurrentPlans();var S=studioState();var side=(S&&S._side)||'her';var plan=(r.mode==='pair')?(side==='ta'?r.ta:r.her):r.plan;var tags=[];try{tags=fateSelfTags();}catch(e){}var top=tags.slice().sort(function(a,b){return b.weight-a.weight;}).slice(0,4);return {wx:plan.wx,tizhi:plan.tizhi,xf:plan.xiangfang,mode:r.mode,anchor:r.anchor,themes:top,side:side};}catch(e){return null;}};
  window.studioVecCard=function(){
   var v=studioVec();if(!v)return '';var E=FATE_ELCN;
-  var wx=v.wx?('喜 '+(v.wx.favorable||[]).map(function(e){return E[e];}).join('')+' · 忌 '+(v.wx.avoid||[]).map(function(e){return E[e];}).join('')):'—';
+  var fav=function(w){return w?('喜 '+(w.favorable||[]).map(function(e){return E[e];}).join('')+' · 忌 '+(w.avoid||[]).map(function(e){return E[e];}).join('')):'—';};
   var srcCN={natal:'星盘',tarot:'塔罗',emotion:'情绪',wuxing:'体质',synastry:'合盘'};
-  var th=(v.themes&&v.themes.length)?v.themes.map(function(t){return t.theme+'<i style="font-style:normal;color:var(--faint2)">·'+(srcCN[t.source]||t.source)+'</i>';}).join(' / '):'情绪安定';
   var tz=v.tizhi?(v.tizhi.key+' · 宜「'+(v.xf||'沉檀龙麝')+'」香方'):'—';
-  var rel=(v.mode==='pair')?('<div class="vc-row"><b>关系轴</b><span>按你俩合盘最弱项补 · 锚「'+(v.anchor||'情绪安定')+'」<i style="font-style:normal;color:var(--faint2)">·合盘</i></span></div>'):'';
+  if(v.mode==='pair'){
+   var who=(v.side==='ta')?'TA':'你';var anc=v.anchor||'情绪安定';
+   var why=(v.side==='ta')
+     ?('顺 TA 的八字五行补这串；再共嵌一颗你俩的「关系锚珠」，锚定'+anc+'——让 TA 的能量和你搭得上。')
+     :('按你的八字五行补你命里最缺的那口气；再看你俩合盘最容易起消耗的地方，嵌一颗「关系锚珠」稳住'+anc+'。');
+   return '<div class="st-vec"><div class="vc-h">🧭 为「'+who+'」排这串的依据 · 关系合盘</div>'
+    +'<div class="vc-row"><b>五行·八字</b><span>'+who+'的八字 · '+fav(v.wx)+'</span></div>'
+    +'<div class="vc-row"><b>关系锚珠</b><span>你俩各一串 · 共嵌一颗 · 锚「'+anc+'」<i style="font-style:normal;color:var(--faint2)">·合盘</i></span></div>'
+    +'<div class="vc-row"><b>体质·中医</b><span>'+tz+'</span></div>'
+    +'<div class="vc-note">'+why+'　（上方可切「你的串 / TA的串」看各自依据）</div></div>';
+  }
+  var th=(v.themes&&v.themes.length)?v.themes.map(function(t){return t.theme+'<i style="font-style:normal;color:var(--faint2)">·'+(srcCN[t.source]||t.source)+'</i>';}).join(' / '):'情绪安定';
   return '<div class="st-vec"><div class="vc-h">🧭 为你排这串的依据 · 单一能量向量</div>'
-   +'<div class="vc-row"><b>五行·八字</b><span>'+wx+'</span></div>'
-   +'<div class="vc-row"><b>此刻议题</b><span>'+th+'</span></div>'+rel
+   +'<div class="vc-row"><b>五行·八字</b><span>'+fav(v.wx)+'</span></div>'
+   +'<div class="vc-row"><b>此刻议题</b><span>'+th+'</span></div>'
    +'<div class="vc-row"><b>体质·中医</b><span>'+tz+'</span></div>'
    +'<div class="vc-note">命理选品只依据这一个能量向量为你排石——换五行 / 换议题 / 换合盘对象，串也随之变。</div></div>';
  };
