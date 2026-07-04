@@ -395,7 +395,7 @@
   .tp-price span{font-size:11px;color:var(--ink-faint);margin-left:2px;}
   .tp-go{font-size:11px;color:var(--amber);margin-top:4px;}
   /* ---- 分组列表（参考 iOS 设置风格）---- */
-  .exlist{background:var(--bg-raise);border:1px solid var(--line);border-radius:16px;overflow:hidden;}
+  .exlist{background:var(--bg-raise);border-top:1px solid var(--line);border-bottom:1px solid var(--line);border-radius:0;overflow:hidden;margin:0 -20px;}
   .exrow{position:relative;display:flex;align-items:center;gap:13px;padding:15px 16px;cursor:pointer;transition:background .15s;}
   .exrow:active{background:#F1EEE8;}
   .exrow:not(:first-child)::before{content:"";position:absolute;left:54px;right:0;top:0;height:1px;background:var(--line-soft);}
@@ -2597,16 +2597,25 @@ function studioPaint(){
   const dp=Math.min(window.devicePixelRatio||1,2),nw=Math.round(W*dp),nh=Math.round(H*dp);if(cv.width!==nw||cv.height!==nh){cv.width=nw;cv.height=nh;}
   const ctx=cv.getContext('2d');ctx.setTransform(dp,0,0,dp,0,0);
   drawPlate(ctx,W,H);
-  const cx=W/2,cy=H*.46,R=Math.min(W,H*1.1)*.42,mmPx=R*0.052; // 8mm≈基准
-  // 串绳（仅收拢时露）
-  if(S.gathered&&S.beads.length){ctx.save();ctx.strokeStyle='rgba(120,100,72,.5)';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(cx,cy,R*0.62,R*0.62*0.9,0,0,7);ctx.stroke();ctx.restore();}
-  const items=S.beads.map((b,i)=>({b,i,px:cx+b.x*R,py:cy+b.y*R*0.9,d:Math.max(9,(b.mm||8)*mmPx)})).sort((p,q)=>p.py-q.py);
+  const cx=W/2,cy=H*.5,n=S.beads.length;let items;
+  if(S.gathered&&n){ // 收拢成串：参考「成串照片合成台」——沿椭圆等距、珠径按环长自适应相切，成连续手串
+    const rx=Math.min(W,H)*0.30,ry=rx*0.72,circ=2*Math.PI*Math.sqrt((rx*rx+ry*ry)/2);
+    const avg=S.beads.reduce((a,b)=>a+(b.mm||8),0)/n||8,baseD=circ/n*1.06;
+    ctx.save();ctx.strokeStyle='rgba(120,100,72,.3)';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,7);ctx.stroke();ctx.restore();
+    items=S.beads.map((b,i)=>{const a=i/n*6.2832-1.5708,yb=Math.sin(a),sp=(b.id==='silver'||b.id==='gold_sp');
+      const mmS=Math.max(0.5,Math.min(1.3,(b.mm||8)/avg)),depth=0.85+0.22*(yb+1)/2;
+      return {b,px:cx+rx*Math.cos(a),py:cy+ry*yb,d:baseD*(sp?0.5:mmS)*depth};});
+  }else{
+    const R=Math.min(W,H*1.1)*.42,mmPx=R*0.052;
+    items=S.beads.map(b=>({b,px:cx+b.x*R,py:cy+b.y*R*0.9,d:Math.max(9,(b.mm||8)*mmPx)}));
+  }
+  items.sort((p,q)=>p.py-q.py);
   items.forEach(o=>{const b=o.b,d=o.d,sku=STUDIO_BEADS[b.id];
     ctx.save();ctx.beginPath();ctx.ellipse(o.px,o.py+d*.42,d*.5,d*.18,0,0,7);ctx.fillStyle='rgba(56,46,34,.22)';ctx.filter='blur(4px)';ctx.fill();ctx.restore();
     const im=studioBeadImg(b.id);
     if(im&&im.complete&&im.naturalWidth){ctx.drawImage(im,o.px-d/2,o.py-d/2,d,d);}
-    else{const c=(sku&&sku.color)||['#ddd','#aaa'];const g=ctx.createRadialGradient(o.px-d*.28,o.py-d*.3,d*.1,o.px,o.py,d*.52);g.addColorStop(0,c[0]);g.addColorStop(1,c[1]);ctx.fillStyle=g;ctx.beginPath();ctx.arc(o.px,o.py,d*.5,0,7);ctx.fill();}
-    ctx.save();ctx.globalAlpha=.5;ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(o.px-d*.2,o.py-d*.22,d*.15,d*.09,-0.5,0,7);ctx.fill();ctx.restore();
+    else{const c=(sku&&sku.color)||['#ddd','#aaa'];const g=ctx.createRadialGradient(o.px-d*.28,o.py-d*.3,d*.1,o.px,o.py,d*.52);g.addColorStop(0,c[0]);g.addColorStop(1,c[1]);ctx.fillStyle=g;ctx.beginPath();ctx.arc(o.px,o.py,d*.5,0,7);ctx.fill();
+      ctx.save();ctx.globalAlpha=.5;ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(o.px-d*.2,o.py-d*.22,d*.15,d*.09,-0.5,0,7);ctx.fill();ctx.restore();}
     if(b===STUDIO_SEL){ctx.save();ctx.strokeStyle='rgba(178,58,44,.9)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(o.px,o.py,d*.5+3,0,7);ctx.stroke();ctx.restore();}
   });
 }
@@ -2615,7 +2624,7 @@ let STUDIO_SEL=null;
 function studioBindCanvas(cv){
   if(cv._sbound)return;cv._sbound=1;cv.style.touchAction='none';
   let drag=null;
-  const hit=(e)=>{const S=studioState();const r=cv.getBoundingClientRect();const W=r.width,H=r.height;const cx=W/2,cy=H*.46,R=Math.min(W,H*1.1)*.42,mmPx=R*0.052;
+  const hit=(e)=>{const S=studioState();const r=cv.getBoundingClientRect();const W=r.width,H=r.height;const cx=W/2,cy=H*.5,R=Math.min(W,H*1.1)*.42,mmPx=R*0.052;
     const mx=e.clientX-r.left,my=e.clientY-r.top;let best=null,bd=1e9;
     S.beads.forEach(b=>{const px=cx+b.x*R,py=cy+b.y*R*0.9,d=Math.max(9,(b.mm||8)*mmPx);const dist=Math.hypot(mx-px,my-py);if(dist<d*0.6&&dist<bd){bd=dist;best=b;}});
     return {best,R,cx,cy,W,H,mx,my};};
@@ -4089,7 +4098,7 @@ function renderNatal(){
   <div class="ns-detail" id="natalDetail"><div class="ns-g" id="nsG">\u2609</div><div class="ns-m"><div class="ns-nm" id="nsNm"></div><div class="ns-d" id="nsD"></div></div></div>
   <div class="ns-three" id="natalThree"></div>`;
   const full=`<div style="text-align:center;margin:2px 0 4px"><button id="natalFullBtn" class="btn ghost" style="font-size:13px;padding:8px 18px;border-color:#6b5a2e;color:#cbb78a" onclick="toggleNatalFull()">查看完整星盘图 ▾</button></div><div id="natalFullWrap" style="display:none"><div style="background:radial-gradient(120% 120% at 50% 40%,#2a2216,#17110a);border-radius:18px;padding:16px 10px;margin:8px 0 4px"><div id="natalWheel" style="width:100%;max-width:360px;margin:0 auto;min-height:200px"></div></div></div>`;
-  body.innerHTML=head+ring+full+`<button class="btn block" style="margin-top:18px;background:linear-gradient(135deg,#E7C892,var(--amber));color:#2a1f10;box-shadow:0 8px 22px rgba(201,162,78,.32);border:none" onclick="go('bazichart')">🀄 八字命盘 · 五行喜忌与体质</button><button class="btn block" style="margin-top:12px;border:1px solid var(--line);background:transparent;color:var(--ink)" onclick="go('synastry')">💞 八字合盘 · 测测你和 TA</button><button class="btn block" style="margin-top:12px" onclick="natalDeepRead()">🔮 深度人格图谱解读</button><div style="text-align:center;margin-top:14px"><span onclick="personaPoster()" style="font-size:12.5px;color:var(--ink-faint);cursor:pointer;border-bottom:1px solid var(--line)">✦ 生成人格标签海报 · 分享</span></div>${readerHookHTML('natalToReader()','想更懂这份人格图谱、聊聊最近的状态？找 {nick} 深聊一次 →')}<div class="disclaimer">星盘基于公历出生时间排算；时辰越精确，上升与宫位越准。</div><div id="natalDeep" style="margin-top:18px"></div>`;
+  body.innerHTML=head+ring+full+`<div style="display:flex;gap:11px;margin-top:18px"><div onclick="go('bazichart')" style="flex:1;min-width:0;cursor:pointer;border-radius:20px;padding:17px 14px 15px;box-shadow:0 14px 34px rgba(30,26,22,.16),inset 0 1px 0 rgba(230,196,106,.1);border:1px solid rgba(201,162,78,.34);background:radial-gradient(130% 120% at 50% 0%,#2c2417,#17110a)"><div style="font-size:28px;line-height:1">🀄</div><div class="serif" style="font-size:16px;font-weight:700;color:#f0e6cf;margin-top:11px;letter-spacing:.04em">八字命盘</div><div style="font-size:11.5px;color:#c7b187;margin-top:6px;line-height:1.65">四柱五行 · 喜用忌神<br>中医体质倾向</div><div style="font-size:12.5px;color:var(--amber);margin-top:12px;font-weight:600">排盘 →</div></div><div onclick="go('synastry')" style="flex:1;min-width:0;cursor:pointer;border-radius:20px;padding:17px 14px 15px;box-shadow:0 14px 34px rgba(30,26,22,.16),inset 0 1px 0 rgba(230,196,106,.1);border:1px solid rgba(201,162,78,.34);background:radial-gradient(130% 120% at 50% 0%,#2b1a1f,#170f12)"><div style="font-size:28px;line-height:1">💞</div><div class="serif" style="font-size:16px;font-weight:700;color:#f0e6cf;margin-top:11px;letter-spacing:.04em">关系合盘</div><div style="font-size:11.5px;color:#c7b187;margin-top:6px;line-height:1.65">八字合盘 · 五行互济<br>日主相性 · 配偶宫气</div><div style="font-size:12.5px;color:var(--amber);margin-top:12px;font-weight:600">合盘 →</div></div></div><button class="btn block" style="margin-top:12px" onclick="natalDeepRead()">🔮 深度人格图谱解读</button><div style="text-align:center;margin-top:14px"><span onclick="personaPoster()" style="font-size:12.5px;color:var(--ink-faint);cursor:pointer;border-bottom:1px solid var(--line)">✦ 生成人格标签海报 · 分享</span></div>${readerHookHTML('natalToReader()','想更懂这份人格图谱、聊聊最近的状态？找 {nick} 深聊一次 →')}<div class="disclaimer">星盘基于公历出生时间排算；时辰越精确，上升与宫位越准。</div><div id="natalDeep" style="margin-top:18px"></div>`;
   startNatalCanvas(ch);
   if(state._natalRead)renderNatalDeep(state._natalRead);
 }
