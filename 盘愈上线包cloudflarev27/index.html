@@ -5067,5 +5067,221 @@ function paintBrandMarks(){document.querySelectorAll('.brand-mark').forEach(el=>
 })();
 </script>
 
+<style>
+/* ===== Stone LAB v2（对齐参考视频交互）===== */
+#beadshop .st-stage{position:relative}
+#beadshop .st-step{display:flex;align-items:center;justify-content:center;gap:9px;margin-top:7px}
+#beadshop .st-step b{width:23px;height:23px;line-height:21px;text-align:center;border-radius:7px;border:1px solid var(--line3);background:#fff;color:var(--soft2);font-size:15px;cursor:pointer;user-select:none}
+#beadshop .st-step b.pl{background:var(--cin);color:#fff;border-color:var(--cin)}
+#beadshop .st-step span{min-width:14px;text-align:center;font-size:12.5px;color:var(--ink);font-weight:700}
+#beadshop .st-card{position:relative}
+#beadshop .st-card.has{border-color:var(--cin);box-shadow:inset 0 0 0 1px var(--cin)}
+#beadshop .st-card.has::after{content:'';position:absolute;right:7px;top:7px;width:6px;height:6px;border-radius:50%;background:var(--cin)}
+#beadshop .st-plate{position:absolute;left:12px;bottom:12px;height:34px;padding:0 11px 0 9px;border-radius:18px;background:rgba(255,255,255,.86);border:1px solid var(--line3);display:flex;align-items:center;gap:6px;color:var(--soft2);cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+#beadshop .st-plate-nm{font-size:11.5px;color:var(--ink);white-space:nowrap}
+#beadshop .st-empty-hint{position:absolute;left:0;right:0;top:34%;text-align:center;color:var(--faint2);font-size:13px;line-height:1.75;pointer-events:none;letter-spacing:.02em}
+.plate-sheet{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:430px;background:#fff;border-radius:22px 22px 0 0;padding:18px 18px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(0,0,0,.16)}
+.plate-sheet .ps-t{font-family:var(--serif);font-size:16px;font-weight:700;color:#1C1712;text-align:center;margin-bottom:16px}
+.plate-sheet .ps-row{display:flex;gap:10px;justify-content:center}
+.plate-sheet .ps-item{text-align:center;cursor:pointer;flex:1;min-width:0}
+.plate-sheet .ps-sw{width:60px;height:60px;margin:0 auto;border-radius:50%;box-shadow:0 5px 12px rgba(60,50,38,.18)}
+.plate-sheet .ps-item.on .ps-sw{outline:2px solid #B23A2C;outline-offset:2.5px}
+.plate-sheet .ps-n{font-size:11.5px;color:#7A766E;margin-top:8px}
+.plate-sheet .ps-item.on .ps-n{color:#B23A2C;font-weight:600}
+.plate-sheet .ps-close{width:100%;height:46px;margin-top:18px;border:none;border-radius:23px;background:#1C1712;color:#fff;font-size:14.5px;font-family:var(--serif);cursor:pointer}
+.wr-box{width:302px;max-width:86%;background:#fff;border-radius:22px;padding:24px 20px 20px;position:relative;text-align:center}
+.wr-box .wr-x{position:absolute;right:15px;top:13px;color:#B4B1A9;font-size:15px;cursor:pointer}
+.wr-t{font-family:var(--serif);font-size:18px;font-weight:700;color:#1C1712;margin-bottom:18px}
+.wr-num{display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:4px}
+.wr-num b{width:42px;height:42px;border-radius:12px;border:1px solid #E5DDCD;background:#fff;font-size:22px;color:#1C1712;cursor:pointer;line-height:40px;user-select:none}
+.wr-num span{font-family:var(--serif);font-size:32px;font-weight:700;color:#1C1712;min-width:96px}
+.wr-num span i{font-size:14px;font-style:normal;color:#9a9086;margin-left:3px}
+.wr-box input[type=range]{width:100%;margin:16px 0 8px;accent-color:#B23A2C}
+.wr-tip{font-size:11.5px;color:#9a9086;line-height:1.65;margin-bottom:18px}
+.wr-ok{width:100%;height:46px;border:none;border-radius:23px;background:#1C1712;color:#fff;font-size:15px;font-family:var(--serif);cursor:pointer}
+.wr-clr{font-size:12px;color:#B4B1A9;margin-top:13px;cursor:pointer;text-decoration:underline}
+.nm-in{width:100%;box-sizing:border-box;padding:13px;border:1px solid #E5DDCD;border-radius:12px;font-size:15px;text-align:center;outline:none;color:#1C1712}
+.nm-in:focus{border-color:#B23A2C}
+.st-prev-ov{position:fixed;inset:0;z-index:320;background:#F1EDE6;display:flex;flex-direction:column}
+.st-prev-top{height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;font-family:var(--serif);font-size:16px;font-weight:700;color:#1C1712}
+.st-prev-top .st-prev-back{font-size:26px;color:#1C1712;cursor:pointer;width:26px;line-height:1}
+.st-prev-scroll{flex:1;overflow-y:auto;padding:2px 16px 14px}
+.st-prev-stage{height:238px;display:flex;align-items:center;justify-content:center}
+.st-prev-stage canvas{width:100%;height:238px;display:block}
+.st-prev-card{background:#fff;border-radius:16px;padding:16px}
+.st-prev-card .pc-row{display:flex;justify-content:space-between;align-items:baseline}
+.pc-t{font-family:var(--serif);font-size:17px;font-weight:700;color:#1C1712}
+.pc-p{font-family:var(--serif);font-size:18px;font-weight:700;color:#B23A2C}
+.pc-sub{display:flex;align-items:center;gap:12px;margin-top:14px;padding-top:14px;border-top:1px solid #EFEBE3}
+.pc-k{font-size:11px;color:#9a9086}
+.pc-v{font-family:var(--serif);font-size:20px;font-weight:700;color:#1C1712;margin-top:2px;white-space:nowrap}
+.pc-note{font-size:10.5px;color:#B4B1A9;margin-top:3px}
+.pc-guide{margin-left:auto;padding:11px 15px;border-radius:22px;border:1px solid #E5DDCD;background:#fff;font-size:12.5px;color:#7A766E;cursor:pointer;white-space:nowrap}
+.st-prev-pkg{background:#fff;border-radius:16px;padding:14px 16px;margin-top:12px}
+.pk-h{font-size:12.5px;color:#7A766E;margin-bottom:10px}
+.pk-item{display:flex;align-items:center;gap:11px;padding:12px;border:1px solid #EAE7E0;border-radius:12px;margin-bottom:9px;cursor:pointer}
+.pk-item:last-child{margin-bottom:0}
+.pk-item.on{border-color:#8FB08A;background:rgba(143,176,138,.09)}
+.pk-dot{width:18px;height:18px;border-radius:50%;border:2px solid #CFC9BC;flex:none;box-sizing:border-box}
+.pk-item.on .pk-dot{border-color:#5F8F5A;background:radial-gradient(circle,#5F8F5A 42%,#fff 46%)}
+.pk-m{flex:1;min-width:0}
+.pk-n{font-size:14px;color:#1C1712}
+.pk-d{font-size:11px;color:#9a9086;margin-top:2px}
+.pk-f{font-size:13px;color:#7A766E;white-space:nowrap}
+.pk-item.on .pk-f{color:#5F8F5A;font-weight:600}
+.st-prev-list{background:#fff;border-radius:16px;padding:4px 16px;margin-top:12px}
+.st-prev-list .li{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #F2EFE9;font-size:12.5px;color:#5B5347}
+.st-prev-list .li:last-child{border-bottom:none}
+.st-prev-disc{font-size:10px;color:#B4B1A9;line-height:1.6;margin-top:12px;padding:0 4px}
+.st-prev-bar{display:flex;align-items:center;gap:10px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid #EFEBE3}
+.pb-tot{font-size:11.5px;color:#9a9086}
+.pb-tot b{font-family:var(--serif);font-size:19px;color:#B23A2C;font-weight:700;display:block;margin-top:1px}
+.pb-edit{padding:12px 16px;border-radius:24px;border:1px solid #E5DDCD;background:#fff;font-size:13.5px;color:#5B5347;cursor:pointer;white-space:nowrap}
+.pb-submit{flex:1;height:48px;border-radius:24px;border:none;background:#1C1712;color:#fff;font-size:15px;font-family:var(--serif);cursor:pointer}
+</style>
+<script>
+/* ===== Stone LAB v2：覆盖式增强，对齐参考视频交互 ===== */
+(function(){
+ if(typeof studioState!=='function')return;
+ var CUBE='<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"/><path d="M12 12v9M4 7.5l8 4.5 8-4.5"/></svg>';
+ window.STUDIO_PLATES=[
+  {k:'sutai',n:'素胎白瓷',bg:['#f4eee3','#e6dfd1'],p:['#fdfbf6','#efe9dd','#dbd2c2'],rim:'rgba(120,110,90,.16)',wm:'rgba(120,108,86,.17)'},
+  {k:'mojiang',n:'陌江夹青',bg:['#e7ede7','#d0dacd'],p:['#eef4ee','#c6d6c6','#a3bba1'],rim:'rgba(86,108,88,.22)',wm:'rgba(70,92,72,.18)'},
+  {k:'tianxing',n:'天星珊瑚',bg:['#e2eaf0','#c8d7e2'],p:['#ebf2f7','#bad0df','#93b1c6'],rim:'rgba(78,104,124,.24)',wm:'rgba(58,86,108,.2)'},
+  {k:'daishan',n:'黛山',bg:['#e5e7ec','#ccd1d8'],p:['#dde3ea','#9aabb9','#5c7182'],rim:'rgba(58,74,90,.28)',wm:'rgba(48,64,78,.22)'}
+ ];
+ window.studioPlateDef=function(){var S=studioState();var k=S.plate||'sutai';for(var i=0;i<STUDIO_PLATES.length;i++)if(STUDIO_PLATES[i].k===k)return STUDIO_PLATES[i];return STUDIO_PLATES[0];};
+
+ /* 换瓷盘配色 + Stone LAB 暗纹（覆盖 drawPlate；studioPaint 里画珠环不变）*/
+ window.drawPlate=function(ctx,W,H){var pd=studioPlateDef();var cx=W/2,cy=H*.44,pr=Math.min(W,H*1.15)*.44;
+  var bg=ctx.createRadialGradient(cx,cy*.8,pr*.2,cx,H*.58,Math.max(W,H)*.9);bg.addColorStop(0,pd.bg[0]);bg.addColorStop(1,pd.bg[1]);ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  ctx.save();ctx.filter='blur(16px)';ctx.fillStyle='rgba(60,50,38,.15)';ctx.beginPath();ctx.ellipse(cx,cy+pr*.30,pr*1.0,pr*.82,0,0,7);ctx.fill();ctx.restore();
+  ctx.save();ctx.beginPath();ctx.ellipse(cx,cy+pr*.10,pr,pr*.82,0,0,7);var g=ctx.createRadialGradient(cx-pr*.22,cy-pr*.3,pr*.1,cx,cy,pr);g.addColorStop(0,pd.p[0]);g.addColorStop(.66,pd.p[1]);g.addColorStop(1,pd.p[2]);ctx.fillStyle=g;ctx.fill();ctx.strokeStyle=pd.rim;ctx.lineWidth=1.6;ctx.stroke();ctx.restore();
+  ctx.save();ctx.globalAlpha=.55;ctx.beginPath();ctx.ellipse(cx,cy+pr*.10,pr*.74,pr*.6,0,0,7);ctx.strokeStyle=pd.rim;ctx.lineWidth=1;ctx.stroke();ctx.restore();
+  ctx.save();ctx.textAlign='center';ctx.fillStyle=pd.wm;ctx.font='italic 600 '+Math.round(pr*.14)+'px Georgia,serif';ctx.fillText('Stone',cx,cy+pr*.04);ctx.font='700 '+Math.round(pr*.2)+'px Georgia,serif';ctx.fillText('LAB',cx,cy+pr*.26);ctx.restore();};
+
+ /* 素材栏：每颗珠 −/＋ 步进（即点即加/减，无弹窗）*/
+ window.studioCountOf=function(id){return studioState().beads.filter(function(b){return b.id===id;}).length;};
+ window.studioAddQ=function(id){var b=STUDIO_BEADS[id];if(!b)return;var S=studioState();var a=S.beads.length*2.399,rr=.5;S.beads.push({id:id,mm:b.mm,x:S.gathered?0:Math.cos(a)*rr,y:S.gathered?0:Math.sin(a)*rr*.9});if(S.gathered)studioGather(true);try{if(navigator.vibrate)navigator.vibrate(6);}catch(e){}studioTouch();};
+ window.studioRemoveQ=function(id){var S=studioState();for(var i=S.beads.length-1;i>=0;i--){if(S.beads[i].id===id){S.beads.splice(i,1);break;}}if(S.gathered)studioGather(true);studioTouch();};
+ window.studioCard=function(id){var b=STUDIO_BEADS[id];var c=studioCountOf(id);return '<div class="st-card'+(c?' has':'')+'"><canvas id="stc_'+id+'" onclick="studioAddQ(\''+id+'\')"></canvas><div class="st-cn">'+b.n+'</div><div class="st-cp">'+b.mm+'mm · ¥'+b.price+'</div><div class="st-step"><b class="mn" onclick="studioRemoveQ(\''+id+'\')">−</b><span id="stq_'+id+'">'+c+'</span><b class="pl" onclick="studioAddQ(\''+id+'\')">＋</b></div></div>';};
+
+ /* 侧栏支持「正在使用」 */
+ window.studioGrid=function(){var S=studioState();var inCat=Object.keys(STUDIO_BEADS).filter(function(id){return STUDIO_BEADS[id].cat===S.cat;});
+  var used={};S.beads.forEach(function(b){used[b.id]=1;});
+  var shown=inCat.filter(function(id){var subOk=(S.sub==='all')?true:(S.sub==='using'?!!used[id]:STUDIO_BEADS[id].sub===S.sub);return subOk&&(!S.q||STUDIO_BEADS[id].n.indexOf(S.q)>=0);});
+  var seen={},subs=['using','all'];inCat.forEach(function(id){var s=STUDIO_BEADS[id].sub;if(!seen[s]){seen[s]=1;subs.push(s);}});
+  return {shown:shown,subs:subs};};
+ window.studioSubLabel=function(s){return s==='all'?'全部':s==='using'?'正在使用':s;};
+
+ /* 轻量刷新（不重建 DOM，保持滚动位置）*/
+ window.studioTouch=function(){var S=studioState();if(document.getElementById('studioPlate'))studioPaint();
+  var t=studioTotal(),n=S.beads.length,w=(S.wristCm||studioWristCm());
+  var q=function(sel){return document.querySelector('#beadBody '+sel);};
+  var pe=q('.st-price');if(pe)pe.textContent='¥ '+t+'.0';
+  var ce=q('.st-cnt');if(ce)ce.textContent=n+' 颗';
+  var se=q('.st-sugg');if(se)se.textContent='建议净手围 '+w+'cm';
+  var ca=q('.st-cart');if(ca)ca.innerHTML='🛒 加入购物车 · 结算　¥'+t+' · '+n+'颗';
+  var eh=document.getElementById('stEmptyHint');if(eh)eh.style.display=n?'none':'';
+  studioGrid().shown.forEach(function(id){var el=document.getElementById('stq_'+id);if(el)el.textContent=studioCountOf(id);var card=el&&el.parentNode&&el.parentNode.parentNode;if(card&&card.classList)card.classList.toggle('has',studioCountOf(id)>0);});};
+
+ window.studioSearch=function(v){studioState().q=v;var g=document.getElementById('stGrid');if(!g)return;var shown=studioGrid().shown;g.innerHTML=shown.map(studioCard).join('')||'<div class="st-empty">没有匹配的珠子</div>';shown.forEach(function(id){paintBeadThumb2(document.getElementById('stc_'+id),id);});};
+
+ /* 换瓷盘弹层 */
+ window.studioSetPlate=function(){var S=studioState();var cur=S.plate||'sutai';var m=document.createElement('div');m.className='sz-mask';
+  var items=STUDIO_PLATES.map(function(p){return '<div class="ps-item'+(p.k===cur?' on':'')+'" onclick="studioPickPlate(\''+p.k+'\')"><div class="ps-sw" style="background:radial-gradient(circle at 38% 32%,'+p.p[0]+','+p.p[1]+' 62%,'+p.p[2]+')"></div><div class="ps-n">'+p.n+'</div></div>';}).join('');
+  m.innerHTML='<div class="plate-sheet"><div class="ps-t">换个瓷盘背景</div><div class="ps-row">'+items+'</div><button class="ps-close" onclick="this.closest(\'.sz-mask\').remove()">完成</button></div>';
+  m.addEventListener('click',function(e){if(e.target===m)m.remove();});document.body.appendChild(m);window.__plateMask=m;};
+ window.studioPickPlate=function(k){studioState().plate=k;if(document.getElementById('studioPlate'))studioPaint();var pd=studioPlateDef();var nm=document.querySelector('#beadBody .st-plate-nm');if(nm)nm.textContent=pd.n;var m=window.__plateMask;if(m){var its=m.querySelectorAll('.ps-item');for(var i=0;i<STUDIO_PLATES.length;i++){if(its[i])its[i].classList.toggle('on',STUDIO_PLATES[i].k===k);}}toast('已换「'+pd.n+'」瓷盘');};
+
+ /* 设置手围：大数字 + 滑杆 + 步进 */
+ window.studioSetWrist=function(){var w=studioState().wristCm||16;var m=document.createElement('div');m.className='sz-mask';
+  m.innerHTML='<div class="wr-box"><div class="wr-x" onclick="this.closest(\'.sz-mask\').remove()">✕</div><div class="wr-t">设置手围</div><div class="wr-num"><b onclick="window.__wrStep(-0.5)">−</b><span id="wrNum">'+w.toFixed(1)+'<i>cm</i></span><b onclick="window.__wrStep(0.5)">＋</b></div><input id="wrRange" type="range" min="11" max="22" step="0.5" value="'+w+'" oninput="window.__wrSet(this.value)"><div class="wr-tip">手围会影响推荐串长与珠数搭配，可随时在此调整。</div><button class="wr-ok" onclick="window.__wrOk()">确认</button><div class="wr-clr" onclick="window.__wrClr()">清除设置（恢复未设置）</div></div>';
+  document.body.appendChild(m);var st={w:w};
+  var upd=function(){var s=document.getElementById('wrNum');if(s)s.innerHTML=st.w.toFixed(1)+'<i>cm</i>';var r=document.getElementById('wrRange');if(r)r.value=st.w;};
+  window.__wrStep=function(d){st.w=Math.max(11,Math.min(22,st.w+d));upd();};
+  window.__wrSet=function(v){st.w=parseFloat(v);var s=document.getElementById('wrNum');if(s)s.innerHTML=st.w.toFixed(1)+'<i>cm</i>';};
+  window.__wrOk=function(){studioState().wristCm=st.w;m.remove();renderBeadshop();};
+  window.__wrClr=function(){studioState().wristCm=null;m.remove();renderBeadshop();};
+  m.addEventListener('click',function(e){if(e.target===m)m.remove();});};
+
+ /* 保存作品：命名 */
+ window.studioSave=function(){var S=studioState();if(!S.beads.length){toast('盘里还没有珠子');return;}
+  var arr=[];try{arr=JSON.parse(localStorage.getItem('py_studio_saves')||'[]');}catch(e){}
+  if(arr.length>=8){toast('最多保存 8 个作品，请先删除后再保存');return;}
+  var m=document.createElement('div');m.className='sz-mask';
+  m.innerHTML='<div class="wr-box"><div class="wr-x" onclick="this.closest(\'.sz-mask\').remove()">✕</div><div class="wr-t">为你的作品命名</div><input class="nm-in" id="stNameIn" maxlength="10" placeholder="请输入 2-10 个字符"><div class="sz-act" style="margin-top:16px"><button class="sz-cancel" onclick="this.closest(\'.sz-mask\').remove()">取消</button><button class="sz-ok" onclick="window.__saveWork()">确认保存</button></div></div>';
+  document.body.appendChild(m);setTimeout(function(){var i=document.getElementById('stNameIn');if(i)i.focus();},60);
+  m.addEventListener('click',function(e){if(e.target===m)m.remove();});
+  window.__saveWork=function(){var i=document.getElementById('stNameIn');var nm=((i&&i.value)||'').trim();if(nm.length<2){toast('名字至少 2 个字');return;}
+   var a2=[];try{a2=JSON.parse(localStorage.getItem('py_studio_saves')||'[]');}catch(e){}
+   a2.push({name:nm,beads:S.beads,plate:S.plate||'sutai',when:Date.now()});try{localStorage.setItem('py_studio_saves',JSON.stringify(a2));}catch(e){}
+   m.remove();toast('已保存作品「'+nm+'」✓');};};
+
+ window.studioGuide=function(){modal({icon:'📿',title:'怎么玩灵感石验室',msg:'1) 点下方素材的「＋」把珠子加到盘上，「−」取走；\n2) 收拢成串一键排成手串，解除串珠后可自由拖动摆位；\n3) 换瓷盘、设手围、保存作品都在盘面与工具栏；\n4) 满意就「加入购物车」进结算预览下单。',okText:'开始'});};
+ window.studioMeasureGuide=function(){modal({icon:'📏',title:'怎么量手围',msg:'用软尺贴着手腕骨下方绕一圈，读到的厘米数就是净手围；没有软尺就用一根绳绕一圈，再比着直尺量长度。手围 +1~2cm ≈ 舒适串长。',okText:'知道了'});};
+
+ /* 结算预览页（照片级串图 + 手串周长 + 包装选择 + 提交订单）*/
+ window.studioCheckout=function(){var S=studioState();if(!S.beads.length){toast('先加几颗珠子');return;}
+  var total=studioTotal(),n=S.beads.length;var perim=(S.beads.reduce(function(a,b){return a+(b.mm||8);},0)/10);var wLo=(perim-1).toFixed(1),wHi=(perim-0.3).toFixed(1);
+  S.pkg=S.pkg||'std';var pay=total+(S.pkg==='gift'?15:0);
+  var grp={};S.beads.forEach(function(b){var k=b.id+'@'+b.mm;if(!grp[k])grp[k]={id:b.id,mm:b.mm,n:0};grp[k].n++;});
+  var list=Object.keys(grp).map(function(k){var r=grp[k];return '<div class="li"><span>'+STUDIO_BEADS[r.id].n+' '+r.mm+'mm ×'+r.n+'</span><span>¥'+(studioPrice(r.id,r.mm)*r.n)+'</span></div>';}).join('');
+  var ov=document.createElement('div');ov.className='st-prev-ov';ov.id='stPrevOv';
+  ov.innerHTML='<div class="st-prev-top"><span class="st-prev-back" onclick="studioClosePrev()">‹</span><span>结算预览</span><span style="width:26px"></span></div>'
+   +'<div class="st-prev-scroll"><div class="st-prev-stage"><canvas id="stPrevCv"></canvas></div>'
+   +'<div class="st-prev-card"><div class="pc-row"><span class="pc-t">灵感定制方案</span><span class="pc-p">¥'+total+'.0</span></div>'
+   +'<div class="pc-sub"><div><div class="pc-k">手串周长</div><div class="pc-v">'+perim.toFixed(1)+' cm</div><div class="pc-note">建议净手围 '+wLo+'~'+wHi+' cm</div></div><button class="pc-guide" onclick="studioMeasureGuide()">查看测量指南</button></div></div>'
+   +'<div class="st-prev-pkg"><div class="pk-h">包装选择</div>'
+   +'<div class="pk-item'+(S.pkg==='std'?' on':'')+'" onclick="studioPickPkg(\'std\')"><div class="pk-dot"></div><div class="pk-m"><div class="pk-n">普通包装</div><div class="pk-d">基础防护包装，适合日常佩戴收货</div></div><div class="pk-f">免费</div></div>'
+   +'<div class="pk-item'+(S.pkg==='gift'?' on':'')+'" onclick="studioPickPkg(\'gift\')"><div class="pk-dot"></div><div class="pk-m"><div class="pk-n">精美礼盒</div><div class="pk-d">送礼推荐，含礼盒包装</div></div><div class="pk-f">+¥15</div></div></div>'
+   +'<div class="st-prev-list">'+list+'</div>'
+   +'<div class="st-prev-disc">提交后凭定制码联系客服确认净手围与尾款；含定制香珠约 15-20 天。命理选品仅供自我觉察参考，香珠为古法气味体验、非医疗声称。</div></div>'
+   +'<div class="st-prev-bar"><div class="pb-tot">合计<b id="pbPay">¥'+pay+'</b></div><button class="pb-edit" onclick="studioClosePrev()">修改设计</button><button class="pb-submit" onclick="studioSubmitOrder()">提交订单</button></div>';
+  document.body.appendChild(ov);setTimeout(function(){studioPaintProduct(document.getElementById('stPrevCv'));},40);};
+ window.studioClosePrev=function(){var o=document.getElementById('stPrevOv');if(o)o.remove();};
+ window.studioPickPkg=function(k){var S=studioState();S.pkg=k;var o=document.getElementById('stPrevOv');if(!o)return;var its=o.querySelectorAll('.pk-item');if(its[0])its[0].classList.toggle('on',k==='std');if(its[1])its[1].classList.toggle('on',k==='gift');var pb=document.getElementById('pbPay');if(pb)pb.textContent='¥'+(studioTotal()+(k==='gift'?15:0));};
+ window.studioPaintProduct=function(cv){if(!cv)return;var S=studioState();var beads=S.beads;if(!beads.length)return;
+  var W=cv.clientWidth||cv.parentNode.clientWidth||320,H=238,dp=Math.min(window.devicePixelRatio||1,2);cv.width=W*dp;cv.height=H*dp;var ctx=cv.getContext('2d');ctx.setTransform(dp,0,0,dp,0,0);ctx.clearRect(0,0,W,H);
+  var cx=W/2,cy=H/2,n=beads.length,rx=Math.min(W,H*1.5)*0.33,ry=rx*0.82;
+  ctx.save();ctx.textAlign='center';ctx.fillStyle='rgba(150,138,116,.5)';ctx.font='italic 600 15px Georgia,serif';ctx.fillText('Stone',cx,cy-2);ctx.font='700 23px Georgia,serif';ctx.fillText('LAB',cx,cy+21);ctx.restore();
+  var circ=2*Math.PI*Math.sqrt((rx*rx+ry*ry)/2),avg=beads.reduce(function(a,b){return a+(b.mm||8);},0)/n||8,baseD=circ/n*1.06;
+  var items=beads.map(function(b,i){var a=i/n*6.2832-1.5708,yb=Math.sin(a),sp=(b.id==='silver'||b.id==='gold_sp');var mmS=Math.max(0.5,Math.min(1.3,(b.mm||8)/avg)),depth=0.85+0.22*(yb+1)/2;return {b:b,px:cx+rx*Math.cos(a),py:cy+ry*yb,d:baseD*(sp?0.5:mmS)*depth};}).sort(function(p,q){return p.py-q.py;});
+  items.forEach(function(o){var d=o.d,sku=STUDIO_BEADS[o.b.id];ctx.save();ctx.beginPath();ctx.ellipse(o.px,o.py+d*.42,d*.5,d*.16,0,0,7);ctx.fillStyle='rgba(60,50,38,.15)';ctx.filter='blur(5px)';ctx.fill();ctx.restore();var im=studioBeadImg(o.b.id);if(im&&im.complete&&im.naturalWidth){ctx.drawImage(im,o.px-d/2,o.py-d/2,d,d);}else{var c=(sku&&sku.color)||['#ddd','#aaa'];var gg=ctx.createRadialGradient(o.px-d*.28,o.py-d*.3,d*.1,o.px,o.py,d*.52);gg.addColorStop(0,c[0]);gg.addColorStop(1,c[1]);ctx.fillStyle=gg;ctx.beginPath();ctx.arc(o.px,o.py,d*.5,0,7);ctx.fill();ctx.save();ctx.globalAlpha=.5;ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(o.px-d*.2,o.py-d*.22,d*.15,d*.09,-0.5,0,7);ctx.fill();ctx.restore();}});};
+ window.studioSubmitOrder=async function(){var S=studioState();var total=studioTotal();var pkg=S.pkg||'std';var pkgFee=pkg==='gift'?15:0;var pay0=total+pkgFee;
+  var custom=S.beads.some(function(b){return STUDIO_BEADS[b.id]&&STUDIO_BEADS[b.id].stock==='custom';});
+  var wrist=S.wristCm||studioWristCm();
+  var name=('灵感定制·'+(STUDIO_BEADS[S.beads[0].id]?STUDIO_BEADS[S.beads[0].id].n:'串')+'·'+wrist+'cm'+(pkg==='gift'?'·礼盒':'')).slice(0,40);
+  var usePt=Math.min(state.balance,450),yuanOff=Math.min(Math.round(usePt/15),Math.round(total*0.3)),useReal=usePt>0&&yuanOff>0,pay=Math.max(0,pay0-(useReal?yuanOff:0));
+  var r=await apiPost('/api/goods',{action:'redeem',phone:state.phone,goodId:'studio',name:name,ptOff:useReal?usePt:0,yuanOff:useReal?yuanOff:0,price:pay0});
+  var o=r.ok,j=r.j;
+  if(o&&j&&j.ok&&j.code){if(typeof j.balance==='number')state.balance=j.balance;if(useReal)state.ledger.unshift({type:'积分抵扣 · '+name,amount:'-'+usePt,when:'刚刚'});refreshBalanceUI();studioClosePrev();
+   await modal({icon:'📿',title:'订单已提交',msg:(useReal?'已抵扣 '+usePt+' 积分。\n':'')+'定制码 '+j.code+'\n'+(pkg==='gift'?'（含精美礼盒 +¥15）\n':'')+'发客服微信 Syl18268346784 确认净手围与尾款 ¥'+pay+'。',okText:'复制码 · 找客服'});copyText(j.code,'定制码已复制～');
+  }else toast((j&&j.error)||'提交失败');};
+
+ /* 重建 renderBeadshop：换盘钮 + 空态提示 + −/＋ 素材栏 */
+ window.renderBeadshop=function(){var box=document.getElementById('beadBody');if(!box)return;var back=state._fateBack||'skinshop';
+  if(!state.phone){box.innerHTML='<span class="st-back" onclick="go(\''+back+'\')">‹ 返回</span><div class="st-blank">登录后进入灵感石验室<br><button class="st-cart" style="margin-top:14px" onclick="go(\'login\')">去登录</button></div>';return;}
+  if(!fateSelfBirth()){box.innerHTML='<span class="st-back" onclick="go(\''+back+'\')">‹ 返回</span><div class="st-blank">先补出生信息，为你的八字预排一串<br><button class="st-cart" style="margin-top:14px" onclick="state._pendingFate=true;go(\'profile\')">去补出生信息 →</button></div>';return;}
+  var S=studioState();if(!S._seeded){S._seeded=true;studioSeedFromFate();}
+  var total=studioTotal(),n=S.beads.length,wrist=(S.wristCm||studioWristCm());var G=studioGrid(),shown=G.shown,subs=G.subs,pd=studioPlateDef();
+  box.innerHTML='<div class="st-topbar"><span class="st-back" onclick="go(\''+back+'\')">‹ 返回</span><span class="st-title">灵感石验室</span><span class="st-guide" onclick="studioGuide()">指南 ?</span></div>'
+   +'<div class="st-headrow"><span class="st-price">¥ '+total+'.0</span><span class="st-cnt">'+n+' 颗</span><span class="st-sugg">建议净手围 '+wrist+'cm</span></div>'
+   +'<div class="st-stage"><canvas id="studioPlate" data-h="300"></canvas>'
+     +'<div class="st-plate" onclick="studioSetPlate()">'+CUBE+'<span class="st-plate-nm">'+pd.n+'</span></div>'
+     +'<div class="st-undo" onclick="studioUndo()">↩</div>'
+     +'<div class="st-empty-hint" id="stEmptyHint" style="'+(n?'display:none':'')+'">轻点下方素材，<br>添加第一颗珠子 ✧</div></div>'
+   +'<div class="st-tools"><button class="st-tool" onclick="studioSetWrist()">📏 '+(S.wristCm?S.wristCm+'cm':'手围')+'</button><button class="st-tool" onclick="studioClear()">🗑</button><button class="st-tool" onclick="studioSave()">💾</button><button class="st-gather" onclick="studioToggleGather()">'+(S.gathered?'解除串珠':'收拢成串')+'</button></div>'
+   +'<button class="st-cart" onclick="studioCheckout()">🛒 加入购物车 · 结算　¥'+total+' · '+n+'颗</button>'
+   +'<div class="st-search"><input placeholder="搜珠子（如 南红 / 月光 / 香珠）" value="'+esc(S.q||'')+'" oninput="studioSearch(this.value)"></div>'
+   +'<div class="st-cats">'+STUDIO_CAT.map(function(c){return '<b class="'+(S.cat===c?'on':'')+'" onclick="studioSetCat(\''+c+'\')">'+c+'</b>';}).join('')+'</div>'
+   +'<div class="st-catbody"><div class="st-side">'+subs.map(function(s){return '<div class="'+(S.sub===s?'on':'')+'" onclick="studioSetSub(\''+s+'\')">'+studioSubLabel(s)+'</div>';}).join('')+'</div>'
+     +'<div class="st-grid" id="stGrid">'+(shown.map(studioCard).join('')||'<div class="st-empty">没有匹配的珠子</div>')+'</div></div>'
+   +'<div class="st-disc">珠子为示意资产（换实拍即照片级）；初始串由你的八字五行预排，可自由增减/换盘/摆位。命理选品仅供自我觉察参考，香珠为古法气味体验、非医疗声称。</div>';
+  var cv=document.getElementById('studioPlate');if(cv){studioBindCanvas(cv);studioPaint();}
+  shown.forEach(function(id){paintBeadThumb2(document.getElementById('stc_'+id),id);});};
+})();
+</script>
+
 </body>
 </html>
