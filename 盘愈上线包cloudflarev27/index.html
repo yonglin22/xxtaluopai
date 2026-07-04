@@ -1011,7 +1011,7 @@
   <!-- ===== HOME 首页 ===== -->
   <section class="screen" id="home">
     <div class="home-top">
-      <div class="home-greet"><div class="hg-hi serif" id="homeGreet">你好</div><div class="hg-date" id="homeDate"></div><div id="buildTag" style="display:inline-block;margin-top:3px;font-size:10px;color:#B0843A;background:rgba(201,162,78,.12);border:1px solid rgba(201,162,78,.3);border-radius:8px;padding:1px 7px;letter-spacing:.05em">构建 v28 · 命理版 · 07-04</div></div>
+      <div class="home-greet"><div class="hg-hi serif" id="homeGreet">你好</div><div class="hg-date" id="homeDate"></div><div id="buildTag" style="display:inline-block;margin-top:3px;font-size:10px;color:#B0843A;background:rgba(201,162,78,.12);border:1px solid rgba(201,162,78,.3);border-radius:8px;padding:1px 7px;letter-spacing:.05em">构建 v29 · 命理版 · 07-04</div></div>
       <div class="home-tr">
         <button class="hp-bal" id="signinBtn" onclick="go('mine')">✨ <span id="homeTopBal">300</span></button>
         <div class="hp-av" onclick="go('mine')"><span class="brand-mark" data-size="24"></span></div>
@@ -5325,6 +5325,90 @@ function paintBrandMarks(){document.querySelectorAll('.brand-mark').forEach(el=>
 #home .eh-sub{margin-top:8px!important;}
 #home .eh-yj{margin-top:15px!important;}
 #home .eh-guide{margin-top:15px!important;padding-top:13px!important;}
+</style>
+<style>
+/* ===== 八字命盘 v2（五行大环 + 四柱十神/藏干/纳音）===== */
+#bazichart .bz-grid{display:flex;gap:6px}
+#bazichart .bz-col{flex:1;min-width:0;border-radius:12px;overflow:hidden;border:1px solid var(--line);text-align:center;background:var(--bg-raise)}
+#bazichart .bz-col.day{box-shadow:0 0 0 1.5px var(--amber)}
+#bazichart .bz-lab{font-size:9.5px;color:var(--ink-faint);padding:5px 0 4px;background:var(--bg)}
+#bazichart .bz-ss{font-size:10.5px;padding:5px 0;color:var(--gold-deep);border-bottom:1px solid var(--line-soft)}
+#bazichart .bz-gan,#bazichart .bz-zhi{font-family:var(--serif);font-size:26px;font-weight:700;padding:9px 0;line-height:1}
+#bazichart .bz-hid{font-size:10px;color:var(--ink-soft);padding:6px 2px;border-top:1px solid var(--line-soft);line-height:1.5}
+#bazichart .bz-ny{font-size:9.5px;color:var(--ink-faint);padding:5px 0 7px}
+#bazichart .bz-wheel{width:100%;height:210px;display:block}
+</style>
+<script>
+(function(){
+ if(typeof bzChartData!=='function')return;
+ var S10=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'],B12=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+ var NN=['海中金','炉中火','大林木','路旁土','剑锋金','山头火','涧下水','城头土','白蜡金','杨柳木','泉中水','屋上土','霹雳火','松柏木','长流水','沙中金','山下火','平地木','壁上土','金箔金','覆灯火','天河水','大驿土','钗钏金','桑柘木','大溪水','沙中土','天上火','石榴木','大海水'];
+ var NAYIN={};for(var i=0;i<60;i++){NAYIN[S10[i%10]+B12[i%12]]=NN[Math.floor(i/2)];}
+ var HID={子:['癸'],丑:['己','癸','辛'],寅:['甲','丙','戊'],卯:['乙'],辰:['戊','乙','癸'],巳:['丙','戊','庚'],午:['丁','己'],未:['己','丁','乙'],申:['庚','壬','戊'],酉:['辛'],戌:['戊','辛','丁'],亥:['壬','甲']};
+ var ELC={huo:'#d0553a',tu:'#c99a2e',jin:'#9aa0a6',shui:'#3f97a3',mu:'#5f8f5a'};
+ var ORDER=['mu','huo','tu','jin','shui'];
+ function el(s){return BZ_STEMEL[s];}
+ function tint(e,a){var c=ELC[e]||'#999';return 'rgba('+parseInt(c.slice(1,3),16)+','+parseInt(c.slice(3,5),16)+','+parseInt(c.slice(5,7),16)+','+a+')';}
+
+ window.baziWheel=function(cv,wx){
+  if(!cv)return;var W=cv.clientWidth||(cv.parentNode&&cv.parentNode.clientWidth)||300,H=210,dp=Math.min(window.devicePixelRatio||1,2);
+  cv.width=W*dp;cv.height=H*dp;var x=cv.getContext('2d');x.setTransform(dp,0,0,dp,0,0);x.clearRect(0,0,W,H);
+  var cx=W/2,cy=H/2,R=Math.min(W,H)*0.35,pos={};
+  ORDER.forEach(function(e,i){var a=-Math.PI/2+i*2*Math.PI/5;pos[e]={x:cx+R*Math.cos(a),y:cy+R*Math.sin(a)};});
+  x.save();x.strokeStyle='rgba(160,140,110,.32)';x.lineWidth=1.4;x.beginPath();
+  ORDER.forEach(function(e,i){var p=pos[e];if(i===0)x.moveTo(p.x,p.y);else x.lineTo(p.x,p.y);});x.closePath();x.stroke();x.restore();
+  ORDER.forEach(function(e){var p=pos[e],sc=wx.scores[e]||0,rr=13+sc*0.34,isDay=(e===wx.dayMaster);
+   x.save();x.beginPath();x.arc(p.x,p.y+rr*.5,rr*.85,0,7);x.fillStyle='rgba(40,32,20,.13)';x.filter='blur(4px)';x.fill();x.restore();
+   var g=x.createRadialGradient(p.x-rr*.32,p.y-rr*.36,rr*.2,p.x,p.y,rr);g.addColorStop(0,tint(e,.96));g.addColorStop(1,ELC[e]);x.fillStyle=g;x.beginPath();x.arc(p.x,p.y,rr,0,7);x.fill();
+   if(isDay){x.strokeStyle='#E7C892';x.lineWidth=2.6;x.beginPath();x.arc(p.x,p.y,rr+3,0,7);x.stroke();}
+   x.fillStyle='#fff';x.textAlign='center';x.textBaseline='middle';x.font='700 '+Math.round(rr*.92)+'px serif';x.fillText(FATE_ELCN[e],p.x,p.y);
+   x.fillStyle='#8a8071';x.font='10px sans-serif';x.fillText(String(sc),p.x,p.y+rr+9);});
+  x.fillStyle='#2a2016';x.textAlign='center';x.textBaseline='middle';x.font='700 15px serif';x.fillText(FATE_ELCN[wx.dayMaster]+'日主',cx,cy-8);
+  x.fillStyle=ELC[wx.dayMaster];x.font='700 13px serif';x.fillText('身'+wx.shen,cx,cy+11);
+ };
+
+ window.renderBazichart=function(){
+  var box=$("#baziBody");if(!box)return;var d=bzChartData();
+  if(!d){box.innerHTML='<div class="panel" style="text-align:center"><div class="pv-d">补出生信息（含时辰更准），为你排八字命盘。</div><button class="btn block" style="margin-top:12px" onclick="state._pendingBazi=true;go(\'profile\')">去补出生信息 →</button></div>';return;}
+  var wx=d.wx,tz=d.tz,E=FATE_ELCN;
+  var pillars=(wx.pillars||'').split(' '),plab=['年柱','月柱','日柱','时柱'];
+  var cols=pillars.map(function(p,idx){
+   if(p==='—'||p.length<2)return '<div class="bz-col"><div class="bz-lab">'+plab[idx]+'</div><div class="bz-ss">—</div><div class="bz-gan">未</div><div class="bz-zhi">知</div><div class="bz-hid">时辰未填</div><div class="bz-ny">—</div></div>';
+   var g=p[0],z=p[1],ge=el(g),ze=el((HID[z]||[z])[0]),isDay=(idx===2);
+   var ss=isDay?'<b style="color:var(--amber)">日主</b>':bzShiShen(wx.dayStem,g);
+   var hid=(HID[z]||[]).map(function(hs){var t=bzShiShen(wx.dayStem,hs);return hs+'<span style="color:var(--ink-faint);font-size:9px">'+(t||'')+'</span>';}).join(' ');
+   var ny=NAYIN[g+z]||'';
+   return '<div class="bz-col'+(isDay?' day':'')+'"><div class="bz-lab">'+plab[idx]+'</div><div class="bz-ss">'+ss+'</div>'
+    +'<div class="bz-gan" style="color:'+ELC[ge]+';background:'+tint(ge,.1)+'">'+g+'</div>'
+    +'<div class="bz-zhi" style="color:'+ELC[ze]+';background:'+tint(ze,.08)+'">'+z+'</div>'
+    +'<div class="bz-hid">'+hid+'</div><div class="bz-ny">'+ny+'</div></div>';
+  }).join('');
+  var elc={huo:'#d0553a',tu:'#c99a2e',jin:'#9aa0a6',shui:'#3f97a3',mu:'#4f7a5e'};
+  var bars=['jin','mu','shui','huo','tu'].map(function(e){return '<div style="margin-bottom:9px"><div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink-soft);margin-bottom:4px"><span>'+E[e]+'</span><span style="color:'+elc[e]+'">'+wx.scores[e]+'</span></div><div style="height:7px;background:var(--line-soft);border-radius:4px;overflow:hidden"><div style="height:100%;width:'+wx.scores[e]+'%;background:'+elc[e]+';border-radius:4px"></div></div></div>';}).join('');
+  var persona=(BZ_PERSONA[wx.dayMaster]&&BZ_PERSONA[wx.dayMaster][wx.shen])||'';
+  var care=BZ_CARE[tz.key]||'作息规律、饮食清淡即养。';
+  var fav=(wx.favorable||[]).map(function(e){return E[e];}).join('')||'—',avo=(wx.avoid||[]).map(function(e){return E[e];}).join('')||'—';
+  box.innerHTML=pHero('bā zì mìng pán','八字命盘','四柱五行 · 喜用忌神 · 中医体质')
+   +'<div style="font-size:11px;color:var(--ink-faint);letter-spacing:.1em;margin:8px 2px 8px">四 柱 · 十 神 · 藏 干 · 纳 音 <span style="color:var(--gold-deep)">· 代码排盘</span></div>'
+   +'<div class="bz-grid">'+cols+'</div>'
+   +'<div class="panel" style="margin-top:14px"><div style="font-size:12.5px;color:var(--gold-deep);margin-bottom:2px">五行生克大环</div><canvas class="bz-wheel" id="bzWheel"></canvas><div style="font-size:11px;color:var(--ink-faint);text-align:center;margin-top:-4px">环上相邻为「相生」· 圈大＝力量强 · 金框＝日主</div></div>'
+   +'<div class="panel" style="margin-top:12px"><div style="font-size:12.5px;color:var(--gold-deep);margin-bottom:10px">五行分布</div>'+bars+'<div style="font-size:11.5px;color:var(--ink-faint);margin-top:4px">偏旺 '+(E[wx.excess&&wx.excess[0]]||'—')+' · 偏弱 '+((wx.lack||[]).map(function(e){return E[e];}).join('')||'—')+'</div></div>'
+   +'<div class="panel" style="margin-top:12px;display:flex;gap:12px"><div style="flex:1"><div style="font-size:11px;color:var(--ink-faint)">日主 · 强弱</div><div class="serif" style="font-size:17px;color:var(--ink);margin-top:3px">'+E[wx.dayMaster]+'（身'+wx.shen+'）</div></div><div style="width:1px;background:var(--line-soft)"></div><div style="flex:1.4"><div style="font-size:11px;color:var(--ink-faint)">喜用 / 忌神</div><div class="serif" style="font-size:15px;color:var(--gold-deep);margin-top:4px">喜 '+fav+'　忌 '+avo+'</div>'+(wx.tiaohouNote?'<div style="font-size:10.5px;color:var(--ink-faint);margin-top:4px">调候：'+wx.tiaohouNote+'</div>':'')+'</div></div>'
+   +(persona?'<div class="panel" style="margin-top:12px;background:rgba(201,162,78,.06)"><div style="font-size:12px;color:var(--gold-deep);margin-bottom:6px">一句话性格底色</div><div class="pv-d" style="line-height:1.85;color:var(--ink-soft)">'+persona+'</div></div>':'')
+   +'<div class="panel" style="margin-top:12px"><div style="font-size:12.5px;color:var(--gold-deep);margin-bottom:6px">中医体质倾向 · '+tz.key+'</div><div class="pv-d" style="line-height:1.8">对应香承香方「'+tz.xf+'」——传统香方灵感下的古法气味体验，帮你在忙碌里静下来，<b>不是用来治疗或调理身体</b>。<br>宜养：'+care+'</div></div>'
+   +'<button class="btn block" style="margin-top:16px;background:linear-gradient(135deg,#E7C892,var(--amber));color:#2a1f10;border:none" onclick="goFateFrom(\'natal\')">📿 按这盘 · 为你排一串（补 '+fav+'）→</button>'
+   +'<div class="disclaimer">命理分析仅供文化研究与自我觉察参考，不构成确定性预测；中医体质为生活状态倾向、非体检结论，不替代医学诊断；香方为传统气味养生体验、非医疗用途；人生在于自身的努力与选择。</div>';
+  var cv=document.getElementById('bzWheel');if(cv)baziWheel(cv,wx);
+ };
+})();
+</script>
+
+<style>
+/* 首页顶部 greeting 区收紧 */
+#home .home-top{padding:14px 2px 2px!important;}
+#home .home-greet .hg-hi{font-size:23px!important;line-height:1.2!important;}
+#home .home-greet .hg-date{margin-top:6px!important;}
+#home .prof-line{margin:7px 0 8px!important;}
 </style>
 </body>
 </html>
