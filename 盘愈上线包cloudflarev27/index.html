@@ -2334,13 +2334,20 @@ const FateWX=(function(){
     [P.year,P.month,P.day,P.hour].filter(Boolean).forEach(([s,b],i)=>{sc[stemEl(s)]+=1;const w=(i===1)?1.6:1;HIDDEN[b].forEach(([hs,ww])=>sc[stemEl(hs)]+=ww*w);});
     const total=Object.values(sc).reduce((a,b)=>a+b,0)||1,scores={};Object.keys(sc).forEach(k=>scores[k]=Math.round(sc[k]/total*100));
     const dayEl=stemEl(pp.dayStem),yin=genBy(dayEl),bi=dayEl,strong=sc[yin]+sc[bi],weak=sc[GEN[dayEl]]+sc[CTRL[dayEl]]+sc[ctrlBy(dayEl)];
-    const shen=strong>=weak?'强':'弱';let favorable,avoid;
-    if(shen==='强'){favorable=[GEN[dayEl],CTRL[dayEl],ctrlBy(dayEl)].sort((a,b)=>sc[a]-sc[b]);avoid=[yin,bi].sort((a,b)=>sc[b]-sc[a]);}
-    else{favorable=[yin,bi].sort((a,b)=>sc[a]-sc[b]);avoid=[GEN[dayEl],CTRL[dayEl],ctrlBy(dayEl)].sort((a,b)=>sc[b]-sc[a]).slice(0,2);}
+    const shen=strong>=weak?'强':'弱';let fuFav,fuAvo;
+    if(shen==='强'){fuFav=[GEN[dayEl],CTRL[dayEl],ctrlBy(dayEl)].sort((a,b)=>sc[a]-sc[b]);fuAvo=[yin,bi].sort((a,b)=>sc[b]-sc[a]);}
+    else{fuFav=[yin,bi].sort((a,b)=>sc[a]-sc[b]);fuAvo=[GEN[dayEl],CTRL[dayEl],ctrlBy(dayEl)].sort((a,b)=>sc[b]-sc[a]).slice(0,2);}
+    const mb=P.month[1];let tiaohou=null,thNote='';
+    if('亥子丑'.indexOf(mb)>=0){tiaohou='huo';thNote='冬寒·首用火暖局';}
+    else if('巳午未'.indexOf(mb)>=0){tiaohou='shui';thNote='夏燥·首用水润局';}
+    else if('寅卯辰'.indexOf(mb)>=0){if(sc.huo<20){tiaohou='huo';thNote='春寒未透·宜火暖';}else if(sc.jin<15){tiaohou='jin';thNote='木旺·宜金修';}}
+    else if('申酉戌'.indexOf(mb)>=0){if(sc.shui<16){tiaohou='shui';thNote='秋燥·宜水润';}else if(sc.huo<16){tiaohou='huo';thNote='金旺·宜火炼';}}
+    let favorable=[];if(tiaohou&&sc[tiaohou]<38)favorable.push(tiaohou);fuFav.forEach(e=>{if(favorable.indexOf(e)<0)favorable.push(e);});favorable=[...new Set(favorable)].slice(0,2);
+    let avoid=[...new Set(fuAvo)].filter(e=>favorable.indexOf(e)<0).slice(0,2);
     const ks=Object.keys(scores);
     return {scores,lack:ks.slice().sort((a,b)=>scores[a]-scores[b]).slice(0,2),excess:ks.slice().sort((a,b)=>scores[b]-scores[a]).slice(0,1),
-      favorable:[...new Set(favorable)].slice(0,2),avoid:[...new Set(avoid)].slice(0,2),dayMaster:dayEl,shen,dayStem:P.day[0],dayBranch:P.day[1],
-      pillars:`${P.year.join('')} ${P.month.join('')} ${P.day.join('')} ${P.hour?P.hour.join(''):'—'}`,source:'bazi_simplified'};
+      favorable,avoid,dayMaster:dayEl,shen,dayStem:P.day[0],dayBranch:P.day[1],monthBranch:mb,tiaohou,tiaohouNote:thNote,pillarStems:[P.year[0],P.month[0],P.day[0],P.hour?P.hour[0]:''],
+      pillars:`${P.year.join('')} ${P.month.join('')} ${P.day.join('')} ${P.hour?P.hour.join(''):'—'}`,source:'bazi'};
   }
   return {profile};
 })();
@@ -4241,6 +4248,9 @@ const BZ_PERSONA={
  tu:{强:'土旺·踏实能扛、重承诺、有担当；宜别把什么都往自己身上揽，学会把事分出去。',弱:'土弱·随和好说话、易心软让步；宜先立住自己的边界，把自己也照顾好。'}
 };
 const BZ_CARE={'平和·守中':'守中即好——作息规律、饮食清淡、动静有度。','阳虚·偏寒':'宜温养、忌生冷；多晒背、喝温水、别贪凉。','阴虚·偏燥':'宜静养滋润、忌熬夜辛燥；早些睡、多补水。','气郁·思虑':'宜疏解舒展、忌闷压；多走动、把心里话找个出口说出来。','痰湿·困重':'宜清爽走动、忌甜腻久坐；饭后走一走。','气虚·易倦':'宜养气缓行、忌过劳；小步慢来，别硬撑。'};
+const BZ_STEMEL={甲:'mu',乙:'mu',丙:'huo',丁:'huo',戊:'tu',己:'tu',庚:'jin',辛:'jin',壬:'shui',癸:'shui'};
+const BZ_YIN={甲:0,丙:0,戊:0,庚:0,壬:0,乙:1,丁:1,己:1,辛:1,癸:1};
+function bzShiShen(day,other){if(!day||!other||!BZ_STEMEL[day]||!BZ_STEMEL[other])return '';const G={mu:'huo',huo:'tu',tu:'jin',jin:'shui',shui:'mu'},C={mu:'tu',tu:'shui',shui:'huo',huo:'jin',jin:'mu'};const me=BZ_STEMEL[day],o=BZ_STEMEL[other],same=BZ_YIN[day]===BZ_YIN[other];if(o===me)return same?'比肩':'劫财';if(G[o]===me)return same?'偏印':'正印';if(G[me]===o)return same?'食神':'伤官';if(C[o]===me)return same?'七杀':'正官';if(C[me]===o)return same?'偏财':'正财';return '';}
 function bzChartData(){const b=fateSelfBirth();if(!b)return null;const wx=fateWXFromBirth(b);if(!wx)return null;return {wx,tz:fateTizhi(wx)};}
 function renderBazichart(){
   const box=$("#baziBody");if(!box)return;const d=bzChartData();
@@ -4249,17 +4259,18 @@ function renderBazichart(){
   const elc={huo:'#d0553a',tu:'#c99a2e',jin:'#9aa0a6',shui:'#3f97a3',mu:'#4f7a5e'};
   const bars=['jin','mu','shui','huo','tu'].map(e=>`<div style="margin-bottom:9px"><div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink-soft);margin-bottom:4px"><span>${E[e]}</span><span style="color:${elc[e]}">${wx.scores[e]}</span></div><div style="height:7px;background:var(--line-soft);border-radius:4px;overflow:hidden"><div style="height:100%;width:${wx.scores[e]}%;background:${elc[e]};border-radius:4px"></div></div></div>`).join('');
   const pillars=(wx.pillars||'').split(' '),plabels=['年柱','月柱','日柱','时柱'];
-  const pillarHtml=pillars.map((p,i)=>`<div style="flex:1;text-align:center;padding:10px 2px;border-radius:10px;background:${i===2?'rgba(201,162,78,.12)':'var(--bg)'};border:1px solid ${i===2?'var(--amber)':'var(--line)'}"><div style="font-size:10px;color:var(--ink-faint)">${plabels[i]||''}</div><div class="serif" style="font-size:18px;color:${i===2?'var(--gold-deep)':'var(--ink)'};margin-top:3px">${p==='—'?'未知':p}</div>${i===2?'<div style="font-size:9px;color:var(--gold-deep);margin-top:2px">日主</div>':''}</div>`).join('');
+  const stems=wx.pillarStems||[];const shishen=stems.map((st,i)=>i===2?'日主':bzShiShen(wx.dayStem,st));
+  const pillarHtml=pillars.map((p,i)=>`<div style="flex:1;text-align:center;padding:8px 2px;border-radius:10px;background:${i===2?'rgba(201,162,78,.12)':'var(--bg)'};border:1px solid ${i===2?'var(--amber)':'var(--line)'}"><div style="font-size:9px;color:${i===2?'var(--gold-deep)':'var(--amber)'};font-weight:600;min-height:12px">${shishen[i]||''}</div><div style="font-size:10px;color:var(--ink-faint)">${plabels[i]||''}</div><div class="serif" style="font-size:18px;color:${i===2?'var(--gold-deep)':'var(--ink)'};margin-top:3px">${p==='—'?'未知':p}</div>${i===2?'<div style="font-size:9px;color:var(--gold-deep);margin-top:2px">日主</div>':''}</div>`).join('');
   const persona=(BZ_PERSONA[wx.dayMaster]&&BZ_PERSONA[wx.dayMaster][wx.shen])||'';
   const care=BZ_CARE[tz.key]||'作息规律、饮食清淡即养。';
   box.innerHTML=`${pHero('bā zì mìng pán','八字命盘','四柱五行 · 喜用忌神 · 中医体质')}
-   <div style="font-size:11px;color:var(--ink-faint);letter-spacing:.1em;margin:8px 2px 8px">四 柱 干 支 <span style="color:var(--gold-deep)">· 代码排盘 确定性</span></div>
+   <div style="font-size:11px;color:var(--ink-faint);letter-spacing:.1em;margin:8px 2px 8px">四 柱 干 支 <span style="color:var(--gold-deep)">· 真节气排盘 · 十神</span></div>
    <div style="display:flex;gap:8px">${pillarHtml}</div>
    <div class="panel" style="margin-top:14px"><div style="font-size:12.5px;color:var(--gold-deep);margin-bottom:10px">五行分布</div>${bars}<div style="font-size:11.5px;color:var(--ink-faint);margin-top:4px">偏旺 ${E[wx.excess&&wx.excess[0]]||'—'} · 偏弱 ${(wx.lack||[]).map(e=>E[e]).join('')||'—'}</div></div>
    <div class="panel" style="margin-top:12px;display:flex;gap:12px">
      <div style="flex:1"><div style="font-size:11px;color:var(--ink-faint)">日主 · 强弱</div><div class="serif" style="font-size:17px;color:var(--ink);margin-top:3px">${E[wx.dayMaster]}（身${wx.shen}）</div></div>
      <div style="width:1px;background:var(--line-soft)"></div>
-     <div style="flex:1.4"><div style="font-size:11px;color:var(--ink-faint)">喜用 / 忌神</div><div class="serif" style="font-size:15px;color:var(--gold-deep);margin-top:4px">喜 ${(wx.favorable||[]).map(e=>E[e]).join('')||'—'}　忌 ${(wx.avoid||[]).map(e=>E[e]).join('')||'—'}</div></div></div>
+     <div style="flex:1.4"><div style="font-size:11px;color:var(--ink-faint)">喜用 / 忌神</div><div class="serif" style="font-size:15px;color:var(--gold-deep);margin-top:4px">喜 ${(wx.favorable||[]).map(e=>E[e]).join('')||'—'}　忌 ${(wx.avoid||[]).map(e=>E[e]).join('')||'—'}</div>${wx.tiaohouNote?`<div style="font-size:10.5px;color:var(--ink-faint);margin-top:4px">调候：${wx.tiaohouNote} · 综合扶抑取用</div>`:''}</div></div>
    ${persona?`<div class="panel" style="margin-top:12px;background:rgba(201,162,78,.06)"><div style="font-size:12px;color:var(--gold-deep);margin-bottom:6px">一句话性格底色</div><div class="pv-d" style="line-height:1.85;color:var(--ink-soft)">${persona}</div></div>`:''}
    <div class="panel" style="margin-top:12px"><div style="font-size:12.5px;color:var(--gold-deep);margin-bottom:6px">中医体质倾向 · ${tz.key}</div><div class="pv-d" style="line-height:1.8">对应香承香方「${tz.xf}」——传统香方灵感下的古法气味体验，帮你在忙碌里静下来，<b>不是用来治疗或调理身体</b>。<br>宜养：${care}</div></div>
    <button class="btn block" style="margin-top:16px;background:linear-gradient(135deg,#E7C892,var(--amber));color:#2a1f10;border:none" onclick="goFateFrom('natal')">📿 按这盘 · 为你排一串（补 ${(wx.favorable||[]).map(e=>E[e]).join('')||'五行'}）→</button>
