@@ -2605,7 +2605,7 @@ function studioWristCm(){const S=studioState();const sum=S.beads.reduce((a,b)=>a
 /* ---- 收拢成串：把珠子按尺寸弧长排成椭圆环（归一化坐标）---- */
 function studioGather(silent){const S=studioState();const n=S.beads.length;if(!n){S.gathered=true;return;}
   const sz=S.beads.map(b=>Math.max(4,b.mm||8));const units=sz.reduce((a,b)=>a+b,0)||1;let acc=0;
-  S.beads.forEach((b,i)=>{const mid=acc+sz[i]/2;acc+=sz[i];const a=mid/units*6.283-1.5708;b.x=Math.cos(a)*0.62;b.y=Math.sin(a)*0.62;});
+  S.beads.forEach((b,i)=>{const mid=acc+sz[i]/2;acc+=sz[i];const a=mid/units*6.283-1.5708;b.x=Math.cos(a)*0.72;b.y=Math.sin(a)*0.57;});
   S.gathered=true;if(!silent)studioPaint();}
 function studioScatter(){const S=studioState();S.beads.forEach((b,i)=>{const a=i*2.399;const rr=0.30+((i*0.13)%0.34);b.x=Math.cos(a)*rr;b.y=Math.sin(a)*rr*0.9;});S.gathered=false;studioPaint();}
 /* ---- 瓷盘 + 摆珠 渲染（逐颗按 x,y,mm 画）---- */
@@ -2615,16 +2615,15 @@ function studioPaint(){
   const dp=Math.min(window.devicePixelRatio||1,2),nw=Math.round(W*dp),nh=Math.round(H*dp);if(cv.width!==nw||cv.height!==nh){cv.width=nw;cv.height=nh;}
   const ctx=cv.getContext('2d');ctx.setTransform(dp,0,0,dp,0,0);
   drawPlate(ctx,W,H);
-  const cx=W/2,cy=H*.5,n=S.beads.length;let items;
-  if(S.gathered&&n){ // 收拢成串：参考「成串照片合成台」——沿椭圆等距、珠径按环长自适应相切，成连续手串
-    const rx=Math.min(W,H)*0.30,ry=rx*0.72,circ=2*Math.PI*Math.sqrt((rx*rx+ry*ry)/2);
-    const avg=S.beads.reduce((a,b)=>a+(b.mm||8),0)/n||8,baseD=circ/n*1.06;
-    ctx.save();ctx.strokeStyle='rgba(120,100,72,.3)';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,7);ctx.stroke();ctx.restore();
-    items=S.beads.map((b,i)=>{const a=i/n*6.2832-1.5708,yb=Math.sin(a),sp=(b.id==='silver'||b.id==='gold_sp');
+  const cx=W/2,cy=H*.5,n=S.beads.length;let items;const R=Math.min(W,H*1.1)*.42;
+  if(S.gathered&&n){ // 收拢成串：珠子沿存储坐标(b.x,b.y)成串，可自由拖动；串线随珠联动
+    const circ=2*Math.PI*R*0.66,baseD=circ/n*1.06,avg=S.beads.reduce((a,b)=>a+(b.mm||8),0)/n||8;
+    items=S.beads.map(b=>{const sp=(b.id==='silver'||b.id==='gold_sp'),yb=b.y;
       const mmS=Math.max(0.5,Math.min(1.3,(b.mm||8)/avg)),depth=0.85+0.22*(yb+1)/2;
-      return {b,px:cx+rx*Math.cos(a),py:cy+ry*yb,d:baseD*(sp?0.5:mmS)*depth};});
+      return {b,px:cx+b.x*R,py:cy+b.y*R*0.9,d:baseD*(sp?0.55:mmS)*depth};});
+    ctx.save();ctx.strokeStyle='rgba(120,100,72,.34)';ctx.lineWidth=1.6;ctx.beginPath();items.forEach((o,i)=>{i?ctx.lineTo(o.px,o.py):ctx.moveTo(o.px,o.py);});ctx.closePath();ctx.stroke();ctx.restore();
   }else{
-    const R=Math.min(W,H*1.1)*.42,mmPx=R*0.052;
+    const mmPx=R*0.052;
     items=S.beads.map(b=>({b,px:cx+b.x*R,py:cy+b.y*R*0.9,d:Math.max(9,(b.mm||8)*mmPx)}));
   }
   items.sort((p,q)=>p.py-q.py);
@@ -2643,13 +2642,14 @@ function studioBindCanvas(cv){
   if(cv._sbound)return;cv._sbound=1;cv.style.touchAction='none';
   let drag=null;
   const hit=(e)=>{const S=studioState();const r=cv.getBoundingClientRect();const W=r.width,H=r.height;const cx=W/2,cy=H*.5,R=Math.min(W,H*1.1)*.42,mmPx=R*0.052;
-    const mx=e.clientX-r.left,my=e.clientY-r.top;let best=null,bd=1e9;
-    S.beads.forEach(b=>{const px=cx+b.x*R,py=cy+b.y*R*0.9,d=Math.max(9,(b.mm||8)*mmPx);const dist=Math.hypot(mx-px,my-py);if(dist<d*0.6&&dist<bd){bd=dist;best=b;}});
+    const mx=e.clientX-r.left,my=e.clientY-r.top;let best=null,bd=1e9;const n=S.beads.length;
+    const gd=(2*Math.PI*R*0.66)/Math.max(1,n)*1.06;
+    S.beads.forEach(b=>{const px=cx+b.x*R,py=cy+b.y*R*0.9,d=S.gathered?gd:Math.max(9,(b.mm||8)*mmPx);const dist=Math.hypot(mx-px,my-py);if(dist<d*0.62&&dist<bd){bd=dist;best=b;}});
     return {best,R,cx,cy,W,H,mx,my};};
   cv.addEventListener('pointerdown',e=>{const h=hit(e);if(h.best){drag={b:h.best,R:h.R,cx:h.cx,cy:h.cy};STUDIO_SEL=h.best;try{cv.setPointerCapture(e.pointerId);}catch(_){}studioPaint();}});
   cv.addEventListener('pointermove',e=>{if(!drag)return;const S=studioState();const r=cv.getBoundingClientRect();const mx=e.clientX-r.left,my=e.clientY-r.top;
     let nx=(mx-drag.cx)/drag.R,ny=(my-drag.cy)/(drag.R*0.9);const rr=Math.hypot(nx,ny);if(rr>0.94){nx=nx/rr*0.94;ny=ny/rr*0.94;}
-    drag.b.x=nx;drag.b.y=ny;if(S.gathered)S.gathered=false;studioPaint();});
+    drag.b.x=nx;drag.b.y=ny;studioPaint();});
   cv.addEventListener('pointerup',()=>{drag=null;});cv.addEventListener('pointercancel',()=>{drag=null;});
 }
 /* ---- 目录点选：调珠大小弹窗 → 加进盘 ---- */
@@ -5175,7 +5175,7 @@ function paintBrandMarks(){document.querySelectorAll('.brand-mark').forEach(el=>
   ctx.save();ctx.filter='blur(16px)';ctx.fillStyle='rgba(60,50,38,.15)';ctx.beginPath();ctx.ellipse(cx,cy+pr*.30,pr*1.0,pr*.82,0,0,7);ctx.fill();ctx.restore();
   ctx.save();ctx.beginPath();ctx.ellipse(cx,cy+pr*.10,pr,pr*.82,0,0,7);var g=ctx.createRadialGradient(cx-pr*.22,cy-pr*.3,pr*.1,cx,cy,pr);g.addColorStop(0,pd.p[0]);g.addColorStop(.66,pd.p[1]);g.addColorStop(1,pd.p[2]);ctx.fillStyle=g;ctx.fill();ctx.strokeStyle=pd.rim;ctx.lineWidth=1.6;ctx.stroke();ctx.restore();
   ctx.save();ctx.globalAlpha=.55;ctx.beginPath();ctx.ellipse(cx,cy+pr*.10,pr*.74,pr*.6,0,0,7);ctx.strokeStyle=pd.rim;ctx.lineWidth=1;ctx.stroke();ctx.restore();
-  ctx.save();ctx.textAlign='center';ctx.fillStyle=pd.wm;ctx.font='italic 600 '+Math.round(pr*.14)+'px Georgia,serif';ctx.fillText('Stone',cx,cy+pr*.04);ctx.font='700 '+Math.round(pr*.2)+'px Georgia,serif';ctx.fillText('LAB',cx,cy+pr*.26);ctx.restore();};
+  };
 
  /* 素材栏：每颗珠 −/＋ 步进（即点即加/减，无弹窗）*/
  window.studioCountOf=function(id){return studioState().beads.filter(function(b){return b.id===id;}).length;};
@@ -5261,7 +5261,7 @@ function paintBrandMarks(){document.querySelectorAll('.brand-mark').forEach(el=>
  window.studioPaintProduct=function(cv){if(!cv)return;var S=studioState();var beads=S.beads;if(!beads.length)return;
   var W=cv.clientWidth||cv.parentNode.clientWidth||320,H=238,dp=Math.min(window.devicePixelRatio||1,2);cv.width=W*dp;cv.height=H*dp;var ctx=cv.getContext('2d');ctx.setTransform(dp,0,0,dp,0,0);ctx.clearRect(0,0,W,H);
   var cx=W/2,cy=H/2,n=beads.length,rx=Math.min(W,H*1.5)*0.33,ry=rx*0.82;
-  ctx.save();ctx.textAlign='center';ctx.fillStyle='rgba(150,138,116,.5)';ctx.font='italic 600 15px Georgia,serif';ctx.fillText('Stone',cx,cy-2);ctx.font='700 23px Georgia,serif';ctx.fillText('LAB',cx,cy+21);ctx.restore();
+  
   var circ=2*Math.PI*Math.sqrt((rx*rx+ry*ry)/2),avg=beads.reduce(function(a,b){return a+(b.mm||8);},0)/n||8,baseD=circ/n*1.06;
   var items=beads.map(function(b,i){var a=i/n*6.2832-1.5708,yb=Math.sin(a),sp=(b.id==='silver'||b.id==='gold_sp');var mmS=Math.max(0.5,Math.min(1.3,(b.mm||8)/avg)),depth=0.85+0.22*(yb+1)/2;return {b:b,px:cx+rx*Math.cos(a),py:cy+ry*yb,d:baseD*(sp?0.5:mmS)*depth};}).sort(function(p,q){return p.py-q.py;});
   items.forEach(function(o){var d=o.d,sku=STUDIO_BEADS[o.b.id];ctx.save();ctx.beginPath();ctx.ellipse(o.px,o.py+d*.42,d*.5,d*.16,0,0,7);ctx.fillStyle='rgba(60,50,38,.15)';ctx.filter='blur(5px)';ctx.fill();ctx.restore();var im=studioBeadImg(o.b.id);if(im&&im.complete&&im.naturalWidth){ctx.drawImage(im,o.px-d/2,o.py-d/2,d,d);}else{var c=(sku&&sku.color)||['#ddd','#aaa'];var gg=ctx.createRadialGradient(o.px-d*.28,o.py-d*.3,d*.1,o.px,o.py,d*.52);gg.addColorStop(0,c[0]);gg.addColorStop(1,c[1]);ctx.fillStyle=gg;ctx.beginPath();ctx.arc(o.px,o.py,d*.5,0,7);ctx.fill();ctx.save();ctx.globalAlpha=.5;ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(o.px-d*.2,o.py-d*.22,d*.15,d*.09,-0.5,0,7);ctx.fill();ctx.restore();}});};
