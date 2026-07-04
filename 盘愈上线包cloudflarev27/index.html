@@ -2827,7 +2827,7 @@ function go(id){
   if(id==="myorb")renderOrb();
   if(id==="invite"){renderInvite();loadInvite().then(renderInvite);}
   if(id==="skinshop"){renderSkinShop();loadSkins().then(renderSkinShop);}
-  if(id==="beadshop")renderBeadshop();
+  if(id==="beadshop"){renderBeadshop();if(typeof studioIntro==="function")setTimeout(studioIntro,90);}
 }
 function doLogin(){
   const el=$("#lgPhone");
@@ -5614,6 +5614,11 @@ window.fpSync=function(el){try{var c=el.children[0];if(!c)return;var step=c.offs
 #synastry ul.sy-pts.fri li::before{background:#c98a3a}
 #synastry ul.sy-pts.ins li::before{background:var(--amber)}
 #synastry .sy-act{background:linear-gradient(180deg,#fcf9f4,#f3ecdf);border:1px solid rgba(201,162,78,.24);border-radius:14px;padding:14px;font-size:13px;color:#3a2f1c;line-height:1.7}
+#synastry .sy-inbar{display:flex;align-items:center;gap:10px;background:var(--bg-raise);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:2px;cursor:pointer}
+#synastry .sy-inbar-tx{flex:1;min-width:0}
+#synastry .sy-inbar-t{font-size:13px;color:var(--ink);font-weight:600}
+#synastry .sy-inbar-sub{font-size:11.5px;color:var(--ink-faint);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#synastry .sy-inbar-edit{flex:none;font-size:12.5px;color:var(--gold-deep);font-weight:600}
 </style>
 <script>
 (function(){
@@ -5645,6 +5650,7 @@ window.fpSync=function(el){try{var c=el.children[0];if(!c)return;var step=c.offs
   var hProv=(p&&p.prov)||'北京市';
   var cityOpts=function(sel){return provs.map(function(pv){return '<option'+(pv===sel?' selected':'')+'>'+pv+'</option>';}).join('');};
   box.innerHTML=pHero('bā zì hé pán','关系合盘','走心合拍 · 相位实算 · 八字五行喜忌')
+   +'<div id="synInputs">'
    +'<div class="sy-who"><h4><span class="sy-dot her"></span>你</h4>'
      +'<div class="sy-lab">出生日期</div><input class="sy-in" type="date" id="h_date" value="'+hd+'">'
      +'<div class="sy-row2" style="margin-top:8px"><div style="flex:1"><div class="sy-lab">时间</div><input class="sy-in" type="time" id="h_time" value="'+ht+'"></div><div style="flex:1"><div class="sy-lab">城市</div><select class="sy-in" id="h_city">'+cityOpts(hProv)+'</select></div></div>'
@@ -5656,6 +5662,8 @@ window.fpSync=function(el){try{var c=el.children[0];if(!c)return;var step=c.offs
    +'<div class="sy-lab" style="margin-top:14px">你们现在是</div>'
    +'<div class="sy-seg" id="synSeg"><b class="on" data-v="暧昧">暧昧中</b><b data-v="在一起">在一起</b><b data-v="复合">分手/复合</b></div>'
    +'<button class="btn block" style="margin-top:16px;background:linear-gradient(135deg,#E7C892,var(--amber));color:#2a1f10;border:none;box-shadow:0 8px 22px rgba(201,162,78,.3)" onclick="doSynastry()">❤ 开始合盘'+((typeof FEAT_COST!=='undefined'&&FEAT_COST.synastry>0)?(' · '+FEAT_COST.synastry+' 心元'):'')+'</button>'
+   +'</div>'
+   +'<div id="synInputBar" class="sy-inbar" style="display:none" onclick="synEditInputs()"><div class="sy-inbar-tx"><div class="sy-inbar-t">出生信息 · 已填写</div><div class="sy-inbar-sub" id="synInbarSub"></div></div><div class="sy-inbar-edit">✎ 修改</div></div>'
    +'<div id="synResult" style="margin-top:16px"></div>'
    +'<div class="disclaimer">相位/契合分为示例实算，解读语气为规则模板；仅供自我觉察与关系参考，不构成对关系走向的确定性预测。出生信息仅本机计算，不上传。</div>';
   var seg=document.getElementById('synSeg');if(seg)seg.addEventListener('click',function(e){var b=e.target.closest('b');if(!b)return;seg.querySelectorAll('b').forEach(function(x){x.classList.remove('on');});b.classList.add('on');state._synScene=b.dataset.v;});
@@ -5711,6 +5719,20 @@ window.fpSync=function(el){try{var c=el.children[0];if(!c)return;var step=c.offs
      +'<button class="btn block" style="flex:1;margin:0;font-size:14px;letter-spacing:.03em;white-space:nowrap;background:#211E18!important;color:#F0E1BE!important;border:1px solid rgba(201,162,78,.42)!important;box-shadow:0 10px 24px rgba(30,26,20,.2)!important" onclick="synInviteTa()">邀 TA 一起测 →</button>'
    +'</div>'
    +(typeof fateHookCard==='function'?fateHookCard('synastry'):'');
+  try{synCollapseInputs(s,info);}catch(e){}
+ };
+ /* 合盘出结果后收起出生信息输入，只看报告；可点「修改」再展开 */
+ window.synCollapseInputs=function(s,info){
+  var inp=document.getElementById('synInputs'),bar=document.getElementById('synInputBar');if(!inp||!bar)return;
+  inp.style.display='none';bar.style.display='flex';
+  var sub=document.getElementById('synInbarSub');
+  if(sub){var f=function(b){return b?(b.y+'-'+pad(b.mo)+'-'+pad(b.d)):'—';};var sc=(s&&s.scene)||'';
+   sub.textContent='你 '+f(info&&info.H)+' · TA '+f(info&&info.T)+(sc?(' · '+sc):'');}
+ };
+ window.synEditInputs=function(){
+  var inp=document.getElementById('synInputs'),bar=document.getElementById('synInputBar');
+  if(inp)inp.style.display='';if(bar)bar.style.display='none';
+  try{inp.scrollIntoView({block:'start',behavior:'smooth'});}catch(e){}
  };
 
  /* 邀 TA 一起测：分享/复制邀请，退化为生成海报 */
@@ -5913,8 +5935,64 @@ try{setHomeZodiac();}catch(e){}
 
 <script>
 /* 生肖 彩色插画（最终版：覆盖水墨版；虎/龙 打磨）*/
-window.ZODIAC_SVG={鼠:'<circle cx="32" cy="35" r="18" fill="#b9bcc4"/><circle cx="20" cy="20" r="9" fill="#b9bcc4"/><circle cx="44" cy="20" r="9" fill="#b9bcc4"/><circle cx="20" cy="20" r="4.5" fill="#e7b7c4"/><circle cx="44" cy="20" r="4.5" fill="#e7b7c4"/><circle cx="26" cy="34" r="2.4" fill="#2a2622"/><circle cx="38" cy="34" r="2.4" fill="#2a2622"/><circle cx="32" cy="41" r="3" fill="#e78ea0"/><path d="M32 44v4M22 44l-8 2M42 44l8 2" stroke="#8a8f98" stroke-width="1.4" fill="none" stroke-linecap="round"/>',牛:'<path d="M12 20c-4-6-9-4-9-4s2 8 9 9M52 20c4-6 9-4 9-4s-2 8-9 9" fill="none" stroke="#cbb6a0" stroke-width="4" stroke-linecap="round"/><ellipse cx="32" cy="37" rx="17" ry="16" fill="#a98d70"/><ellipse cx="32" cy="44" rx="10" ry="8" fill="#d8c4b0"/><circle cx="27" cy="46" r="1.8" fill="#5a4633"/><circle cx="37" cy="46" r="1.8" fill="#5a4633"/><circle cx="26" cy="34" r="2.4" fill="#2a2622"/><circle cx="38" cy="34" r="2.4" fill="#2a2622"/>',虎:'<circle cx="17" cy="19" r="8" fill="#e8913f"/><circle cx="47" cy="19" r="8" fill="#e8913f"/><circle cx="17" cy="19" r="3.6" fill="#c76a28"/><circle cx="47" cy="19" r="3.6" fill="#c76a28"/><ellipse cx="32" cy="35" rx="19" ry="17" fill="#f2a24e"/><ellipse cx="32" cy="42" rx="12" ry="10" fill="#fbf3e6"/><path d="M32 20v8" stroke="#3a2410" stroke-width="2.6" stroke-linecap="round"/><path d="M26 22l1.5 6M38 22l-1.5 6" stroke="#3a2410" stroke-width="2.2" stroke-linecap="round"/><path d="M15 32l6 2M15 38l6 1M49 32l-6 2M49 38l-6 1" stroke="#3a2410" stroke-width="2" stroke-linecap="round"/><circle cx="25" cy="34" r="2.8" fill="#2a2016"/><circle cx="39" cy="34" r="2.8" fill="#2a2016"/><path d="M32 40l-3 3h6z" fill="#d06a52"/><path d="M32 43v3M29 47c1.5 1.5 4.5 1.5 6 0" fill="none" stroke="#7a4a28" stroke-width="1.6" stroke-linecap="round"/>',兔:'<ellipse cx="24" cy="16" rx="6" ry="15" fill="#e9e4dc"/><ellipse cx="40" cy="16" rx="6" ry="15" fill="#e9e4dc"/><ellipse cx="24" cy="16" rx="2.6" ry="9" fill="#e7b7c4"/><ellipse cx="40" cy="16" rx="2.6" ry="9" fill="#e7b7c4"/><circle cx="32" cy="40" r="16" fill="#f3efe8"/><circle cx="26" cy="39" r="2.4" fill="#2a2622"/><circle cx="38" cy="39" r="2.4" fill="#2a2622"/><circle cx="32" cy="45" r="2.6" fill="#e78ea0"/>',龙:'<path d="M18 20c-4-8-11-9-11-9s0 8 5 12c-4 0-7 3-6 7 4-2 8-1 10 1" fill="#e0b24a"/><path d="M46 20c4-8 11-9 11-9s0 8-5 12c4 0 7 3 6 7-4-2-8-1-10 1" fill="#e0b24a"/><ellipse cx="32" cy="34" rx="18" ry="17" fill="#4fa38c"/><ellipse cx="32" cy="42" rx="12" ry="10" fill="#8fd0bb"/><path d="M20 26q6-5 12-3M44 26q-6-5-12-3" fill="none" stroke="#2f7a63" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="31" r="4" fill="#fff"/><circle cx="40" cy="31" r="4" fill="#fff"/><circle cx="24" cy="31" r="2.2" fill="#22201c"/><circle cx="40" cy="31" r="2.2" fill="#22201c"/><ellipse cx="28" cy="44" rx="1.8" ry="2.4" fill="#2f7a63"/><ellipse cx="36" cy="44" rx="1.8" ry="2.4" fill="#2f7a63"/><path d="M14 38c-5 1-8 5-8 10M50 38c5 1 8 5 8 10" fill="none" stroke="#e0b24a" stroke-width="2.4" stroke-linecap="round"/><path d="M32 50q3 3 6 1" fill="none" stroke="#2f7a63" stroke-width="1.6" stroke-linecap="round"/>',蛇:'<path d="M18 46c-6 0-8-6-4-10s10-2 10-8-6-8-2-12" fill="none" stroke="#7aa86a" stroke-width="6" stroke-linecap="round"/><circle cx="40" cy="24" r="12" fill="#8fb87a"/><circle cx="36" cy="22" r="2.2" fill="#2a2622"/><circle cx="44" cy="22" r="2.2" fill="#2a2622"/><path d="M40 30v5l-3 3M40 35l3 3" stroke="#c0392b" stroke-width="1.6" fill="none" stroke-linecap="round"/>',马:'<path d="M20 14l-4-6M44 14l4-6" stroke="#8a5a34" stroke-width="4" stroke-linecap="round"/><path d="M22 20q10-10 20 0z" fill="#7a4f2c"/><ellipse cx="32" cy="38" rx="14" ry="17" fill="#9a6a3c"/><ellipse cx="32" cy="48" rx="8" ry="6" fill="#7a4f2c"/><circle cx="26" cy="34" r="2.4" fill="#2a2622"/><circle cx="38" cy="34" r="2.4" fill="#2a2622"/><circle cx="29" cy="49" r="1.4" fill="#3a2818"/><circle cx="35" cy="49" r="1.4" fill="#3a2818"/>',羊:'<path d="M14 26c-8-2-8-12 0-12 2-6 10-4 10 2M50 26c8-2 8-12 0-12-2-6-10-4-10 2" fill="#efe9dd" stroke="#d8cdb8" stroke-width="1.5"/><ellipse cx="32" cy="38" rx="15" ry="15" fill="#f5f0e6"/><ellipse cx="32" cy="44" rx="8" ry="7" fill="#e6ddca"/><circle cx="26" cy="36" r="2.3" fill="#2a2622"/><circle cx="38" cy="36" r="2.3" fill="#2a2622"/>',猴:'<circle cx="16" cy="30" r="8" fill="#a3764a"/><circle cx="48" cy="30" r="8" fill="#a3764a"/><circle cx="16" cy="30" r="4" fill="#d8b48c"/><circle cx="48" cy="30" r="4" fill="#d8b48c"/><circle cx="32" cy="34" r="17" fill="#a3764a"/><ellipse cx="32" cy="38" rx="13" ry="11" fill="#eaceac"/><circle cx="26" cy="33" r="2.4" fill="#2a2622"/><circle cx="38" cy="33" r="2.4" fill="#2a2622"/><path d="M28 42q4 3 8 0" fill="none" stroke="#7a5432" stroke-width="1.6" stroke-linecap="round"/>',鸡:'<path d="M32 12c2-4 7-3 6 2 4-2 6 3 2 5M26 15c-3-3-7 0-4 4" fill="#c0392b"/><ellipse cx="32" cy="38" rx="15" ry="16" fill="#f3ede2"/><path d="M20 30q-8 4-4 12" fill="#e0b34a" opacity=".8"/><circle cx="27" cy="36" r="2.4" fill="#2a2622"/><circle cx="37" cy="36" r="2.4" fill="#2a2622"/><path d="M32 41l7 3-7 3z" fill="#e6a020"/><path d="M30 48q2 4 4 0" fill="#c0392b"/>',狗:'<path d="M14 24q-4 14 4 20l8-6z" fill="#8a6a44"/><path d="M50 24q4 14-4 20l-8-6z" fill="#8a6a44"/><ellipse cx="32" cy="36" rx="15" ry="15" fill="#b08a5c"/><ellipse cx="32" cy="44" rx="9" ry="7" fill="#e0cdb0"/><circle cx="32" cy="42" r="3" fill="#3a2818"/><circle cx="26" cy="34" r="2.4" fill="#2a2622"/><circle cx="38" cy="34" r="2.4" fill="#2a2622"/>',猪:'<circle cx="20" cy="22" r="7" fill="#eaa8b0"/><circle cx="44" cy="22" r="7" fill="#eaa8b0"/><circle cx="32" cy="38" r="17" fill="#f2b8c0"/><ellipse cx="32" cy="42" rx="9" ry="7" fill="#e79aa6"/><circle cx="29" cy="42" r="1.8" fill="#a8546a"/><circle cx="35" cy="42" r="1.8" fill="#a8546a"/><circle cx="25" cy="34" r="2.3" fill="#2a2622"/><circle cx="39" cy="34" r="2.3" fill="#2a2622"/>'};
-window.setHomeZodiac=function(){var av=document.getElementById('homeAv');if(!av)return;var p=state.profile;var zc=(p&&(p.zodiac||(typeof zodiacOf==='function'&&zodiacOf(p.sy||p.by))))||'';var e=ZODIAC_SVG[zc];if(e){av.innerHTML='<span title="属'+zc+'" style="display:flex;line-height:0"><svg viewBox="0 0 64 64" width="34" height="34">'+e+'</svg></span>';}else{av.innerHTML='<span class="brand-mark" data-size="24"></span>';if(typeof paintBrandMarks==='function')paintBrandMarks();}};try{setHomeZodiac();}catch(e){}
+window.ZODIAC_SVG={鼠:'<g fill="none" stroke="#3d3830" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="19" cy="21" r="8"/><circle cx="45" cy="21" r="8"/><path d="M32 20c-9 0-16 7-16 17s7 16 16 16 16-6 16-16-7-17-16-17z"/></g><g fill="none" stroke="#3d3830" stroke-width="1.2" stroke-linecap="round"><circle cx="19" cy="21" r="3.6"/><circle cx="45" cy="21" r="3.6"/><path d="M32 42v4M20 44l-7 2M20 47l-7 4M44 44l7 2M44 47l7 4"/></g><circle cx="26" cy="35" r="2" fill="#3d3830"/><circle cx="38" cy="35" r="2" fill="#3d3830"/><path d="M32 41.5a2.4 2.4 0 0 0 0 3" fill="#3d3830"/>',牛:'<g fill="none" stroke="#3d3830" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13C7 24 16 28 24 27M58 13c-1 11-10 15-18 14"/></g><g fill="none" stroke="#3d3830" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M32 26c-10 0-16 6-16 15 0 6 3 10 6 12 2 6 5 9 10 9s8-3 10-9c3-2 6-6 6-12 0-9-6-15-16-15z"/><ellipse cx="32" cy="49" rx="9.5" ry="6.5"/><circle cx="32" cy="60.5" r="3"/></g><circle cx="26" cy="40" r="2" fill="#3d3830"/><circle cx="38" cy="40" r="2" fill="#3d3830"/><g fill="none" stroke="#3d3830" stroke-width="1.3"><path d="M29 48v3.5M35 48v3.5"/></g>',虎:'<g fill="none" stroke="#3d3830" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 26c-3-8 1-14 1-14s5 5 5 12M47 26c3-8-1-14-1-14s-5 5-5 12"/><path d="M32 16c-11 0-19 8-19 20 0 11 8 18 19 18s19-7 19-18c0-12-8-20-19-20z"/></g><g fill="none" stroke="#3d3830" stroke-width="1.3" stroke-linecap="round"><path d="M32 20v9M27 21l1.5 7M37 21l-1.5 7M14 33l6 2M13 39l6 1M50 33l-6 2M51 39l-6 1"/></g><circle cx="26" cy="36" r="2.1" fill="#3d3830"/><circle cx="38" cy="36" r="2.1" fill="#3d3830"/><path d="M32 42l-3 3h6z" fill="#3d3830"/><path d="M32 45v3M29 49c1.6 1.4 4.4 1.4 6 0" fill="none" stroke="#3d3830" stroke-width="1.2" stroke-linecap="round"/>',兔:'<g fill="none" stroke="#3d3830" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M25 34c-5-8-7-22-3-30 5 3 8 13 8 22M39 34c5-8 7-22 3-30-5 3-8 13-8 22"/><path d="M32 32c-10 0-17 8-17 18s7 16 17 16 17-6 17-16-7-18-17-18z"/></g><path d="M25 30c-2-8-2-18 0-24M39 30c2-8 2-18 0-24" fill="none" stroke="#6b6258" stroke-width="1" opacity=".55"/><circle cx="25" cy="44" r="2.1" fill="#3d3830"/><circle cx="39" cy="44" r="2.1" fill="#3d3830"/><path d="M32 50l-2.4 2.6h4.8z" fill="#3d3830"/><path d="M32 52.6v2.4" stroke="#3d3830" stroke-width="1.2"/>',龙:'<g fill="none" stroke="#3d3830" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M26 22C22 10 15 7 15 7c1 4 3 7 3 7-4-2-8-1-8-1 3 3 6 4 6 4M38 22c4-12 11-15 11-15-1 4-3 7-3 7 4-2 8-1 8-1-3 3-6 4-6 4"/><path d="M32 20c-9 0-15 6-15 15 0 4 1 7 4 10 2 5 6 8 11 8s9-3 11-8c3-3 4-6 4-10 0-9-6-15-15-15z"/><path d="M17 34l-7-2M16 41l-7 1M17 47l-6 3M47 34l7-2M48 41l7 1M47 47l6 3"/><path d="M25 30l4 2M39 30l-4 2"/></g><circle cx="27" cy="35" r="1.7" fill="#3d3830"/><circle cx="37" cy="35" r="1.7" fill="#3d3830"/><path d="M28 42q4 3 8 0" fill="none" stroke="#3d3830" stroke-width="1.3" stroke-linecap="round"/><path d="M29 41l1.5 2M35 41l-1.5 2" stroke="#3d3830" stroke-width="1.1" fill="none"/><path d="M20 40q-6 2-8 8M44 40q6 2 8 8" stroke="#3d3830" stroke-width="1.3" fill="none" stroke-linecap="round"/>',蛇:'<g fill="none" stroke="#3d3830" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M28 56c14 3 22-7 16-16-5-8-19-7-19-18 0-8 7-13 15-11"/><path d="M50 20c-9-1-15 6-13 14 1 6 7 9 13 7"/></g><circle cx="44" cy="24" r="2.1" fill="#3d3830"/><path d="M52 28l7 2-7 2" fill="none" stroke="#a24a3a" stroke-width="1.4" stroke-linecap="round"/>',马:'<g fill="none" stroke="#3d3830" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M24 16l-4-8M42 16l4-8"/><path d="M22 22c0-8 20-8 20 0 3 12 3 26-2 38-2 6-5 10-8 10s-6-4-8-10c-5-12-5-26-2-38z"/><path d="M22 22c-4-1-6-6-4-11M42 22c4-1 6-6 4-11"/></g><path d="M32 20v34" fill="none" stroke="#6b6258" stroke-width="1" opacity=".5"/><circle cx="26" cy="38" r="2" fill="#3d3830"/><circle cx="38" cy="38" r="2" fill="#3d3830"/><g fill="none" stroke="#3d3830" stroke-width="1.2"><circle cx="29" cy="56" r="1.2"/><circle cx="35" cy="56" r="1.2"/></g>',羊:'<g fill="none" stroke="#3d3830" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M24 24C10 20 10 40 20 44 8 46 10 30 18 28M40 24c14-4 14 16 4 20 12 2 10-14 2-16"/><path d="M32 26c-10 0-16 8-16 19s7 17 16 17 16-6 16-17-6-19-16-19z"/><ellipse cx="32" cy="52" rx="7" ry="5"/></g><circle cx="26" cy="42" r="2" fill="#3d3830"/><circle cx="38" cy="42" r="2" fill="#3d3830"/>',猴:'<g fill="none" stroke="#3d3830" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="15" cy="32" r="8"/><circle cx="49" cy="32" r="8"/><path d="M32 16c-11 0-19 8-19 19s8 17 19 17 19-6 19-17-8-19-19-19z"/><path d="M32 24c-8 0-14 6-14 14 0 7 6 12 14 12s14-5 14-12-6-14-14-14z"/></g><circle cx="26" cy="35" r="2" fill="#3d3830"/><circle cx="38" cy="35" r="2" fill="#3d3830"/><path d="M26 43q6 4 12 0" fill="none" stroke="#3d3830" stroke-width="1.3" stroke-linecap="round"/>',鸡:'<g fill="none" stroke="#3d3830" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M27 14c1-4 5-3 5 1 3-3 6 0 4 4 3 0 4 4 0 5"/><path d="M30 24c-11 1-19 9-19 19 0 11 8 18 19 18 8 0 14-5 16-12"/><path d="M46 40l9-2-8 6z"/><path d="M31 32c-6-2-9-9-6-16 1 6 4 9 8 10"/></g><circle cx="24" cy="34" r="2.1" fill="#3d3830"/><path d="M30 46q6 3 11-1" fill="none" stroke="#a24a3a" stroke-width="1.3" stroke-linecap="round"/>',狗:'<g fill="none" stroke="#3d3830" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 24c-4 12 0 22 6 24M44 24c4 12 0 22-6 24"/><path d="M32 18c-10 0-17 8-17 18 0 11 7 18 17 18s17-7 17-18c0-10-7-18-17-18z"/><ellipse cx="32" cy="46" rx="8" ry="6"/></g><circle cx="26" cy="36" r="2.1" fill="#3d3830"/><circle cx="38" cy="36" r="2.1" fill="#3d3830"/><ellipse cx="32" cy="44" rx="3" ry="2.4" fill="#3d3830"/><path d="M32 46v5" fill="none" stroke="#3d3830" stroke-width="1.2"/>',猪:'<g fill="none" stroke="#3d3830" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 26c-8-4-14 0-14 0s2 9 11 11M42 26c8-4 14 0 14 0s-2 9-11 11"/><path d="M32 24c-11 0-19 8-19 18s8 18 19 18 19-8 19-18-8-18-19-18z"/><ellipse cx="32" cy="46" rx="10" ry="8"/></g><circle cx="28" cy="46" r="1.6" fill="#3d3830"/><circle cx="36" cy="46" r="1.6" fill="#3d3830"/><circle cx="26" cy="36" r="2" fill="#3d3830"/><circle cx="38" cy="36" r="2" fill="#3d3830"/>'};
+window.setHomeZodiac=function(){var av=document.getElementById('homeAv');if(!av)return;var p=state.profile;var zc=(p&&(p.zodiac||(typeof zodiacOf==='function'&&zodiacOf(p.sy||p.by))))||'';var e=ZODIAC_SVG[zc];if(e){av.innerHTML='<span title="属'+zc+'" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:50%;background:linear-gradient(160deg,#f7f2e6,#e9e0cd)"><svg viewBox="0 0 64 64" width="30" height="30" style="display:block">'+e+'</svg></span>';}else{av.innerHTML='<span class="brand-mark" data-size="24"></span>';if(typeof paintBrandMarks==='function')paintBrandMarks();}};try{setHomeZodiac();}catch(e){}
+</script>
+<style>
+/* DIY 进场翻转卡：先讲「为什么这么选」，知道了/10s 后进工作室（scaleX 稳定翻面）*/
+.diy-intro{position:fixed;inset:0;z-index:4000;display:flex;align-items:center;justify-content:center;padding:26px;box-sizing:border-box;background:rgba(20,16,10,.52);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);opacity:0;transition:opacity .3s}
+.diy-intro.show{opacity:1}
+.di-card{width:100%;max-width:318px;min-height:360px;box-sizing:border-box;padding:26px 24px;border-radius:22px;background:radial-gradient(135% 120% at 20% 0%,#2c2417,#161009);border:1px solid rgba(201,162,78,.34);box-shadow:0 26px 64px rgba(0,0,0,.42),inset 0 1px 0 rgba(230,196,106,.12);color:#f0e6d2;display:flex;flex-direction:column;transform-origin:center;transition:transform .3s ease;transform:scaleX(1)}
+.di-card.flipping{transform:scaleX(.02)}
+.di-front{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:pointer}
+.di-back{flex:1;display:flex;flex-direction:column}
+.di-en{font-size:10px;letter-spacing:.26em;color:#d8b878;opacity:.85}
+.di-emblem{width:74px;height:74px;margin:16px 0 4px}
+.di-front .di-t{font-family:var(--serif);font-size:25px;color:#f5ecd6;margin:8px 0 10px;letter-spacing:.06em}
+.di-front .di-p{font-size:12.5px;color:#c3ac82;line-height:1.9}
+.di-flip{margin-top:20px;font-size:12px;color:#ecd399;border:1px solid rgba(201,162,78,.42);border-radius:16px;padding:7px 17px;letter-spacing:.05em}
+.di-back .di-h{font-size:14px;color:#ecd399;font-weight:600;margin-bottom:12px}
+.di-row{display:flex;gap:10px;font-size:12.5px;padding:9px 0;border-top:1px solid rgba(201,162,78,.14);line-height:1.6}
+.di-row b{flex:none;width:72px;color:#b8a988;font-weight:600}
+.di-row span{flex:1;color:#efe6d2}
+.di-back .di-note{font-size:11px;color:#a9997d;margin:12px 0 auto;line-height:1.75}
+.di-ok{margin-top:14px;width:100%;height:46px;border:none;border-radius:23px;background:linear-gradient(135deg,#F0D79B,#D9A84E);color:#2a1f10;font-family:var(--serif);font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 12px 26px rgba(201,162,78,.3)}
+.di-ok #diCd{font-weight:400;opacity:.72;font-size:12.5px;margin-left:2px}
+</style>
+<script>
+function studioIntro(){
+  if(document.getElementById('diyIntro'))return;
+  if(!document.getElementById('beadshop')||!document.getElementById('beadshop').classList.contains('active'))return;
+  var v=null;try{if(typeof studioVec==='function')v=studioVec();}catch(e){}
+  var E=(typeof FATE_ELCN!=='undefined')?FATE_ELCN:{};
+  var fav=function(w){return w?('喜 '+(w.favorable||[]).map(function(e){return E[e]||e;}).join('')+' · 忌 '+(w.avoid||[]).map(function(e){return E[e]||e;}).join('')):'—';};
+  var pair=(v&&v.mode==='pair');
+  var mainNm='';try{var r=fateCurrentPlans();var pp=(r&&r.mode==='pair')?r.her:(r&&r.plan);if(pp&&pp.mainId&&typeof BEADS!=='undefined'&&BEADS[pp.mainId])mainNm=BEADS[pp.mainId].n;}catch(e){}
+  var rows='<div class="di-row"><b>五行·八字</b><span>'+fav(v&&v.wx)+'</span></div>'
+   +(pair?('<div class="di-row"><b>关系锚珠</b><span>你俩各一串 · 共嵌一颗 · 锚「'+((v&&v.anchor)||'情绪安定')+'」</span></div>')
+         :('<div class="di-row"><b>此刻议题</b><span>'+((v&&v.themes&&v.themes.length)?v.themes.map(function(t){return t.theme;}).join(' / '):'情绪安定')+'</span></div>'))
+   +'<div class="di-row"><b>体质·中医</b><span>'+((v&&v.tizhi)?(v.tizhi.key+' · 宜「'+(v.xf||'沉檀龙麝')+'」香方'):'—')+'</span></div>';
+  var why=pair?'按你俩的合盘与各自八字，为你和 TA 各排一串，共嵌一颗关系锚珠——让你们的能量互相搭得上。'
+              :'只依据「五行八字 + 此刻议题 + 中医体质」这一个能量向量为你选石——不多加噱头，串也随之而变。';
+  var emblem='<svg class="di-emblem" viewBox="0 0 64 64" fill="none"><ellipse cx="32" cy="33" rx="21" ry="15" stroke="#E7C892" stroke-width="1.3" opacity=".7"/><g fill="#E7C892"><circle cx="32" cy="18" r="4.4"/><circle cx="47" cy="24" r="3.4"/><circle cx="51" cy="35" r="2.8"/><circle cx="44" cy="45" r="3.2"/><circle cx="32" cy="48" r="3.6"/><circle cx="20" cy="45" r="3.2"/><circle cx="13" cy="35" r="2.8"/><circle cx="17" cy="24" r="3.4"/></g></svg>';
+  var frontHTML='<div class="di-front"><div class="di-en">STONE LAB · 命理选品</div>'+emblem+'<div class="di-t">为你排了一串'+(mainNm?('<br><span style="font-size:16px;color:#e7c892">'+mainNm+'</span>'):'')+'</div><div class="di-p">按你的八字为你预排<br>翻看这串「为什么这么选」</div><div class="di-flip">翻 转 看 依 据 ↻</div></div>';
+  var backHTML='<div class="di-back"><div class="di-h">🧭 为什么为你这么选</div>'+rows+'<div class="di-note">'+why+'</div><button class="di-ok" onclick="studioIntroClose()">知道了 · 进工作室<span id="diCd">（10s）</span></button></div>';
+  window._diyBack=backHTML;window._diyFlipped=false;
+  var ov=document.createElement('div');ov.className='diy-intro';ov.id='diyIntro';
+  ov.innerHTML='<div class="di-card" id="diCard" onclick="studioIntroFlip()">'+frontHTML+'</div>';
+  document.body.appendChild(ov);
+  requestAnimationFrame(function(){ov.classList.add('show');});
+  if(window._diyT)clearTimeout(window._diyT);
+  window._diyT=setTimeout(studioIntroFlip,1050);
+  var n=10;if(window._diyCd)clearInterval(window._diyCd);
+  window._diyCd=setInterval(function(){n--;var el=document.getElementById('diCd');if(el)el.textContent='（'+n+'s）';if(n<=0)studioIntroClose();},1000);
+}
+function studioIntroFlip(){
+  if(window._diyFlipped)return;window._diyFlipped=true;if(window._diyT){clearTimeout(window._diyT);window._diyT=null;}
+  var c=document.getElementById('diCard');if(!c)return;c.onclick=null;c.classList.add('flipping');
+  setTimeout(function(){var cc=document.getElementById('diCard');if(cc){cc.innerHTML=window._diyBack||'';cc.classList.remove('flipping');}},300);
+}
+function studioIntroClose(){var ov=document.getElementById('diyIntro');if(window._diyCd){clearInterval(window._diyCd);window._diyCd=null;}if(window._diyT){clearTimeout(window._diyT);window._diyT=null;}if(ov){ov.classList.remove('show');setTimeout(function(){if(ov.parentNode)ov.parentNode.removeChild(ov);},300);}}
 </script>
 </body>
 </html>
