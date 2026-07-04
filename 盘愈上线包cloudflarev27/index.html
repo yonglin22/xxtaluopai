@@ -1100,6 +1100,9 @@
       </div>
     </div>
 
+    <!-- 掷筊问事 · 显眼入口 -->
+    <div class="jb-entry" onclick="openJiaobei()"><div class="jb-e-ic">☯</div><div><div class="jb-e-t">掷筊问事</div><div class="jb-e-d">悬而未决？长按掷筊，让心里的答案发声</div></div><div class="jb-e-go">去掷 →</div></div>
+
     <!-- 情绪陪伴 -->
     <div id="featCarouselWrap"></div>
 
@@ -5410,5 +5413,103 @@ function paintBrandMarks(){document.querySelectorAll('.brand-mark').forEach(el=>
 #home .home-greet .hg-date{margin-top:6px!important;}
 #home .prof-line{margin:7px 0 8px!important;}
 </style>
+<style>
+/* ===== 掷筊问事（3D 摇筊杯）===== */
+#home .jb-entry{display:flex;align-items:center;gap:13px;margin-top:12px;padding:16px 18px;border-radius:20px;cursor:pointer;position:relative;overflow:hidden;background:radial-gradient(120% 120% at 82% 0%,#3a1720,#170a10);border:1px solid rgba(201,120,110,.28);box-shadow:0 14px 34px rgba(30,16,20,.2)}
+#home .jb-entry:active{transform:scale(.99)}
+#home .jb-e-ic{width:46px;height:46px;border-radius:14px;background:radial-gradient(circle at 40% 32%,#a5432f,#5a1810);display:flex;align-items:center;justify-content:center;font-size:22px;flex:none;box-shadow:inset 0 1px 0 rgba(255,220,200,.2)}
+#home .jb-e-t{font-family:var(--serif);font-size:16.5px;font-weight:700;color:#f3ded0;letter-spacing:.04em}
+#home .jb-e-d{font-size:11.5px;color:#c99a8e;margin-top:4px;line-height:1.5}
+#home .jb-e-go{margin-left:auto;font-size:12.5px;color:#e6b8a0;font-weight:600;white-space:nowrap}
+.jb-ov{position:fixed;inset:0;z-index:340;background:radial-gradient(120% 90% at 50% 12%,#2a1116,#150a0d 60%,#0e0709);display:flex;flex-direction:column;color:#f3e6dc}
+.jb-top{height:54px;display:flex;align-items:center;gap:10px;padding:0 18px;font-family:var(--serif);font-size:16px;font-weight:700}
+.jb-top .jb-back{font-size:26px;cursor:pointer;line-height:1}
+.jb-scroll{flex:1;overflow-y:auto;display:flex;flex-direction:column;align-items:center;padding:6px 22px calc(24px + env(safe-area-inset-bottom))}
+.jb-q{font-family:var(--serif);font-size:15px;color:#e9ccb8;letter-spacing:.06em;margin-top:6px;text-align:center}
+.jb-qin{width:100%;max-width:300px;box-sizing:border-box;margin-top:12px;padding:11px 14px;border-radius:12px;border:1px solid rgba(220,180,160,.24);background:rgba(255,240,230,.06);color:#f3e6dc;font-size:13.5px;text-align:center;outline:none}
+.jb-qin::placeholder{color:#a37e72}
+.jb-stage{position:relative;height:280px;width:100%;display:flex;align-items:center;justify-content:center;gap:26px;perspective:760px}
+.jb-block{width:92px;height:120px;position:relative;transform-style:preserve-3d;border-radius:46px 46px 22px 22px;box-shadow:0 16px 26px rgba(0,0,0,.44);transition:none}
+.jb-block .fc{position:absolute;inset:0;border-radius:46px 46px 22px 22px;backface-visibility:hidden}
+.jb-block .yang{background:linear-gradient(158deg,#7c2a1c,#521307);border:1px solid #40100a}
+.jb-block .yang::after{content:'';position:absolute;left:50%;top:20%;width:3px;height:56%;transform:translateX(-50%);background:rgba(30,8,4,.5);border-radius:2px}
+.jb-block .yin{background:radial-gradient(circle at 42% 30%,#b34a34,#661a10 72%);border:1px solid #40100a}
+.jb-block[data-face="yin"] .yang{display:none}
+.jb-block[data-face="yang"] .yin{display:none}
+.jb-lbl{position:absolute;left:0;right:0;bottom:-24px;text-align:center;font-family:var(--serif);font-size:14px;font-weight:700;color:#e6b8a0}
+.jb-shadow{position:absolute;bottom:38px;width:96px;height:16px;border-radius:50%;background:rgba(0,0,0,.4);filter:blur(7px)}
+.jb-tossing{animation:jbToss 1.05s cubic-bezier(.35,0,.25,1)}
+@keyframes jbToss{0%{transform:translateY(0) rotate(0) rotateX(0)}28%{transform:translateY(-118px) rotate(220deg) rotateX(180deg)}55%{transform:translateY(-40px) rotate(430deg) rotateX(360deg)}78%{transform:translateY(-70px) rotate(560deg) rotateX(520deg)}100%{transform:translateY(0) rotate(720deg) rotateX(720deg)}}
+.jb-hint{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:11.5px;color:#b0897c}
+.jb-throw{width:100%;max-width:300px;height:56px;margin-top:8px;border:none;border-radius:28px;background:linear-gradient(135deg,#c0533b,#8a2417);color:#fff;font-family:var(--serif);font-size:16px;font-weight:600;letter-spacing:.08em;cursor:pointer;box-shadow:0 12px 26px rgba(150,40,25,.4);user-select:none;touch-action:none;transition:transform .12s}
+.jb-throw.charging{transform:scale(.94);background:linear-gradient(135deg,#8a2417,#5a1408)}
+.jb-throw:disabled{opacity:.6}
+.jb-result{width:100%;max-width:320px;min-height:8px;margin-top:14px}
+.jb-rc{border-radius:18px;padding:20px 18px;text-align:center;background:linear-gradient(180deg,rgba(255,238,224,.1),rgba(255,238,224,.03));border:1px solid rgba(220,180,160,.24)}
+.jb-rc.sheng{border-color:rgba(230,196,106,.5);box-shadow:0 0 30px rgba(230,196,106,.18)}
+.jb-badge{display:inline-block;width:46px;height:46px;line-height:46px;border-radius:50%;font-family:var(--serif);font-size:22px;font-weight:700}
+.jb-rc.sheng .jb-badge{background:radial-gradient(circle,#E7C892,#b0843a);color:#3a2410}
+.jb-rc.xiao .jb-badge{background:rgba(200,180,150,.2);color:#e9ccb8}
+.jb-rc.yinbei .jb-badge{background:rgba(120,140,160,.2);color:#bcd0df}
+.jb-rt{font-family:var(--serif);font-size:20px;font-weight:700;margin-top:12px;color:#f6e9dc}
+.jb-rd{font-size:13px;color:#d9c2b4;line-height:1.8;margin-top:10px}
+.jb-again{margin-top:14px;font-size:12.5px;color:#e6b8a0;cursor:pointer;text-decoration:underline}
+.jb-disc{font-size:10px;color:#8a6f66;line-height:1.6;margin-top:18px;text-align:center;max-width:320px}
+</style>
+<script>
+(function(){
+ var VERD={
+  sheng:{cls:'sheng',b:'允',t:'圣杯 · 允',d:'一阴一阳，天意应允——此事可行。放下犹疑，稳稳往前走一步。'},
+  xiao:{cls:'xiao',b:'待',t:'笑杯 · 待',d:'两阳，神明失笑，时机未明——别急着下定论，换个问法、或过阵子再问。'},
+  yinbei:{cls:'yinbei',b:'缓',t:'阴杯 · 缓',d:'两阴，暂不宜强求——此路先缓一缓，留意你还没看清的地方。'}
+ };
+ var thrown=false;
+ window.openJiaobei=function(){
+  var ov=document.createElement('div');ov.className='jb-ov';ov.id='jbOv';
+  ov.innerHTML='<div class="jb-top"><span class="jb-back" onclick="closeJiaobei()">‹</span><span>掷筊问事</span></div>'
+   +'<div class="jb-scroll"><div class="jb-q">心中默念一件悬而未决的事…</div>'
+   +'<input class="jb-qin" id="jbQ" placeholder="（可选）写下你问的事" maxlength="24">'
+   +'<div class="jb-stage"><div class="jb-shadow" style="left:calc(50% - 59px)"></div><div class="jb-shadow" style="left:calc(50% + 24px)"></div>'
+     +'<div class="jb-block" id="jbB1" data-face="yang"><div class="fc yang"></div><div class="fc yin"></div><div class="jb-lbl" id="jbL1"></div></div>'
+     +'<div class="jb-block" id="jbB2" data-face="yin"><div class="fc yang"></div><div class="fc yin"></div><div class="jb-lbl" id="jbL2"></div></div>'
+     +'<div class="jb-hint" id="jbHint">长按下方按钮，默念后松手掷出（手机可摇一摇）</div></div>'
+   +'<div class="jb-result" id="jbResult"></div>'
+   +'<button class="jb-throw" id="jbThrow">长按 · 掷筊</button>'
+   +'<div class="jb-disc">掷筊为传统民俗趣味体验，不构成任何决定依据；真正的答案，其实一直在你自己心里。</div></div>';
+  document.body.appendChild(ov);thrown=false;
+  var btn=document.getElementById('jbThrow'),charging=false;
+  var startCharge=function(e){if(thrown&&document.getElementById('jbResult').innerHTML){reset();}if(charging)return;charging=true;btn.classList.add('charging');btn.textContent='默念中… 松手掷出';var h=document.getElementById('jbHint');if(h)h.textContent='默念你问的事，松手掷出';};
+  var release=function(){if(!charging)return;charging=false;btn.classList.remove('charging');doThrow();};
+  btn.addEventListener('pointerdown',function(e){e.preventDefault();startCharge();try{btn.setPointerCapture(e.pointerId);}catch(_){}});
+  btn.addEventListener('pointerup',function(e){e.preventDefault();release();});
+  btn.addEventListener('pointercancel',release);
+  // 摇一摇（best-effort）
+  var lastShake=0;window.__jbMotion=function(ev){var a=ev.accelerationIncludingGravity||ev.acceleration;if(!a)return;var m=Math.abs(a.x||0)+Math.abs(a.y||0)+Math.abs(a.z||0);var now=(ev.timeStamp||0);if(m>34&&charging){charging=false;btn.classList.remove('charging');doThrow();}};
+  try{if(window.DeviceMotionEvent){if(typeof DeviceMotionEvent.requestPermission==='function'){/* iOS 需手势授权：长按已是手势，尝试请求 */btn.addEventListener('pointerdown',function once(){DeviceMotionEvent.requestPermission&&DeviceMotionEvent.requestPermission().then(function(s){if(s==='granted')window.addEventListener('devicemotion',window.__jbMotion);}).catch(function(){});btn.removeEventListener('pointerdown',once);});}else{window.addEventListener('devicemotion',window.__jbMotion);}}}catch(e){}
+ };
+ window.closeJiaobei=function(){try{window.removeEventListener('devicemotion',window.__jbMotion);}catch(e){}var o=document.getElementById('jbOv');if(o)o.remove();};
+ function reset(){var r=document.getElementById('jbResult');if(r)r.innerHTML='';document.getElementById('jbL1').textContent='';document.getElementById('jbL2').textContent='';var b=document.getElementById('jbThrow');b.disabled=false;b.textContent='长按 · 掷筊';thrown=false;}
+ function doThrow(){
+  var b1=document.getElementById('jbB1'),b2=document.getElementById('jbB2'),btn=document.getElementById('jbThrow');
+  if(!b1||!b2||thrown)return;thrown=true;btn.disabled=true;btn.textContent='掷出…';
+  document.getElementById('jbResult').innerHTML='';document.getElementById('jbL1').textContent='';document.getElementById('jbL2').textContent='';
+  var f1=Math.random()<0.5?'yang':'yin',f2=Math.random()<0.5?'yang':'yin';
+  b1.classList.remove('jb-tossing');b2.classList.remove('jb-tossing');void b1.offsetWidth;void b2.offsetWidth;
+  b1.classList.add('jb-tossing');b2.classList.add('jb-tossing');
+  var fin=function(){
+    b1.setAttribute('data-face',f1);b2.setAttribute('data-face',f2);
+    document.getElementById('jbL1').textContent=(f1==='yang'?'阳':'阴');document.getElementById('jbL2').textContent=(f2==='yang'?'阳':'阴');
+    var v=(f1!==f2)?'sheng':(f1==='yang'?'xiao':'yinbei');var V=VERD[v];
+    var q=(document.getElementById('jbQ')&&document.getElementById('jbQ').value||'').trim();
+    document.getElementById('jbResult').innerHTML='<div class="jb-rc '+V.cls+'"><div class="jb-badge">'+V.b+'</div><div class="jb-rt">'+V.t+'</div>'+(q?'<div style="font-size:11.5px;color:#b39a8c;margin-top:6px">所问：'+q.replace(/</g,'&lt;')+'</div>':'')+'<div class="jb-rd">'+V.d+'</div><div class="jb-again" onclick="reset&&window.__jbReset()">再问一筊 ↻</div></div>';
+    btn.disabled=false;btn.textContent='长按 · 再掷';
+    var h=document.getElementById('jbHint');if(h)h.textContent='长按下方按钮，默念后松手掷出（手机可摇一摇）';
+  };
+  setTimeout(fin,1080);
+  window.__jbReset=reset;
+ }
+})();
+</script>
+
 </body>
 </html>
