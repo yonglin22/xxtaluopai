@@ -2547,7 +2547,7 @@ function renderShopDiyHero(){
     return `<div class="shop-diy-hero" onclick="state._fateBack='skinshop';state._pendingFate=true;go('profile')">
       <div class="sdh-glow"></div>
       <div class="sdh-top"><span class="sdh-en">STONE LAB · 定制 DIY</span><span class="sdh-seal">定制</span></div>
-      <div class="sdh-title serif" style="margin-top:12px">定制 DIY · 灵感石验室</div>
+      <div class="sdh-title serif" style="margin-top:12px">定制 DIY · 心元石验室</div>
       <div class="sdh-sub" style="-webkit-line-clamp:3">按你的八字五行，为你排一串「为你而选」的本命珠串——自由摆珠 / 调大小 / 换盘，收拢成串戴上手。</div>
       <div class="sdh-cta">补出生信息，为我排一串 →</div></div>`;
   }
@@ -2581,7 +2581,7 @@ function goFateFrom(source){
   go('beadshop');
 }
 /* ============================================================
- * 灵感石验室 · 成串工作室（1:1 对齐 Stone LAB 视频）
+ * 心元石验室 · 成串工作室（1:1 对齐 Stone LAB 视频）
  * 自由摆珠(逐颗拖动) + 调珠大小(mm) + 撤销/删除/保存 + 收拢↔解除 + 构成清单结算
  * 珠照资产：复用 FATE_BEAD_IMG 的 8 颗；其余渐变占位（换实拍即照片级）
  * ============================================================ */
@@ -2736,7 +2736,7 @@ async function studioCheckout(){
     await modal({icon:'📿',title:'订单已提交',msg:(useReal?'已抵扣 '+usePt+' 心元。\n':'')+'定制码 '+j.code+'\n发客服微信 Syl18268346784 确认净手围与尾款 ¥'+pay+'。',okText:'复制码 · 找客服'});copyText(j.code,'定制码已复制～');
   }else toast((j&&j.error)||'提交失败');
 }
-/* ---- 灵感石验室 UI（renderBeadshop 替换为工作室）---- */
+/* ---- 心元石验室 UI（renderBeadshop 替换为工作室）---- */
 function paintBeadThumb2(cv,id){if(!cv)return;const dp=Math.min(window.devicePixelRatio||1,2);cv.width=40*dp;cv.height=40*dp;const x=cv.getContext('2d');x.setTransform(dp,0,0,dp,0,0);const b=STUDIO_BEADS[id]||{color:['#ccc','#999']};const im=studioBeadImg(id);x.clearRect(0,0,40,40);if(im&&im.complete&&im.naturalWidth){x.drawImage(im,3,3,34,34);}else{const g=x.createRadialGradient(14,12,3,20,20,17);g.addColorStop(0,b.color[0]);g.addColorStop(1,b.color[1]);x.fillStyle=g;x.beginPath();x.arc(20,20,16,0,7);x.fill();x.fillStyle='rgba(255,255,255,.55)';x.beginPath();x.ellipse(14,12,5,3.2,-0.5,0,7);x.fill();}}
 function studioCard(id){const b=STUDIO_BEADS[id];return `<div class="st-card" onclick="studioAdd('${id}')"><canvas id="stc_${id}"></canvas><div class="st-cn">${b.n}</div><div class="st-cp">${b.mm}mm · ¥${b.price}</div></div>`;}
 function studioGrid(){const S=studioState();const inCat=Object.keys(STUDIO_BEADS).filter(id=>STUDIO_BEADS[id].cat===S.cat);const shown=inCat.filter(id=>(S.sub==='all'||STUDIO_BEADS[id].sub===S.sub)&&(!S.q||STUDIO_BEADS[id].n.indexOf(S.q)>=0));return {shown,subs:['all'].concat([...new Set(inCat.map(id=>STUDIO_BEADS[id].sub))])};}
@@ -2744,14 +2744,14 @@ function studioSearch(v){studioState().q=v;const g=document.getElementById('stGr
 function renderBeadshop(){
   const box=$("#beadBody");if(!box)return;
   const back=state._fateBack||'skinshop';
-  if(!state.phone){box.innerHTML=`<span class="st-back" onclick="go('${back}')">‹ 返回</span><div class="st-blank">登录后进入灵感石验室<br><button class="st-cart" style="margin-top:14px" onclick="go('login')">去登录</button></div>`;return;}
+  if(!state.phone){box.innerHTML=`<span class="st-back" onclick="go('${back}')">‹ 返回</span><div class="st-blank">登录后进入心元石验室<br><button class="st-cart" style="margin-top:14px" onclick="go('login')">去登录</button></div>`;return;}
   if(!fateSelfBirth()){box.innerHTML=`<span class="st-back" onclick="go('${back}')">‹ 返回</span><div class="st-blank">先补出生信息，为你的八字预排一串<br><button class="st-cart" style="margin-top:14px" onclick="state._pendingFate=true;go('profile')">去补出生信息 →</button></div>`;return;}
   const S=studioState();
   if(!S._seeded){S._seeded=true;studioSeedFromFate();}
   const total=studioTotal(),n=S.beads.length,wrist=S.wristCm||studioWristCm();
   const {shown,subs}=studioGrid();
   box.innerHTML=`
-   <div class="st-topbar"><span class="st-back" onclick="go('${back}')">‹ 返回</span><span class="st-title">灵感石验室</span><span class="st-guide">指南 ?</span></div>
+   <div class="st-topbar"><span class="st-back" onclick="go('${back}')">‹ 返回</span><span class="st-title">心元石验室</span><span class="st-guide">指南 ?</span></div>
    <div class="st-headrow"><span class="st-price">¥ ${total}.0</span><span class="st-cnt">${n} 颗</span><span class="st-sugg">建议净手围 ${wrist}cm</span></div>
    <div class="st-stage"><canvas id="studioPlate" data-h="300"></canvas><div class="st-undo" onclick="studioUndo()">↩</div></div>
    <div class="st-tools">
@@ -5278,7 +5278,7 @@ function paintBrandMarks(){document.querySelectorAll('.brand-mark').forEach(el=>
    a2.push({name:nm,beads:S.beads,plate:S.plate||'sutai',when:Date.now()});try{localStorage.setItem('py_studio_saves',JSON.stringify(a2));}catch(e){}
    m.remove();toast('已保存作品「'+nm+'」✓');};};
 
- window.studioGuide=function(){modal({icon:'📿',title:'怎么玩灵感石验室',msg:'1) 点下方素材的「＋」把珠子加到盘上，「−」取走；\n2) 收拢成串一键排成手串，解除串珠后可自由拖动摆位；\n3) 换瓷盘、设手围、保存作品都在盘面与工具栏；\n4) 满意就「加入购物车」进结算预览下单。',okText:'开始'});};
+ window.studioGuide=function(){modal({icon:'📿',title:'怎么玩心元石验室',msg:'1) 点下方素材的「＋」把珠子加到盘上，「−」取走；\n2) 收拢成串一键排成手串，解除串珠后可自由拖动摆位；\n3) 换瓷盘、设手围、保存作品都在盘面与工具栏；\n4) 满意就「加入购物车」进结算预览下单。',okText:'开始'});};
  window.studioMeasureGuide=function(){modal({icon:'📏',title:'怎么量手围',msg:'用软尺贴着手腕骨下方绕一圈，读到的厘米数就是净手围；没有软尺就用一根绳绕一圈，再比着直尺量长度。手围 +1~2cm ≈ 舒适串长。',okText:'知道了'});};
 
  /* 结算预览页（照片级串图 + 手串周长 + 包装选择 + 提交订单）*/
@@ -5321,11 +5321,11 @@ function paintBrandMarks(){document.querySelectorAll('.brand-mark').forEach(el=>
 
  /* 重建 renderBeadshop：换盘钮 + 空态提示 + −/＋ 素材栏 */
  window.renderBeadshop=function(){var box=document.getElementById('beadBody');if(!box)return;var back=state._fateBack||'skinshop';
-  if(!state.phone){box.innerHTML='<span class="st-back" onclick="go(\''+back+'\')">‹ 返回</span><div class="st-blank">登录后进入灵感石验室<br><button class="st-cart" style="margin-top:14px" onclick="go(\'login\')">去登录</button></div>';return;}
+  if(!state.phone){box.innerHTML='<span class="st-back" onclick="go(\''+back+'\')">‹ 返回</span><div class="st-blank">登录后进入心元石验室<br><button class="st-cart" style="margin-top:14px" onclick="go(\'login\')">去登录</button></div>';return;}
   if(!fateSelfBirth()){box.innerHTML='<span class="st-back" onclick="go(\''+back+'\')">‹ 返回</span><div class="st-blank">先补出生信息，为你的八字预排一串<br><button class="st-cart" style="margin-top:14px" onclick="state._pendingFate=true;go(\'profile\')">去补出生信息 →</button></div>';return;}
   var S=studioState();var _src=(state._fateSource||'shop');if(!S._seeded||S._seedSrc!==_src){S._seeded=true;S._seedSrc=_src;studioSeedFromFate();}
   var total=studioTotal(),n=S.beads.length,wrist=(S.wristCm||studioWristCm());var G=studioGrid(),shown=G.shown,subs=G.subs,pd=studioPlateDef();
-  box.innerHTML='<div class="st-topbar"><span class="st-back" onclick="go(\''+back+'\')">‹ 返回</span><span class="st-title">灵感石验室</span><span class="st-guide" onclick="studioGuide()">指南 ?</span></div>'
+  box.innerHTML='<div class="st-topbar"><span class="st-back" onclick="go(\''+back+'\')">‹ 返回</span><span class="st-title">心元石验室</span><span class="st-guide" onclick="studioGuide()">指南 ?</span></div>'
    +'<div class="st-headrow"><span class="st-price">¥ '+total+'.0</span><span class="st-cnt">'+n+' 颗</span><span class="st-sugg">建议净手围 '+wrist+'cm</span></div>'
    +(S._pairMode?('<div class="st-side-tog"><b class="'+(S._side==='her'?'on':'')+'" onclick="studioSetSide(\'her\')">你的串</b><b class="'+(S._side==='ta'?'on':'')+'" onclick="studioSetSide(\'ta\')">TA的串</b><span class="st-side-hint">你俩各一串·共嵌关系锚珠</span></div>'):'')
    +'<div class="st-stage"><canvas id="studioPlate" data-h="300"></canvas>'
