@@ -2540,6 +2540,31 @@ function renderShopFateCard(){
       <div style="margin-top:6px;font-size:12.5px;color:#B23A2C;font-weight:600">¥${p.price} 起 · 查看 / 定制 ›</div>
     </div></div>`;
 }
+/* 商城 · 定制DIY 主推 Hero（优先级 > 皮肤）*/
+function renderShopDiyHero(){
+  if(!state.phone)return '';
+  if(!fateSelfBirth()){
+    return `<div class="shop-diy-hero" onclick="state._fateBack='skinshop';state._pendingFate=true;go('profile')">
+      <div class="sdh-glow"></div>
+      <div class="sdh-top"><span class="sdh-en">STONE LAB · 定制 DIY</span><span class="sdh-seal">定制</span></div>
+      <div class="sdh-title serif" style="margin-top:12px">定制 DIY · 灵感石验室</div>
+      <div class="sdh-sub" style="-webkit-line-clamp:3">按你的八字五行，为你排一串「为你而选」的本命珠串——自由摆珠 / 调大小 / 换盘，收拢成串戴上手。</div>
+      <div class="sdh-cta">补出生信息，为我排一串 →</div></div>`;
+  }
+  const r=fateCurrentPlans(),p=(r.mode==='pair')?r.her:r.plan;const el=p.mainEl?FATE_ELCN[p.mainEl]:'';
+  return `<div class="shop-diy-hero" onclick="goFateFrom('shop')">
+    <div class="sdh-glow"></div>
+    <div class="sdh-top"><span class="sdh-en">STONE LAB · 定制 DIY</span><span class="sdh-seal">定制</span></div>
+    <div class="sdh-body">
+      <div class="sdh-cv"><canvas id="shopFateCv" data-h="112" style="width:112px;height:112px;border-radius:14px;display:block"></canvas></div>
+      <div class="sdh-tx">
+        <div class="sdh-title serif">${BEADS[p.mainId]?BEADS[p.mainId].n:'本命串'}${el?' · 补'+el:''}</div>
+        <div class="sdh-sub">${p.reason}</div>
+        <div class="sdh-price">¥${p.price} 起 · 按你的八字预排，可自由定制</div>
+      </div>
+    </div>
+    <div class="sdh-cta">✦ 进工作室 · 开始定制 →</div></div>`;
+}
 /* ---- 漏斗钩子卡（星盘/合盘/树洞 读完 → 为你排了一串 →）---- */
 function fateHookCard(source){
   if(!state.phone)return '';
@@ -3754,10 +3779,11 @@ function renderSkinShop(){
   const grid=Object.keys(SKINS).map(id=>skinCard(id)).join('');
   const goodsHtml=GOODS.map(g=>`<div class="panel" style="display:flex;gap:14px;align-items:center;margin-bottom:10px"><div style="font-size:34px;flex:none">${g.emoji}</div><div style="flex:1;min-width:0"><div class="serif" style="font-size:16px;color:var(--ink)">${esc(g.name)}</div><div style="font-size:11.5px;color:var(--ink-faint);margin:3px 0 6px;line-height:1.5">${esc(g.desc)}</div><div style="font-size:12px;color:var(--gold-deep)">¥${g.price} · 用 ${g.ptOff} 心元抵 ¥${g.yuanOff} → 实付 ¥${Math.max(0,g.price-g.yuanOff)}</div></div><button class="btn" style="flex:none;padding:8px 15px;font-size:13px;background:linear-gradient(135deg,#E7C892,var(--amber));color:#2a1f10;border:none" onclick="redeemGood('${g.id}')">兑换</button></div>`).join('');
   box.innerHTML=`
-   ${pHero('pán yù mall','盘愈商城','为你排的珠串 · 心光球皮肤 · 好物 · 当前 '+state.balance+' 心元')}
-   ${renderShopFateCard()}
-   <div style="font-size:12px;color:var(--ink-faint);letter-spacing:.14em;margin:24px 2px 12px">心 光 球 皮 肤 · 图 鉴</div>
-   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">${grid}</div>
+   ${pHero('pán yù mall','盘愈商城','定制珠串 · 心光球皮肤 · 好物 · 当前 '+state.balance+' 心元')}
+   ${renderShopDiyHero()}
+   <div class="shop-skin-h">心 光 球 皮 肤 · 图 鉴</div>
+   <div class="shop-skin-sub">戴上你定制的实体串之余，也给数字心光球换套皮肤——按星座 / 情绪收集，实体卡可兑换。</div>
+   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${grid}</div>
    ${GOODS.length?`<div style="font-size:12px;color:var(--ink-faint);letter-spacing:.14em;margin:22px 2px 12px">好 物 · 积 分 抵 扣</div>${goodsHtml}<div class="disclaimer" style="text-align:left;margin-bottom:6px">用心元抵扣现金差价，兑换后凭码找客服付尾款发货；实体好物随货附起牌师手写暖话签。</div>`:''}
    <div class="panel" style="margin-top:14px">
      <div style="font-size:13px;color:var(--gold-deep);margin-bottom:8px">🎁 有实体卡？输入兑换码</div>
@@ -3765,7 +3791,7 @@ function renderSkinShop(){
      <div class="disclaimer" style="text-align:left">线下买的暖话签 / 人格签，输入卡片兑换码即可解锁专属皮肤与深读礼。</div>
    </div>
    <button class="btn block ghost" style="margin-top:12px" onclick="go('myorb')">回到心光球</button>`;
-  try{if(fateSelfBirth()){const _fr=fateCurrentPlans();if(_fr&&_fr.plan)paintBracelet('shopFateCv',_fr.plan,false);}}catch(e){}
+  try{if(fateSelfBirth()){const _fr=fateCurrentPlans();const _pp=_fr?((_fr.mode==='pair')?_fr.her:_fr.plan):null;if(_pp)paintBracelet('shopFateCv',_pp,false);}}catch(e){}
 }
 async function redeemGood(id){
   const g=GOODS.find(x=>x.id===id);if(!g)return;
@@ -5777,6 +5803,21 @@ window.fpSync=function(el){try{var c=el.children[0];if(!c)return;var step=c.offs
 #beadshop .st-side-tog b.on{color:#2a1f10;background:linear-gradient(135deg,#F0D79B,#D9A84E);border-color:transparent;box-shadow:0 6px 16px rgba(201,162,78,.28)}
 #beadshop .st-side-tog .st-side-hint{flex:1;text-align:right;font-size:10.5px;color:var(--faint2)}
 .ledger-sheet .ls-note{font-size:11px;color:var(--ink-soft);line-height:1.7;padding:10px 2px;border-bottom:1px solid var(--line-soft);margin-bottom:4px}
+#skinshop .shop-diy-hero{position:relative;overflow:hidden;cursor:pointer;border-radius:20px;padding:17px 18px 15px;margin-top:14px;background:radial-gradient(135% 120% at 18% 0%,#2c2417,#161009);border:1px solid rgba(201,162,78,.34);box-shadow:0 18px 44px rgba(30,26,22,.22),inset 0 1px 0 rgba(230,196,106,.12)}
+#skinshop .shop-diy-hero:active{transform:scale(.992)}
+#skinshop .shop-diy-hero .sdh-glow{position:absolute;width:170px;height:170px;border-radius:50%;filter:blur(34px);top:-56px;right:-44px;opacity:.4;background:radial-gradient(circle,#caa24e,transparent 70%);pointer-events:none}
+#skinshop .sdh-top{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:2}
+#skinshop .sdh-en{font-size:10px;letter-spacing:.22em;color:var(--amber);opacity:.85}
+#skinshop .sdh-seal{width:26px;height:26px;border-radius:7px;border:1px solid rgba(201,162,78,.5);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:12px;color:#e9cf90;background:rgba(201,162,78,.1)}
+#skinshop .sdh-body{display:flex;gap:14px;align-items:center;position:relative;z-index:2;margin-top:12px}
+#skinshop .sdh-cv{flex:none;background:rgba(244,238,227,.9);border-radius:14px;box-shadow:0 6px 16px rgba(0,0,0,.25)}
+#skinshop .sdh-tx{flex:1;min-width:0}
+#skinshop .sdh-title{font-size:18px;font-weight:700;color:#f4ead2;letter-spacing:.03em;line-height:1.3}
+#skinshop .sdh-sub{font-size:11.5px;color:#c3ac82;margin-top:5px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#skinshop .sdh-price{font-size:12.5px;color:#E7C892;font-weight:600;margin-top:7px}
+#skinshop .sdh-cta{position:relative;z-index:2;margin-top:14px;text-align:center;padding:12px 0;border-radius:13px;background:linear-gradient(135deg,#F0D79B,#D9A84E);color:#2a1f10;font-weight:700;font-size:14.5px;letter-spacing:.04em;box-shadow:0 10px 24px rgba(201,162,78,.3)}
+#skinshop .shop-skin-h{font-size:12px;color:var(--ink-faint);letter-spacing:.14em;margin:26px 2px 6px}
+#skinshop .shop-skin-sub{font-size:11.5px;color:var(--ink-faint);margin:0 2px 12px;line-height:1.6}
 </style>
 <script>
 (function(){
