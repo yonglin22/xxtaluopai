@@ -1011,7 +1011,7 @@
   <!-- ===== HOME 首页 ===== -->
   <section class="screen" id="home">
     <div class="home-top">
-      <div class="home-greet"><div class="hg-hi serif" id="homeGreet">你好</div><div class="hg-date" id="homeDate"></div><div id="buildTag" style="display:inline-block;margin-top:3px;font-size:10px;color:#B0843A;background:rgba(201,162,78,.12);border:1px solid rgba(201,162,78,.3);border-radius:8px;padding:1px 7px;letter-spacing:.05em">构建 v29 · 命理版 · 07-04</div></div>
+      <div class="home-greet"><div class="hg-hi serif" id="homeGreet">你好</div><div class="hg-date" id="homeDate"></div></div>
       <div class="home-tr">
         <button class="hp-bal" id="signinBtn" onclick="go('mine')">✨ <span id="homeTopBal">300</span></button>
         <div class="hp-av" onclick="go('mine')"><span class="brand-mark" data-size="24"></span></div>
@@ -1099,9 +1099,6 @@
         <div class="hf-go">排我的八字 →</div>
       </div>
     </div>
-
-    <!-- 掷筊问事 · 显眼入口 -->
-    <div class="jb-entry" onclick="openJiaobei()"><div class="jb-e-ic">☯</div><div><div class="jb-e-t">掷筊问事</div><div class="jb-e-d">悬而未决？长按掷筊，让心里的答案发声</div></div><div class="jb-e-go">去掷 →</div></div>
 
     <!-- 情绪陪伴 -->
     <div id="featCarouselWrap"></div>
@@ -4120,7 +4117,7 @@ function renderNatal(){
   <div class="ns-detail" id="natalDetail"><div class="ns-g" id="nsG">\u2609</div><div class="ns-m"><div class="ns-nm" id="nsNm"></div><div class="ns-d" id="nsD"></div></div></div>
   <div class="ns-three" id="natalThree"></div>`;
   const full=`<div style="text-align:center;margin:2px 0 4px"><button id="natalFullBtn" class="btn ghost" style="font-size:13px;padding:8px 18px;border-color:#6b5a2e;color:#cbb78a" onclick="toggleNatalFull()">查看完整星盘图 ▾</button></div><div id="natalFullWrap" style="display:none"><div style="background:radial-gradient(120% 120% at 50% 40%,#2a2216,#17110a);border-radius:18px;padding:16px 10px;margin:8px 0 4px"><div id="natalWheel" style="width:100%;max-width:360px;margin:0 auto;min-height:200px"></div></div></div>`;
-  body.innerHTML=head+`<div style="display:flex;gap:9px;margin-top:18px"><div onclick="try{(document.getElementById('natalSky')||document.body).scrollIntoView({behavior:'smooth',block:'start'});}catch(e){}" style="flex:1;min-width:0;cursor:pointer;text-align:center;border-radius:18px;padding:15px 6px 13px;border:1.5px solid var(--amber);background:radial-gradient(130% 120% at 50% 0%,#2c2417,#17110a);box-shadow:0 12px 28px rgba(30,26,22,.16)"><div style="font-size:22px;line-height:1">🌌</div><div class="serif" style="font-size:14px;font-weight:700;color:#f0e6cf;margin-top:8px">本命星盘</div><div style="font-size:10px;color:#c7b187;margin-top:4px">日月升 · 十星落座</div></div><div onclick="go('bazichart')" style="flex:1;min-width:0;cursor:pointer;text-align:center;border-radius:18px;padding:15px 6px 13px;border:1px solid rgba(201,162,78,.3);background:radial-gradient(130% 120% at 50% 0%,#2c2417,#17110a);box-shadow:0 12px 28px rgba(30,26,22,.14)"><div style="font-size:22px;line-height:1">🀄</div><div class="serif" style="font-size:14px;font-weight:700;color:#f0e6cf;margin-top:8px">八字命盘</div><div style="font-size:10px;color:#c7b187;margin-top:4px">五行喜忌 · 体质</div></div><div onclick="go('synastry')" style="flex:1;min-width:0;cursor:pointer;text-align:center;border-radius:18px;padding:15px 6px 13px;border:1px solid rgba(201,162,78,.3);background:radial-gradient(130% 120% at 50% 0%,#2b1a1f,#170f12);box-shadow:0 12px 28px rgba(30,26,22,.14)"><div style="font-size:22px;line-height:1">💞</div><div class="serif" style="font-size:14px;font-weight:700;color:#f0e6cf;margin-top:8px">关系合盘</div><div style="font-size:10px;color:#c7b187;margin-top:4px">和 TA 的契合度</div></div></div>`+ring+full+`<button class="btn block" style="margin-top:12px" onclick="natalDeepRead()">🔮 深度人格图谱解读</button><div style="text-align:center;margin-top:14px"><span onclick="personaPoster()" style="font-size:12.5px;color:var(--ink-faint);cursor:pointer;border-bottom:1px solid var(--line)">✦ 生成人格标签海报 · 分享</span></div>${readerHookHTML('natalToReader()','想更懂这份人格图谱、聊聊最近的状态？找 {nick} 深聊一次 →')}<div class="disclaimer">星盘基于公历出生时间排算；时辰越精确，上升与宫位越准。</div><div id="natalDeep" style="margin-top:18px"></div>`;
+  body.innerHTML=`<div style="display:flex;gap:8px;margin:2px 0 14px"><div onclick="try{(document.getElementById('natalSky')||document.body).scrollIntoView({behavior:'smooth',block:'start'});}catch(e){}" style="flex:1;min-width:0;cursor:pointer;text-align:center;position:relative;border-radius:15px;padding:13px 5px 11px;border:1.5px solid var(--amber);background:rgba(201,162,78,.12)"><div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-size:9px;color:#fff;background:var(--amber);border-radius:8px;padding:1px 8px;white-space:nowrap">当前</div><div style="font-size:21px;line-height:1">🌌</div><div class="serif" style="font-size:13.5px;font-weight:700;color:var(--gold-deep);margin-top:7px">本命星盘</div><div style="font-size:9.5px;color:var(--ink-faint);margin-top:3px">日月升 · 十星</div></div><div onclick="go('bazichart')" style="flex:1;min-width:0;cursor:pointer;text-align:center;border-radius:15px;padding:13px 5px 11px;border:1px solid var(--line);background:var(--bg-raise)"><div style="font-size:21px;line-height:1">🀄</div><div class="serif" style="font-size:13.5px;font-weight:700;color:var(--ink);margin-top:7px">八字命盘</div><div style="font-size:9.5px;color:var(--ink-faint);margin-top:3px">五行喜忌 · 体质</div></div><div onclick="go('synastry')" style="flex:1;min-width:0;cursor:pointer;text-align:center;border-radius:15px;padding:13px 5px 11px;border:1px solid var(--line);background:var(--bg-raise)"><div style="font-size:21px;line-height:1">💞</div><div class="serif" style="font-size:13.5px;font-weight:700;color:var(--ink);margin-top:7px">关系合盘</div><div style="font-size:9.5px;color:var(--ink-faint);margin-top:3px">和 TA 的契合度</div></div></div>`+head+ring+full+`<button class="btn block" style="margin-top:12px" onclick="natalDeepRead()">🔮 深度人格图谱解读</button><div style="text-align:center;margin-top:14px"><span onclick="personaPoster()" style="font-size:12.5px;color:var(--ink-faint);cursor:pointer;border-bottom:1px solid var(--line)">✦ 生成人格标签海报 · 分享</span></div>${readerHookHTML('natalToReader()','想更懂这份人格图谱、聊聊最近的状态？找 {nick} 深聊一次 →')}<div class="disclaimer">星盘基于公历出生时间排算；时辰越精确，上升与宫位越准。</div><div id="natalDeep" style="margin-top:18px"></div>`;
   startNatalCanvas(ch);
   if(state._natalRead)renderNatalDeep(state._natalRead);
 }
@@ -5511,5 +5508,168 @@ function paintBrandMarks(){document.querySelectorAll('.brand-mark').forEach(el=>
 })();
 </script>
 
+<style>
+/* ===== 关系合盘 v3（P0 内容 · 盘愈风）===== */
+#synastry .sy-who{background:var(--bg-raise);border:1px solid var(--line);border-radius:16px;padding:14px 14px 12px;margin-top:12px}
+#synastry .sy-who h4{display:flex;align-items:center;gap:7px;font-size:14px;color:var(--ink);margin:0 0 10px;font-weight:600}
+#synastry .sy-dot{width:9px;height:9px;border-radius:50%}
+#synastry .sy-dot.her{background:var(--cinnabar,#B23A2C)}
+#synastry .sy-dot.ta{background:#5a6b8c}
+#synastry .sy-lab{font-size:11px;color:var(--ink-faint);margin:8px 2px 4px}
+#synastry .sy-in{width:100%;box-sizing:border-box;padding:10px 11px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);font-size:14px;outline:none}
+#synastry .sy-in:focus{border-color:var(--amber)}
+#synastry .sy-row2{display:flex;gap:9px}
+#synastry .sy-chk{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-soft);margin-top:9px;cursor:pointer}
+#synastry .sy-seg{display:flex;gap:8px;margin-top:6px}
+#synastry .sy-seg b{flex:1;text-align:center;font-weight:400;font-size:13px;padding:11px 0;border:1px solid var(--line);border-radius:11px;color:var(--ink-soft);cursor:pointer;background:var(--bg-raise)}
+#synastry .sy-seg b.on{border-color:var(--amber);color:var(--gold-deep);font-weight:600;background:rgba(201,162,78,.08)}
+#synastry .sy-mini3{display:flex;gap:9px;margin:12px 0}
+#synastry .sy-m{flex:1;text-align:center;background:var(--bg-raise);border:1px solid var(--line);border-radius:14px;padding:12px 4px}
+#synastry .sy-m .k{font-size:10px;color:var(--ink-faint);letter-spacing:.06em}
+#synastry .sy-m .g{font-size:20px;margin:5px 0 2px}
+#synastry .sy-m .v{font-family:var(--serif);font-size:15px;color:var(--ink);font-weight:700}
+#synastry .sy-sec{margin-top:14px}
+#synastry .sy-h{font-size:13px;color:var(--gold-deep);margin-bottom:9px;letter-spacing:.02em}
+#synastry .sy-each{display:flex;gap:10px}
+#synastry .sy-e{flex:1;background:var(--bg-raise);border:1px solid var(--line);border-radius:14px;padding:12px}
+#synastry .sy-e .w{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink);font-weight:600;margin-bottom:6px}
+#synastry .sy-e p{font-size:12px;color:var(--ink-soft);line-height:1.7;margin:0}
+#synastry ul.sy-pts{list-style:none;padding:0;margin:0}
+#synastry ul.sy-pts li{position:relative;padding:9px 0 9px 20px;font-size:12.5px;color:var(--ink-soft);line-height:1.7;border-bottom:1px solid var(--line-soft)}
+#synastry ul.sy-pts li:last-child{border-bottom:none}
+#synastry ul.sy-pts li::before{content:'';position:absolute;left:4px;top:15px;width:6px;height:6px;border-radius:50%}
+#synastry ul.sy-pts.har li::before{background:#5f8f5a}
+#synastry ul.sy-pts.fri li::before{background:#c98a3a}
+#synastry ul.sy-pts.ins li::before{background:var(--amber)}
+#synastry .sy-act{background:linear-gradient(180deg,#fcf9f4,#f3ecdf);border:1px solid rgba(201,162,78,.24);border-radius:14px;padding:14px;font-size:13px;color:#3a2f1c;line-height:1.7}
+</style>
+<script>
+(function(){
+ if(typeof renderSynastry!=='function')return;
+ function nrm(x){x=x%360;return x<0?x+360:x;}
+ var ASP=[{n:'合相',a:0,o:8,t:'s'},{n:'六分',a:60,o:6,t:'h'},{n:'四分',a:90,o:7,t:'f'},{n:'三分',a:120,o:8,t:'h'},{n:'对分',a:180,o:8,t:'x'}];
+ var WW={'月亮太阳':3,'太阳月亮':3,'月亮月亮':3,'金星火星':3,'火星金星':3,'太阳太阳':2.2,'金星金星':2};
+ var BOD=['太阳','月亮','金星','火星','水星'];
+ var ROLE={太阳:'他的底色',月亮:'情绪与安全感',金星:'爱的方式',火星:'欲望与行动',水星:'沟通频道'};
+ function cross(h,t){var o=[];for(var i=0;i<BOD.length;i++)for(var j=0;j<BOD.length;j++){var a=BOD[i],b=BOD[j];var s=Math.abs(nrm(h[a])-nrm(t[b]));if(s>180)s=360-s;for(var k=0;k<ASP.length;k++){var A=ASP[k],d=Math.abs(s-A.a);if(d<=A.o){o.push({h:a,t:b,n:A.n,t2:A.t,w:(WW[a+b]||1)*(1-d/A.o/2)});break;}}}return o.sort(function(x,y){return y.w-x.w;});}
+ function scoreOf(a){var s=60;a.forEach(function(x){s+=((x.t2=='h'||x.t2=='s')?1:-1)*x.w*3*(x.t2=='s'?.6:1);});return Math.max(55,Math.min(92,Math.round(s)));}
+ function hL(a){var m={'月亮太阳':'你的月亮和 TA 的太阳'+a.n+'——他的存在让你安心。','金星火星':'金星与火星'+a.n+'——吸引力很直接，有化学反应。','月亮月亮':'两人月亮'+a.n+'——情绪同频，不用多解释他也懂。'};return m[a.h+a.t]||('你的'+a.h+'与 TA 的'+a.t+a.n+'——「'+ROLE[a.h]+'」这块天然合拍。');}
+ function fL(a){var m={'金星火星':'金星火星'+a.n+'——想亲近的节奏对不上，容易觉得一个人使劲；是磨合不是不爱。','水星水星':'两人水星'+a.n+'——说话易错频，多确认一句少吵一次。'};return m[a.h+a.t]||('你的'+a.h+'与 TA 的'+a.t+a.n+'——「'+ROLE[a.h]+'」这块易消耗，是要一起学的功课，不是注定不合。');}
+ var SDYN={暧昧:'这段暧昧此刻是真在靠近，还是你一个人加了戏——先看清，再决定要不要迈那一步。',在一起:'你们不是不相爱，是用不同方式在爱；最近的别扭，多半是有句话没说开。',复合:'想复合，先分清是这段关系真的适合，还是舍不得已经付出的。'};
+ var SACT={暧昧:'这周单独相处一次，观察：你表达在乎时，他是接住了还是转移了。',在一起:'挑个不吵架的时刻，把你最在意的一件需要平静说给他听一次。',复合:'今晚写下三件你最需要从关系里得到的，逐条打勾或叉，照见你站在哪。'};
+ var SINS={暧昧:['把"他是不是喜欢我"和"我是不是在自己加戏"分开——先确认信号，再决定要不要投入。','对方主动的频率，比他偶尔一次的热情更说明问题。','先给自己几次"平常心相处"，感受真实的舒适度。'],在一起:['把"他爱不爱我"和"他会不会表达爱"分开——这是两件事。','你要被回应是合理的，但大概率得你先把话说出口。','别用吵架的方式要爱——挑个平静的时刻说需要。'],复合:['先分清你想复合的是"这个人"，还是"不甘心那段付出"。','复合不是把旧关系原样接上，是你俩都得先改掉当初拆散你们的那一点。','给自己一个冷静期再决定——此刻的想念未必是答案。']};
+
+ var CN={sun:'太阳',moon:'月亮',venus:'金星',mars:'火星',mercury:'水星'};
+ function bodiesOf(birth){var ch=window.Astro.compute(birth);var b=ch.bodies;var sg=function(k){return (b[k]&&b[k].sign)||'白羊';};var L=function(s){var i=NS_SIGNS.indexOf(s);return (i<0?0:i)*30+15;};
+  return {太阳:L(sg('sun')),月亮:L(sg('moon')),金星:L(sg('venus')),火星:L(sg('mars')),水星:L(sg('mercury')),sun:sg('sun'),moon:sg('moon'),venus:sg('venus'),mars:sg('mars')};}
+ function mkBirth(y,mo,d,hh,mm,prov,hasTime){var c=(typeof PROVINCE_COORDS!=='undefined'&&PROVINCE_COORDS[prov])||[39.9,116.4];return {year:y,month:mo,date:d,hour:hasTime?hh:12,minute:hasTime?mm:0,latitude:c[0],longitude:c[1],hasTime:hasTime};}
+ function pad(n){return (n<10?'0':'')+n;}
+
+ window.renderSynastry=function(){
+  var box=$("#synBody");if(!box)return;var p=state.profile;
+  var provs=(typeof PROVINCE_COORDS!=='undefined')?Object.keys(PROVINCE_COORDS):['北京市'];
+  var hd=(p&&p.sy)?(p.sy+'-'+pad(p.sm)+'-'+pad(p.sd)):'1996-08-12';
+  var ht=(p&&p.bh>0&&typeof SHICHEN_HOUR!=='undefined')?pad(SHICHEN_HOUR[p.bh])+':00':'12:00';
+  var hProv=(p&&p.prov)||'北京市';
+  var cityOpts=function(sel){return provs.map(function(pv){return '<option'+(pv===sel?' selected':'')+'>'+pv+'</option>';}).join('');};
+  box.innerHTML=pHero('bā zì hé pán','关系合盘','走心合拍 · 相位实算 · 八字五行喜忌')
+   +'<div class="sy-who"><h4><span class="sy-dot her"></span>你</h4>'
+     +'<div class="sy-lab">出生日期</div><input class="sy-in" type="date" id="h_date" value="'+hd+'">'
+     +'<div class="sy-row2" style="margin-top:8px"><div style="flex:1"><div class="sy-lab">时间</div><input class="sy-in" type="time" id="h_time" value="'+ht+'"></div><div style="flex:1"><div class="sy-lab">城市</div><select class="sy-in" id="h_city">'+cityOpts(hProv)+'</select></div></div>'
+     +'<label class="sy-chk"><input type="checkbox" id="h_unk"'+((p&&p.bh>0)?'':' checked')+'> 不知道时辰</label></div>'
+   +'<div class="sy-who"><h4><span class="sy-dot ta"></span>TA</h4>'
+     +'<div class="sy-lab">出生日期</div><input class="sy-in" type="date" id="t_date" value="1994-03-05">'
+     +'<div class="sy-row2" style="margin-top:8px"><div style="flex:1"><div class="sy-lab">时间</div><input class="sy-in" type="time" id="t_time" value="09:00"></div><div style="flex:1"><div class="sy-lab">城市</div><select class="sy-in" id="t_city">'+cityOpts('上海市')+'</select></div></div>'
+     +'<label class="sy-chk"><input type="checkbox" id="t_unk" checked> 不知道时辰（降级为性格契合）</label></div>'
+   +'<div class="sy-lab" style="margin-top:14px">你们现在是</div>'
+   +'<div class="sy-seg" id="synSeg"><b class="on" data-v="暧昧">暧昧中</b><b data-v="在一起">在一起</b><b data-v="复合">分手/复合</b></div>'
+   +'<button class="btn block" style="margin-top:16px;background:linear-gradient(135deg,#E7C892,var(--amber));color:#2a1f10;border:none;box-shadow:0 8px 22px rgba(201,162,78,.3)" onclick="doSynastry()">❤ 开始合盘'+((typeof FEAT_COST!=='undefined'&&FEAT_COST.synastry>0)?(' · '+FEAT_COST.synastry+' 积分'):'')+'</button>'
+   +'<div id="synResult" style="margin-top:16px"></div>'
+   +'<div class="disclaimer">相位/契合分为示例实算，解读语气为规则模板；仅供自我觉察与关系参考，不构成对关系走向的确定性预测。出生信息仅本机计算，不上传。</div>';
+  var seg=document.getElementById('synSeg');if(seg)seg.addEventListener('click',function(e){var b=e.target.closest('b');if(!b)return;seg.querySelectorAll('b').forEach(function(x){x.classList.remove('on');});b.classList.add('on');state._synScene=b.dataset.v;});
+  state._synScene=state._synScene||'暧昧';
+  if(state._synLast)renderSynastryResult(state._synLast.s,state._synLast.info);
+ };
+
+ function readSyn(pfx){var dv=(document.getElementById(pfx+'_date').value||'').split('-').map(Number);var tv=(document.getElementById(pfx+'_time').value||'12:00').split(':').map(Number);var unk=document.getElementById(pfx+'_unk').checked;var prov=document.getElementById(pfx+'_city').value;return {y:dv[0],mo:dv[1],d:dv[2],hh:tv[0],mm:tv[1]||0,unk:unk,prov:prov};}
+
+ window.doSynastry=function(){
+  if(!window.Astro){toast('排盘引擎未加载');return;}
+  var H=readSyn('h'),T=readSyn('t');
+  if(!H.y||!H.mo||!H.d){toast('请填你的出生日期');return;}
+  if(!T.y||!T.mo||!T.d){toast('请填 TA 的出生日期');return;}
+  if(typeof chargeFeat==='function'&&!chargeFeat('synastry','关系合盘'))return;
+  var scene=state._synScene||'暧昧';
+  synReveal(function(){
+   try{
+    var her=bodiesOf(mkBirth(H.y,H.mo,H.d,H.hh,H.mm,H.prov,!H.unk));
+    var ta=bodiesOf(mkBirth(T.y,T.mo,T.d,T.hh,T.mm,T.prov,!T.unk));
+    var asps=cross(her,ta),sc=scoreOf(asps);
+    var s={score:sc,asps:asps,her:her,ta:ta,scene:scene};
+    var info={H:H,T:T};
+    state._synTaBirth={sy:T.y,sm:T.mo,sd:T.d,bh:T.unk?0:1};
+    state._synLast={s:s,info:info};
+    renderSynastryResult(s,info);
+    setTimeout(function(){try{$("#synResult").scrollIntoView({block:'start',behavior:'smooth'});}catch(e){}},120);
+   }catch(err){toast('合盘失败：'+(err.message||''));}
+  });
+ };
+
+ window.renderSynastryResult=function(s,info){
+  var box=$("#synResult");if(!box)return;var her=s.her,ta=s.ta,sc=s.score,scene=s.scene;
+  var mini3=[['SUN 太阳','☉',her.sun],['MOON 月亮','☽',her.moon],['契合','❤',sc+'']];
+  var m3=mini3.map(function(x){return '<div class="sy-m"><div class="k">'+x[0]+'</div><div class="g">'+x[1]+'</div><div class="v">'+x[2]+'</div></div>';}).join('');
+  // 八字行（你）
+  var bzLine='';try{var b=fateSelfBirth();if(b){var wx=fateWXFromBirth(b);var tz=fateTizhi(wx);var E=FATE_ELCN;bzLine='<div class="panel" style="margin-top:12px;font-size:12.5px;color:var(--ink-soft);line-height:1.7">你的八字 <b style="color:var(--gold-deep)">'+wx.pillars+'</b> · 身'+wx.shen+' · 喜'+(wx.favorable||[]).map(function(e){return E[e];}).join('')+'忌'+(wx.avoid||[]).map(function(e){return E[e];}).join('')+' · 体质倾向 <b>'+tz.key+'</b>（宜'+tz.xf+'）</div>';}}catch(e){}
+  var har=s.asps.filter(function(a){return a.t2=='h'||a.t2=='s';}).slice(0,3);
+  var fri=s.asps.filter(function(a){return a.t2=='f'||a.t2=='x';}).slice(0,2);
+  var eh='太阳'+her.sun+'、月亮'+her.moon+'——你最在意被'+(['双鱼','巨蟹','天蝎'].indexOf(her.moon)>=0?'温柔接住':'稳稳回应')+'。';
+  var et='太阳'+ta.sun+'、金星'+ta.venus+'——TA 爱的方式偏'+(['金牛','摩羯','处女'].indexOf(ta.venus)>=0?'踏实靠做事':'热烈靠表达')+'。';
+  var tier=sc>=85?'很来电':sc>=74?'合拍':sc>=64?'各有功课':'需要磨合';
+  box.innerHTML='<div class="panel" style="text-align:center;background:linear-gradient(180deg,#fcf9f4,#f3ecdf);border:1px solid rgba(201,162,78,.2)"><div style="font-size:12px;letter-spacing:.2em;color:var(--gold-deep)">契 合 度</div><div class="serif" style="font-size:54px;color:var(--amber);line-height:1.05;margin:4px 0">'+sc+'<span style="font-size:20px;color:#9a8f7e"> 分</span></div><div style="font-size:14px;color:#282016">「'+tier+'」</div><div class="pv-d" style="margin-top:10px;line-height:1.8">'+SDYN[scene]+'</div></div>'
+   +'<div class="sy-mini3">'+m3+'</div>'+bzLine
+   +'<div class="sy-sec"><div class="sy-h">各自带来什么</div><div class="sy-each"><div class="sy-e"><div class="w"><span class="sy-dot her"></span>你</div><p>'+eh+'</p></div><div class="sy-e"><div class="w"><span class="sy-dot ta"></span>TA</div><p>'+et+'</p></div></div></div>'
+   +'<div class="sy-sec"><div class="sy-h">你们在哪里合拍</div><ul class="sy-pts har">'+((har.length?har:s.asps.slice(0,2)).map(function(a){return '<li>'+hL(a)+'</li>';}).join(''))+'</ul></div>'
+   +'<div class="sy-sec"><div class="sy-h">哪里容易起消耗</div><ul class="sy-pts fri">'+(fri.length?fri.map(function(a){return '<li>'+fL(a)+'</li>';}).join(''):'<li>硬相位不多，摩擦点少——但别把「没冲突」当「很懂彼此」。</li>')+'</ul></div>'
+   +'<div class="sy-sec"><div class="sy-h">给你的提示</div><ul class="sy-pts ins">'+((SINS[scene]||SINS.暧昧).map(function(t){return '<li>'+t+'</li>';}).join(''))+'</ul></div>'
+   +'<div class="sy-sec"><div class="sy-h">今天先做这一件</div><div class="sy-act">'+SACT[scene]+'</div></div>'
+   +(typeof readerHookHTML==='function'?readerHookHTML('synToReader()','想把你俩的合盘聊透？找 {nick} 做一次关系深度盘 →'):'')
+   +'<button class="btn block" style="margin-top:14px;background:linear-gradient(135deg,#E7C892,var(--amber));color:#2a1f10;border:none" onclick="synastryPoster()">✦ 生成合盘海报 · 分享</button>'
+   +'<button class="btn block ghost" style="margin-top:10px" onclick="toast(\'把海报发给 TA，邀请一起测～\')">邀请 TA 一起测</button>'
+   +(typeof fateHookCard==='function'?fateHookCard('synastry'):'');
+ };
+
+ /* 筊杯摇卦揭晓（关系合盘专用 reveal）*/
+ window.synReveal=function(onDone){
+  var ov=document.createElement('div');ov.className='jb-ov';ov.id='synRevOv';
+  ov.innerHTML='<div class="jb-top"><span style="width:26px"></span><span>为你俩摇一卦</span><span style="width:26px"></span></div>'
+   +'<div class="jb-scroll"><div class="jb-q">默念你俩，摇一摇 / 长按松手揭晓</div>'
+   +'<div class="jb-stage"><div class="jb-shadow" style="left:calc(50% - 59px)"></div><div class="jb-shadow" style="left:calc(50% + 24px)"></div>'
+     +'<div class="jb-block" id="srB1" data-face="yang"><div class="fc yang"></div><div class="fc yin"></div></div>'
+     +'<div class="jb-block" id="srB2" data-face="yin"><div class="fc yang"></div><div class="fc yin"></div></div>'
+     +'<div class="jb-hint">长按下方按钮，松手掷筊揭晓（手机可摇一摇）</div></div>'
+   +'<button class="jb-throw" id="srThrow">长按 · 摇卦揭晓</button>'
+   +'<div class="jb-disc">摇卦为进入合盘结果的仪式感彩蛋；契合分与解读来自星盘实算，与掷筊结果无关。</div></div>';
+  document.body.appendChild(ov);
+  var btn=document.getElementById('srThrow'),charging=false,done=false;
+  var go=function(){if(done)return;done=true;btn.disabled=true;btn.textContent='揭晓中…';
+   var b1=document.getElementById('srB1'),b2=document.getElementById('srB2');
+   b1.classList.add('jb-tossing');b2.classList.add('jb-tossing');
+   setTimeout(function(){b1.setAttribute('data-face','yin');b2.setAttribute('data-face','yang');
+    setTimeout(function(){try{window.removeEventListener('devicemotion',window.__srMotion);}catch(e){}ov.remove();try{onDone&&onDone();}catch(e){}},420);},1080);};
+  btn.addEventListener('pointerdown',function(e){e.preventDefault();charging=true;btn.classList.add('charging');btn.textContent='默念中… 松手揭晓';try{btn.setPointerCapture(e.pointerId);}catch(_){}});
+  btn.addEventListener('pointerup',function(e){e.preventDefault();if(charging){charging=false;btn.classList.remove('charging');go();}});
+  btn.addEventListener('pointercancel',function(){if(charging){charging=false;btn.classList.remove('charging');go();}});
+  window.__srMotion=function(ev){var a=ev.accelerationIncludingGravity||ev.acceleration;if(!a)return;var m=Math.abs(a.x||0)+Math.abs(a.y||0)+Math.abs(a.z||0);if(m>34&&charging){charging=false;btn.classList.remove('charging');go();}};
+  try{if(window.DeviceMotionEvent&&typeof DeviceMotionEvent.requestPermission!=='function'){window.addEventListener('devicemotion',window.__srMotion);}}catch(e){}
+ };
+})();
+</script>
+
+<style>
+/* 牌堆定位修正：固定在宜忌区，运势卡置于其上，避免遮住收起按钮 */
+#home .eh-deck{top:120px!important;}
+#home #energyHero .ft-card{position:relative;z-index:4;}
+</style>
 </body>
 </html>
