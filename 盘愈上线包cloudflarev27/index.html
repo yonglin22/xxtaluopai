@@ -1325,44 +1325,53 @@
 
   <!-- ===== 命理选品 · 为你排的珠串（1:1 对齐参考原型 FateStone）===== -->
   <style>
-  #beadshop{background:#fff;padding:14px 20px 120px;--cin:#B23A2C;--jade:#4F7A5E;--gold2:#C0913A;--card2:#F5F4F1;--line3:#EAE7E0;--soft2:#7A766E;--faint2:#B4B1A9}
-  #beadshop .bs-back{font-size:12.5px;color:var(--soft2);cursor:pointer;margin-bottom:8px;display:inline-block}
-  #beadshop .bs-tt{font-family:var(--serif);font-size:21px;font-weight:700;letter-spacing:.06em;text-align:center;margin:2px 0;color:var(--ink)}
-  #beadshop .bs-sub{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint2);text-align:center;margin-bottom:16px}
-  #beadshop .bs-stage{position:relative;border-radius:14px;overflow:hidden;background:radial-gradient(120% 100% at 50% 32%,#f4efe6,#e8e1d4 60%,#d8d1c2)}
-  #beadshop .bs-stage canvas{display:block;width:100%;height:290px}
-  #beadshop .bs-swch{display:flex;gap:7px;margin:10px 0}
-  #beadshop .bs-swch b{flex:1;text-align:center;font-size:12px;padding:9px 0;border-radius:10px;background:var(--card2);border:1px solid var(--line3);cursor:pointer;font-weight:600;color:var(--soft2)}
-  #beadshop .bs-swch b.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-  #beadshop .bs-reason{font-size:12px;color:#403c34;background:var(--card2);border:1px solid var(--line3);border-radius:11px;padding:10px 12px;margin:9px 0 4px;line-height:1.6}
-  #beadshop .bs-reason b{color:var(--cin)}
-  #beadshop .bs-baziLine{font-size:10.5px;color:var(--soft2);text-align:center;margin:4px 2px 2px;line-height:1.5}
-  #beadshop .bs-baziLine b{color:var(--cin)}
-  #beadshop .bs-anchor{background:#F3E5E0;border:1px solid rgba(178,58,44,.2);border-radius:11px;padding:9px 12px;margin:8px 0 2px;font-size:11.5px;color:var(--cin);text-align:center}
-  #beadshop .bs-sec{margin:14px 0 6px}
-  #beadshop .bs-sec .h{font-family:var(--serif);font-size:13.5px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:7px;color:var(--ink)}
-  #beadshop .bs-sec .h::before{content:"";width:14px;height:2px;background:var(--cin);border-radius:2px;flex:none}
-  #beadshop .bs-seg{display:flex;gap:6px}
-  #beadshop .bs-seg .s{flex:1;text-align:center;font-size:11.5px;padding:9px 3px;border:1px solid var(--line3);border-radius:9px;cursor:pointer;color:var(--soft2);background:#fff}
-  #beadshop .bs-seg .s.on{border-color:var(--ink);color:var(--ink);font-weight:600;background:var(--card2)}
-  #beadshop .bs-pal{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-  #beadshop .bs-pi{background:var(--card2);border:1px solid var(--line3);border-radius:9px;padding:7px 2px 5px;text-align:center;cursor:pointer}
-  #beadshop .bs-pi canvas{width:34px;height:34px;display:block;margin:0 auto}
-  #beadshop .bs-pi .n{font-size:8.5px;color:var(--soft2);margin-top:3px}
-  #beadshop .bs-opts{background:var(--card2);border:1px solid var(--line3);border-radius:12px;padding:2px 13px;margin-top:12px}
-  #beadshop .bs-opt{display:flex;justify-content:space-between;align-items:center;padding:11px 2px;border-bottom:1px solid var(--line3);font-size:12.5px;color:var(--ink)}
-  #beadshop .bs-opt:last-child{border:0}
-  #beadshop .bs-opt select{width:auto;font-size:12px;padding:7px 26px 7px 9px;border:1px solid var(--line3);border-radius:8px;background:#fff;color:var(--ink)}
-  #beadshop .bs-priceRow{display:flex;justify-content:space-between;align-items:center;margin:14px 0 10px}
-  #beadshop .bs-price{font-family:var(--serif);font-size:17px;font-weight:700;color:var(--ink)}
-  #beadshop .bs-price small{font-size:9px;color:var(--soft2);font-weight:400}
-  #beadshop .bs-badge{display:inline-block;font-size:9.5px;padding:3px 8px;border-radius:6px;font-weight:600}
-  #beadshop .bs-badge.custom{background:#F3E5E0;color:var(--cin)}
-  #beadshop .bs-badge.ready{background:#e7f0e9;color:var(--jade)}
-  #beadshop .bs-cta{height:50px;border-radius:25px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--serif);font-size:15px;font-weight:600;cursor:pointer;border:none;width:100%;letter-spacing:.04em}
-  #beadshop .bs-cta:active{transform:scale(.99)}
-  #beadshop .bs-disc{font-size:9.5px;color:var(--faint2);text-align:center;margin-top:12px;line-height:1.6}
-  #beadshop .bs-empty{text-align:center;padding:36px 10px;color:var(--soft2);font-size:13.5px;line-height:1.9}
+  #beadshop{background:#fff;padding:12px 16px 120px;--cin:#B23A2C;--jade:#4F7A5E;--card2:#F5F4F1;--line3:#EAE7E0;--soft2:#7A766E;--faint2:#B4B1A9}
+  #beadshop .st-topbar{display:flex;align-items:center;justify-content:space-between;padding:2px 0 6px}
+  #beadshop .st-back{font-size:12.5px;color:var(--soft2);cursor:pointer}
+  #beadshop .st-title{font-family:var(--serif);font-size:16px;font-weight:700;color:var(--ink);letter-spacing:.04em}
+  #beadshop .st-guide{font-size:11px;color:var(--faint2)}
+  #beadshop .st-headrow{display:flex;align-items:center;gap:12px;margin:2px 0 8px;font-size:12px}
+  #beadshop .st-price{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--cin)}
+  #beadshop .st-cnt{color:var(--soft2)}
+  #beadshop .st-sugg{margin-left:auto;color:var(--cin);font-size:11.5px}
+  #beadshop .st-stage{position:relative;border-radius:16px;overflow:hidden;background:radial-gradient(120% 100% at 50% 40%,#f4efe6,#e8e1d4 60%,#d8d1c2)}
+  #beadshop .st-stage canvas{display:block;width:100%;height:300px;touch-action:none}
+  #beadshop .st-undo{position:absolute;right:12px;bottom:12px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.85);border:1px solid var(--line3);display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--soft2);cursor:pointer}
+  #beadshop .st-tools{display:flex;gap:7px;margin:10px 0 8px;align-items:center}
+  #beadshop .st-tool{font-size:11px;padding:8px 10px;border:1px solid var(--line3);border-radius:20px;background:#fff;color:var(--soft2);cursor:pointer}
+  #beadshop .st-gather{margin-left:auto;font-size:12px;padding:9px 14px;white-space:nowrap;border-radius:20px;background:var(--ink);color:#fff;border:none;font-weight:600;cursor:pointer}
+  #beadshop .st-cart{width:100%;box-sizing:border-box;height:48px;border-radius:24px;background:var(--cin);color:#fff;border:none;font-family:var(--serif);font-size:15px;font-weight:600;cursor:pointer;margin-bottom:12px}
+  #beadshop .st-search input{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line3);border-radius:10px;font-size:13px;background:#fff;color:var(--ink);outline:none}
+  #beadshop .st-search input:focus{border-color:var(--ink)}
+  #beadshop .st-cats{display:flex;gap:16px;margin:12px 2px 4px;border-bottom:1px solid var(--line3)}
+  #beadshop .st-cats b{font-size:14px;font-weight:400;color:var(--soft2);padding-bottom:8px;cursor:pointer}
+  #beadshop .st-cats b.on{color:var(--ink);font-weight:700;border-bottom:2px solid var(--cin)}
+  #beadshop .st-catbody{display:flex;gap:10px;margin-top:8px}
+  #beadshop .st-side{flex:none;width:66px;display:flex;flex-direction:column;gap:2px}
+  #beadshop .st-side div{font-size:11.5px;padding:9px 5px;border-radius:8px;color:var(--soft2);cursor:pointer;text-align:center}
+  #beadshop .st-side div.on{background:var(--card2);color:var(--cin);font-weight:600}
+  #beadshop .st-grid{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;align-content:start}
+  #beadshop .st-card{background:#fff;border:1px solid var(--line3);border-radius:12px;padding:10px 4px 8px;text-align:center;cursor:pointer}
+  #beadshop .st-card canvas{width:40px;height:40px;display:block;margin:0 auto}
+  #beadshop .st-cn{font-size:11px;color:var(--ink);margin-top:5px}
+  #beadshop .st-cp{font-size:10px;color:var(--soft2);margin-top:1px}
+  #beadshop .st-empty{grid-column:1/-1;text-align:center;color:var(--faint2);font-size:12px;padding:24px}
+  #beadshop .st-disc{font-size:9.5px;color:var(--faint2);text-align:center;margin-top:14px;line-height:1.6}
+  #beadshop .st-blank{text-align:center;color:var(--soft2);font-size:13.5px;padding:40px 10px;line-height:1.9}
+  .sz-mask{position:fixed;inset:0;background:rgba(20,16,10,.5);display:flex;align-items:center;justify-content:center;z-index:200}
+  .sz-box{width:300px;max-width:86%;background:#fff;border-radius:20px;padding:20px 18px;text-align:center}
+  .sz-t{font-family:var(--serif);font-size:19px;font-weight:700;color:#1C1712}
+  .sz-sub{font-size:11.5px;color:#9a9086;margin:5px 0 14px}
+  .sz-prev{display:flex;align-items:center;justify-content:center;height:56px;margin-bottom:14px}
+  .sz-prev span{display:inline-block;border-radius:50%;box-shadow:0 3px 8px rgba(0,0,0,.15)}
+  .sz-step{display:flex;align-items:center;gap:14px;justify-content:center}
+  .sz-step b{width:44px;height:44px;border-radius:12px;border:1px solid #E5DDCD;display:flex;align-items:center;justify-content:center;font-size:22px;color:#1C1712;cursor:pointer;user-select:none}
+  .sz-step span{font-family:var(--serif);font-size:18px;font-weight:700;min-width:64px}
+  .sz-name{font-size:12px;color:#7A766E;margin:12px 0 14px}
+  .sz-act{display:flex;gap:10px}
+  .sz-act button{flex:1;height:44px;border-radius:22px;border:none;font-size:14px;font-family:var(--serif);cursor:pointer}
+  .sz-cancel{background:#F0EEE8;color:#7A766E}
+  .sz-ok{background:#B23A2C;color:#fff;font-weight:600}
   </style>
   <section class="screen" id="beadshop"><div id="beadBody"></div></section>
 
@@ -2520,79 +2529,166 @@ function goFateFrom(source){
   if(!fateSelfBirth()){state._pendingFate=true;go('profile');return;}
   go('beadshop');
 }
-/* ---- 命理选品详情/成串（S4·S5·S6·1:1 对齐参考原型 FateStone）---- */
-function fatePkgFee(){return state._fatePkg||0;}
-function fateCertFee(){return state._fateCert||0;}
-function fateTotal(r){const base=(r.mode==='pair')?(r.her.price+(r.ta?r.ta.price:0)):r.plan.price;return base+fatePkgFee()+fateCertFee();}
-function paintBeadThumb(cid,id){const cv=document.getElementById(cid);if(!cv)return;const dp=Math.min(window.devicePixelRatio||1,2);cv.width=34*dp;cv.height=34*dp;const x=cv.getContext('2d');x.setTransform(dp,0,0,dp,0,0);const b=BEADS[id]||BEADS.clear;const im=FATE_IMG[b.img];x.clearRect(0,0,34,34);if(im&&im.complete&&im.naturalWidth){x.drawImage(im,2,2,30,30);}else{const g=x.createRadialGradient(12,11,3,17,17,15);g.addColorStop(0,b.color[0]);g.addColorStop(1,b.color[1]);x.fillStyle=g;x.beginPath();x.arc(17,17,14,0,7);x.fill();x.fillStyle='rgba(255,255,255,.5)';x.beginPath();x.ellipse(12,11,5,3.2,-0.5,0,7);x.fill();}}
-const FATE_PAL=['nanhong','moonstone','bluelace','citrine','clear','obsidian','incense','silver'];
+/* ============================================================
+ * 灵感石验室 · 成串工作室（1:1 对齐 Stone LAB 视频）
+ * 自由摆珠(逐颗拖动) + 调珠大小(mm) + 撤销/删除/保存 + 收拢↔解除 + 构成清单结算
+ * 珠照资产：复用 FATE_BEAD_IMG 的 8 颗；其余渐变占位（换实拍即照片级）
+ * ============================================================ */
+/* 目录：cat=分类, sub=子类, mm=默认直径, price=该mm单价, img=照片key(可空,走渐变), color=渐变 */
+const STUDIO_CAT=['水晶','天然石','配饰','随型','文玩'];
+const STUDIO_BEADS={
+  // 水晶
+  clear:{n:'白水晶',cat:'水晶',sub:'白水晶',mm:8,price:4,img:'clear',color:['#f4f2ee','#d4d0c8'],el:'jin'},
+  clearA:{n:'高品净体白水晶',cat:'水晶',sub:'白水晶',mm:10,price:11,img:'clear',color:['#f7f6f2','#dcd8d0'],el:'jin'},
+  amethyst:{n:'紫水晶',cat:'水晶',sub:'紫水晶',mm:8,price:9,color:['#b79ad6','#6d4f9c'],el:'shui'},
+  rose:{n:'粉水晶',cat:'水晶',sub:'粉水晶',mm:8,price:7,color:['#f3c5cf','#d98ea0'],el:'huo'},
+  citrine:{n:'黄水晶',cat:'水晶',sub:'黄水晶',mm:8,price:6,img:'citrine',color:['#f2cf6a','#c99a2e'],el:'tu'},
+  green_c:{n:'绿水晶',cat:'水晶',sub:'绿水晶',mm:9,price:8,color:['#9ec89a','#4f7a5e'],el:'mu'},
+  smoky:{n:'茶晶',cat:'水晶',sub:'茶晶',mm:10,price:8,color:['#b6a48f','#6b5a45'],el:'tu'},
+  // 天然石
+  nanhong:{n:'南红玛瑙',cat:'天然石',sub:'玛瑙',mm:10,price:28,img:'nanhong',color:['#e0563f','#8f2417'],el:'huo'},
+  bluelace:{n:'蓝纹玛瑙',cat:'天然石',sub:'玛瑙',mm:8,price:14,img:'bluelace',color:['#a7c4d6','#5f89a8'],el:'shui'},
+  moonstone:{n:'月光石',cat:'天然石',sub:'月光石',mm:8,price:16,img:'moonstone',color:['#eef1f4','#c2ccd6'],el:'shui'},
+  obsidian:{n:'黑曜石',cat:'天然石',sub:'黑曜石',mm:10,price:18,img:'obsidian',color:['#3a3a40','#141417'],el:'jin'},
+  garnet:{n:'石榴石',cat:'天然石',sub:'石榴石',mm:6,price:12,color:['#a5233a','#5e0f1c'],el:'huo'},
+  tigereye:{n:'虎眼石',cat:'天然石',sub:'虎眼石',mm:10,price:14,color:['#c69a4c','#7a5320'],el:'tu'},
+  aquamarine:{n:'海蓝宝',cat:'天然石',sub:'海蓝宝',mm:8,price:20,color:['#8fd0d6','#3f97a3'],el:'shui'},
+  green_ph:{n:'绿幽灵',cat:'天然石',sub:'幽灵',mm:10,price:20,color:['#5f8f5a','#2f5a2c'],el:'mu'},
+  // 配饰
+  silver:{n:'银隔珠',cat:'配饰',sub:'隔珠',mm:4,price:6,img:'silver',color:['#e8eaed','#b4b9bf']},
+  gold_sp:{n:'金隔珠',cat:'配饰',sub:'隔珠',mm:4,price:9,color:['#f0d79b','#c79b44']},
+  incense:{n:'静心香珠',cat:'文玩',sub:'香珠',mm:12,price:22,img:'incense',color:['#7a5a3a','#4a3421'],stock:'custom'},
+  incense2:{n:'解郁香珠',cat:'文玩',sub:'香珠',mm:12,price:22,color:['#8a6a44','#553c22'],stock:'custom'}
+};
+// 直径→单价（近似线性，最小价保底）
+function studioPrice(id,mm){const b=STUDIO_BEADS[id];if(!b)return 0;const base=b.mm||8;return Math.max(2,Math.round(b.price*(mm/base)));}
+function studioBeadImg(id){const b=STUDIO_BEADS[id];return (b&&b.img)?FATE_IMG[b.img]:null;}
+/* ---- 工作室状态：beads=[{id,mm,x,y}] 归一化坐标(-1..1) ---- */
+function studioState(){if(!state._studio)state._studio={beads:[],gathered:true,wristCm:null,cat:'水晶',sub:'all',q:''};return state._studio;}
+function studioSeedFromFate(){ // 用八字五行推荐预填初始串
+  try{const r=fateCurrentPlans();const plan=(r.mode==='pair')?r.her:r.plan;const map={clear:'clear',moonstone:'moonstone',bluelace:'bluelace',citrine:'citrine',nanhong:'nanhong',obsidian:'obsidian',silver:'silver',incense:'incense'};
+    const ids=plan.seq.map(id=>map[id]||'clear');const S=studioState();S.beads=ids.map(id=>({id,mm:STUDIO_BEADS[id]?STUDIO_BEADS[id].mm:8,x:0,y:0}));S.gathered=true;studioGather(true);
+  }catch(e){const S=studioState();if(!S.beads.length){['nanhong','clear','bluelace','clear','citrine','silver','incense','silver','moonstone','clear'].forEach(id=>S.beads.push({id,mm:STUDIO_BEADS[id].mm,x:0,y:0}));studioGather(true);}}
+}
+function studioTotal(){const S=studioState();return S.beads.reduce((s,b)=>s+studioPrice(b.id,b.mm),0);}
+function studioWristCm(){const S=studioState();const sum=S.beads.reduce((a,b)=>a+(b.mm||8),0);return (sum/10).toFixed(1);} // 珠径累计≈手围
+/* ---- 收拢成串：把珠子按尺寸弧长排成椭圆环（归一化坐标）---- */
+function studioGather(silent){const S=studioState();const n=S.beads.length;if(!n){S.gathered=true;return;}
+  const sz=S.beads.map(b=>Math.max(4,b.mm||8));const units=sz.reduce((a,b)=>a+b,0)||1;let acc=0;
+  S.beads.forEach((b,i)=>{const mid=acc+sz[i]/2;acc+=sz[i];const a=mid/units*6.283-1.5708;b.x=Math.cos(a)*0.62;b.y=Math.sin(a)*0.62;});
+  S.gathered=true;if(!silent)studioPaint();}
+function studioScatter(){const S=studioState();S.beads.forEach((b,i)=>{const a=i*2.399;const rr=0.30+((i*0.13)%0.34);b.x=Math.cos(a)*rr;b.y=Math.sin(a)*rr*0.9;});S.gathered=false;studioPaint();}
+/* ---- 瓷盘 + 摆珠 渲染（逐颗按 x,y,mm 画）---- */
+function studioPaint(){
+  const cv=document.getElementById('studioPlate');if(!cv)return;const S=studioState();
+  const rect=cv.getBoundingClientRect();let W=rect.width||cv.clientWidth||(cv.parentNode&&cv.parentNode.clientWidth)||330;let H=rect.height||300;
+  const dp=Math.min(window.devicePixelRatio||1,2),nw=Math.round(W*dp),nh=Math.round(H*dp);if(cv.width!==nw||cv.height!==nh){cv.width=nw;cv.height=nh;}
+  const ctx=cv.getContext('2d');ctx.setTransform(dp,0,0,dp,0,0);
+  drawPlate(ctx,W,H);
+  const cx=W/2,cy=H*.46,R=Math.min(W,H*1.1)*.42,mmPx=R*0.052; // 8mm≈基准
+  // 串绳（仅收拢时露）
+  if(S.gathered&&S.beads.length){ctx.save();ctx.strokeStyle='rgba(120,100,72,.5)';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(cx,cy,R*0.62,R*0.62*0.9,0,0,7);ctx.stroke();ctx.restore();}
+  const items=S.beads.map((b,i)=>({b,i,px:cx+b.x*R,py:cy+b.y*R*0.9,d:Math.max(9,(b.mm||8)*mmPx)})).sort((p,q)=>p.py-q.py);
+  items.forEach(o=>{const b=o.b,d=o.d,sku=STUDIO_BEADS[b.id];
+    ctx.save();ctx.beginPath();ctx.ellipse(o.px,o.py+d*.42,d*.5,d*.18,0,0,7);ctx.fillStyle='rgba(56,46,34,.22)';ctx.filter='blur(4px)';ctx.fill();ctx.restore();
+    const im=studioBeadImg(b.id);
+    if(im&&im.complete&&im.naturalWidth){ctx.drawImage(im,o.px-d/2,o.py-d/2,d,d);}
+    else{const c=(sku&&sku.color)||['#ddd','#aaa'];const g=ctx.createRadialGradient(o.px-d*.28,o.py-d*.3,d*.1,o.px,o.py,d*.52);g.addColorStop(0,c[0]);g.addColorStop(1,c[1]);ctx.fillStyle=g;ctx.beginPath();ctx.arc(o.px,o.py,d*.5,0,7);ctx.fill();}
+    ctx.save();ctx.globalAlpha=.5;ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(o.px-d*.2,o.py-d*.22,d*.15,d*.09,-0.5,0,7);ctx.fill();ctx.restore();
+    if(b===STUDIO_SEL){ctx.save();ctx.strokeStyle='rgba(178,58,44,.9)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(o.px,o.py,d*.5+3,0,7);ctx.stroke();ctx.restore();}
+  });
+}
+let STUDIO_SEL=null;
+/* ---- 画布拖动：命中最近珠 → 拖动它（解除态自由拖；收拢态拖动=不动，提示解除）---- */
+function studioBindCanvas(cv){
+  if(cv._sbound)return;cv._sbound=1;cv.style.touchAction='none';
+  let drag=null;
+  const hit=(e)=>{const S=studioState();const r=cv.getBoundingClientRect();const W=r.width,H=r.height;const cx=W/2,cy=H*.46,R=Math.min(W,H*1.1)*.42,mmPx=R*0.052;
+    const mx=e.clientX-r.left,my=e.clientY-r.top;let best=null,bd=1e9;
+    S.beads.forEach(b=>{const px=cx+b.x*R,py=cy+b.y*R*0.9,d=Math.max(9,(b.mm||8)*mmPx);const dist=Math.hypot(mx-px,my-py);if(dist<d*0.6&&dist<bd){bd=dist;best=b;}});
+    return {best,R,cx,cy,W,H,mx,my};};
+  cv.addEventListener('pointerdown',e=>{const h=hit(e);if(h.best){drag={b:h.best,R:h.R,cx:h.cx,cy:h.cy};STUDIO_SEL=h.best;try{cv.setPointerCapture(e.pointerId);}catch(_){}studioPaint();}});
+  cv.addEventListener('pointermove',e=>{if(!drag)return;const S=studioState();const r=cv.getBoundingClientRect();const mx=e.clientX-r.left,my=e.clientY-r.top;
+    let nx=(mx-drag.cx)/drag.R,ny=(my-drag.cy)/(drag.R*0.9);const rr=Math.hypot(nx,ny);if(rr>0.94){nx=nx/rr*0.94;ny=ny/rr*0.94;}
+    drag.b.x=nx;drag.b.y=ny;if(S.gathered)S.gathered=false;studioPaint();});
+  cv.addEventListener('pointerup',()=>{drag=null;});cv.addEventListener('pointercancel',()=>{drag=null;});
+}
+/* ---- 目录点选：调珠大小弹窗 → 加进盘 ---- */
+function studioAdd(id){const b=STUDIO_BEADS[id];if(!b)return;studioSizeModal(id,b.mm,mm=>{const S=studioState();const a=S.beads.length*2.399,rr=0.55;S.beads.push({id,mm,x:S.gathered?0:Math.cos(a)*rr,y:S.gathered?0:Math.sin(a)*rr});if(S.gathered)studioGather(true);toast('加了一颗「'+b.n+'」'+mm+'mm');renderBeadshop();});}
+function studioSizeModal(id,mm0,cb){
+  const b=STUDIO_BEADS[id];let mm=mm0;
+  const host=document.getElementById('toast');
+  const wrap=document.createElement('div');wrap.className='sz-mask';
+  const draw=()=>`<div class="sz-box"><div class="sz-t">调整珠子大小</div><div class="sz-sub">点击"-"缩小，点击"+"放大</div>
+    <div class="sz-prev"><span style="width:${18+mm}px;height:${18+mm}px"></span></div>
+    <div class="sz-step"><b onclick="window.__szDec()">−</b><span>${mm}mm</span><b onclick="window.__szInc()">＋</b></div>
+    <div class="sz-name">${b.n} · ¥${studioPrice(id,mm)}</div>
+    <div class="sz-act"><button class="sz-cancel" onclick="window.__szClose()">取消</button><button class="sz-ok" onclick="window.__szOk()">加入 →</button></div></div>`;
+  wrap.innerHTML=draw();document.body.appendChild(wrap);
+  const prev=()=>{const s=wrap.querySelector('.sz-prev span');if(s){s.style.width=(18+mm)+'px';s.style.height=(18+mm)+'px';}wrap.querySelector('.sz-step span').textContent=mm+'mm';wrap.querySelector('.sz-name').textContent=b.n+' · ¥'+studioPrice(id,mm);
+    const im=studioBeadImg(id);const s2=wrap.querySelector('.sz-prev span');if(s2){if(im&&im.complete&&im.naturalWidth){s2.style.background='url('+im.src+') center/cover';}else{s2.style.background='radial-gradient(circle at 35% 32%,'+b.color[0]+','+b.color[1]+')';}}};
+  window.__szInc=()=>{mm=Math.min(16,mm+1);prev();};window.__szDec=()=>{mm=Math.max(4,mm-1);prev();};
+  window.__szClose=()=>{wrap.remove();};window.__szOk=()=>{wrap.remove();cb(mm);};
+  prev();
+}
+function studioUndo(){const S=studioState();if(S.beads.length){const b=S.beads.pop();if(S.gathered)studioGather(true);toast('撤掉「'+(STUDIO_BEADS[b.id]?STUDIO_BEADS[b.id].n:'珠')+'」');renderBeadshop();}else toast('盘里没有珠子了');}
+function studioClear(){confirmBox('清空盘上所有珠子？','清空','再想想').then(ok=>{if(ok){studioState().beads=[];STUDIO_SEL=null;renderBeadshop();}});}
+function studioSave(){try{let arr=JSON.parse(localStorage.getItem('py_studio_saves')||'[]');if(arr.length>=8){toast('最多保存 8 个作品，请先删除后再保存');return;}arr.push({beads:studioState().beads,when:Date.now()});localStorage.setItem('py_studio_saves',JSON.stringify(arr));toast('已保存这版配方 ✓');}catch(e){toast('保存失败');}}
+function studioReset(){delete state._studio;studioSeedFromFate();toast('已重置为你的八字推荐');renderBeadshop();}
+function studioToggleGather(){const S=studioState();if(S.gathered)studioScatter();else studioGather();renderBeadshop();}
+function studioSetWrist(){const v=prompt('输入净手围（cm，如 14）','');if(v){const n=parseFloat(v);if(n>0){studioState().wristCm=n;renderBeadshop();}}}
+function studioSetCat(c){const S=studioState();S.cat=c;S.sub='all';renderBeadshop();}
+function studioSetSub(s){studioState().sub=s;renderBeadshop();}
+/* ---- 加入购物车 → 构成清单结算 ---- */
+async function studioCheckout(){
+  const S=studioState();if(!S.beads.length){toast('先加几颗珠子');return;}
+  const grp={};S.beads.forEach(b=>{const k=b.id+'@'+b.mm;if(!grp[k])grp[k]={id:b.id,mm:b.mm,n:0};grp[k].n++;});
+  const rows=Object.values(grp);const total=studioTotal();const custom=S.beads.some(b=>STUDIO_BEADS[b.id]&&STUDIO_BEADS[b.id].stock==='custom');
+  const wrist=S.wristCm||studioWristCm();
+  const name=('灵感定制·'+(STUDIO_BEADS[S.beads[0].id]?STUDIO_BEADS[S.beads[0].id].n:'串')+'·'+wrist+'cm').slice(0,40);
+  const usePt=Math.min(state.balance,450),yuanOff=Math.min(Math.round(usePt/15),Math.round(total*0.3)),useReal=usePt>0&&yuanOff>0,pay=Math.max(0,total-(useReal?yuanOff:0));
+  const list=rows.map(r=>`${STUDIO_BEADS[r.id].n} ${r.mm}mm ×${r.n} ¥${studioPrice(r.id,r.mm)*r.n}`).join('\n');
+  const msg='构成清单：\n'+list+'\n\n合计 ¥'+total+' · '+S.beads.length+'颗 · 净手围'+wrist+'cm'+(useReal?('\n用 '+usePt+' 积分抵 ¥'+yuanOff+'，实付 ¥'+pay):'')+(custom?'\n含定制香珠·约15-20天':'');
+  const ok=await confirmBox(msg,'提交订单','再调调');if(!ok)return;
+  const {ok:o,j}=await apiPost('/api/goods',{action:'redeem',phone:state.phone,goodId:'studio',name,ptOff:useReal?usePt:0,yuanOff:useReal?yuanOff:0,price:total});
+  if(o&&j&&j.ok&&j.code){if(typeof j.balance==='number')state.balance=j.balance;if(useReal)state.ledger.unshift({type:'积分抵扣 · '+name,amount:'-'+usePt,when:'刚刚'});refreshBalanceUI();
+    await modal({icon:'📿',title:'订单已提交',msg:(useReal?'已抵扣 '+usePt+' 积分。\n':'')+'定制码 '+j.code+'\n发客服微信 Syl18268346784 确认净手围与尾款 ¥'+pay+'。',okText:'复制码 · 找客服'});copyText(j.code,'定制码已复制～');
+  }else toast((j&&j.error)||'提交失败');
+}
+/* ---- 灵感石验室 UI（renderBeadshop 替换为工作室）---- */
+function paintBeadThumb2(cv,id){if(!cv)return;const dp=Math.min(window.devicePixelRatio||1,2);cv.width=40*dp;cv.height=40*dp;const x=cv.getContext('2d');x.setTransform(dp,0,0,dp,0,0);const b=STUDIO_BEADS[id]||{color:['#ccc','#999']};const im=studioBeadImg(id);x.clearRect(0,0,40,40);if(im&&im.complete&&im.naturalWidth){x.drawImage(im,3,3,34,34);}else{const g=x.createRadialGradient(14,12,3,20,20,17);g.addColorStop(0,b.color[0]);g.addColorStop(1,b.color[1]);x.fillStyle=g;x.beginPath();x.arc(20,20,16,0,7);x.fill();x.fillStyle='rgba(255,255,255,.55)';x.beginPath();x.ellipse(14,12,5,3.2,-0.5,0,7);x.fill();}}
+function studioCard(id){const b=STUDIO_BEADS[id];return `<div class="st-card" onclick="studioAdd('${id}')"><canvas id="stc_${id}"></canvas><div class="st-cn">${b.n}</div><div class="st-cp">${b.mm}mm · ¥${b.price}</div></div>`;}
+function studioGrid(){const S=studioState();const inCat=Object.keys(STUDIO_BEADS).filter(id=>STUDIO_BEADS[id].cat===S.cat);const shown=inCat.filter(id=>(S.sub==='all'||STUDIO_BEADS[id].sub===S.sub)&&(!S.q||STUDIO_BEADS[id].n.indexOf(S.q)>=0));return {shown,subs:['all'].concat([...new Set(inCat.map(id=>STUDIO_BEADS[id].sub))])};}
+function studioSearch(v){studioState().q=v;const g=document.getElementById('stGrid');if(!g)return;const {shown}=studioGrid();g.innerHTML=shown.map(studioCard).join('')||'<div class="st-empty">没有匹配的珠子</div>';shown.forEach(id=>paintBeadThumb2(document.getElementById('stc_'+id),id));}
 function renderBeadshop(){
   const box=$("#beadBody");if(!box)return;
   const back=state._fateBack||'skinshop';
-  if(!state.phone){box.innerHTML=`<span class="bs-back" onclick="go('${back}')">‹ 返回</span><div class="bs-empty">登录后为你排一串<br><button class="bs-cta" style="margin-top:14px" onclick="go('login')">去登录</button></div>`;return;}
-  if(!fateSelfBirth()){box.innerHTML=`<span class="bs-back" onclick="go('${back}')">‹ 返回</span><div class="bs-empty">还差你的出生信息，才能按命理为你选石。<br><button class="bs-cta" style="margin-top:14px" onclick="state._pendingFate=true;go('profile')">去补出生信息 →</button></div>`;return;}
-  if(state._fateWrist==null)state._fateWrist=14;if(state._fatePkg==null)state._fatePkg=0;if(state._fateCert==null)state._fateCert=0;
-  const r=fateCurrentPlans();const pair=(r.mode==='pair');
-  if(pair&&!state._fatePairSide)state._fatePairSide='her';
-  const cur=pair?(state._fatePairSide==='ta'?r.ta:r.her):r.plan;
-  // 微调：把手动加进的珠子铺回串里（可持久）
-  const sideKey=pair?state._fatePairSide:'single';
-  const extras=(state._fateAdd&&state._fateAdd[sideKey])||[];
-  extras.forEach(id=>{if(!BEADS[id])return;cur.seq.splice(cur.seq.length-1,0,id,'silver');cur.price+=BEADS[id].price+6;if(BEADS[id].stock==='custom')cur.hasCustom=true;});
-  state._fateR=r;state._fateCur=cur;
-  const total=fateTotal(r);
-  const title=pair?'为你俩排的对串':'为此刻的你排的串';
-  const emos=[['','平静'],['anxious','焦虑'],['low','低落'],['tired','疲惫'],['hope','期待']];
-  const wristOpts=[[12,'12cm（约12颗）'],[13,'13cm（约12颗）'],[14,'14cm（约14颗）'],[15,'15cm（约16颗）'],[16,'16cm（约16颗）'],[18,'18cm（约18颗）']];
-  const sideNm=pair?(state._fatePairSide==='ta'?'TA 的串':'你的串'):'你的串';
+  if(!state.phone){box.innerHTML=`<span class="st-back" onclick="go('${back}')">‹ 返回</span><div class="st-blank">登录后进入灵感石验室<br><button class="st-cart" style="margin-top:14px" onclick="go('login')">去登录</button></div>`;return;}
+  if(!fateSelfBirth()){box.innerHTML=`<span class="st-back" onclick="go('${back}')">‹ 返回</span><div class="st-blank">先补出生信息，为你的八字预排一串<br><button class="st-cart" style="margin-top:14px" onclick="state._pendingFate=true;go('profile')">去补出生信息 →</button></div>`;return;}
+  const S=studioState();
+  if(!S._seeded){S._seeded=true;studioSeedFromFate();}
+  const total=studioTotal(),n=S.beads.length,wrist=S.wristCm||studioWristCm();
+  const {shown,subs}=studioGrid();
   box.innerHTML=`
-   <span class="bs-back" onclick="go('${back}')">‹ 返回</span>
-   <div class="bs-tt">${title}</div>
-   <div class="bs-sub">Photo-composite · ${cur.hasCustom?'收拢成串':'现货速发'}</div>
-   <div class="bs-stage"><canvas id="beadPlate" data-h="290"></canvas></div>
-   ${pair?`<div class="bs-swch"><b class="${state._fatePairSide==='her'?'on':''}" onclick="fatePairSide('her')">你的串</b><b class="${state._fatePairSide==='ta'?'on':''}" onclick="fatePairSide('ta')">TA 的串</b></div>`:''}
-   <div class="bs-reason"><b>${sideNm}</b> — ${cur.reasonBody}${state._fateEmotion&&FATE_EMO_NOTE[state._fateEmotion]?` <span style="color:var(--jade)">· 情绪 agent：${FATE_EMO_NOTE[state._fateEmotion]}</span>`:''}</div>
-   ${cur.wx?`<div class="bs-baziLine">四柱 <b>${cur.wx.pillars}</b> · 日主${FATE_ELCN[cur.wx.dayMaster]}(${cur.wx.shen}) · 宜补 ${(cur.wx.favorable||[]).map(e=>FATE_ELCN[e]).join('')}${cur.tizhi?' · 体质'+cur.tizhi.key:''}</div>`:`<div class="bs-baziLine" style="color:var(--gold2)">未填时辰 · 按议题选石（补时辰解锁完整补五行）</div>`}
-   ${pair?`<div class="bs-anchor">🔗 两串共嵌同款「静心香珠」——同频的关系锚</div>`:''}
-   <div class="bs-sec"><div class="h">此刻心情（选填 · 情绪 agent 微调香珠）</div>
-     <div class="bs-seg">${emos.map(e=>`<div class="s ${(state._fateEmotion||'')===e[0]?'on':''}" onclick="fateSetEmotion('${e[0]}')">${e[1]}</div>`).join('')}</div></div>
-   <div class="bs-sec"><div class="h">微调（点珠子加进串里）</div>
-     <div class="bs-pal">${FATE_PAL.map(id=>`<div class="bs-pi" onclick="fatePalAdd('${id}')"><canvas id="pal_${id}"></canvas><div class="n">${BEADS[id].n}</div></div>`).join('')}</div></div>
-   <div class="bs-opts">
-     <div class="bs-opt"><span>净手围</span><select onchange="fateSetWrist(+this.value)">${wristOpts.map(w=>`<option value="${w[0]}" ${state._fateWrist===w[0]?'selected':''}>${w[1]}</option>`).join('')}</select></div>
-     <div class="bs-opt"><span>包装</span><select onchange="fateSetPkg(+this.value)"><option value="0" ${state._fatePkg===0?'selected':''}>普通包装（¥0）</option><option value="15" ${state._fatePkg===15?'selected':''}>礼盒装（+¥15）</option></select></div>
-     <div class="bs-opt"><span>证书</span><select onchange="fateSetCert(+this.value)"><option value="0" ${state._fateCert===0?'selected':''}>不购买（¥0）</option><option value="10" ${state._fateCert===10?'selected':''}>水晶鉴定证书（+¥10）</option></select></div>
+   <div class="st-topbar"><span class="st-back" onclick="go('${back}')">‹ 返回</span><span class="st-title">灵感石验室</span><span class="st-guide">指南 ?</span></div>
+   <div class="st-headrow"><span class="st-price">¥ ${total}.0</span><span class="st-cnt">${n} 颗</span><span class="st-sugg">建议净手围 ${wrist}cm</span></div>
+   <div class="st-stage"><canvas id="studioPlate" data-h="300"></canvas><div class="st-undo" onclick="studioUndo()">↩</div></div>
+   <div class="st-tools">
+     <button class="st-tool" onclick="studioSetWrist()">📏 ${S.wristCm?S.wristCm+'cm':'手围'}</button>
+     <button class="st-tool" onclick="studioClear()">🗑</button>
+     <button class="st-tool" onclick="studioSave()">💾</button>
+     <button class="st-gather" onclick="studioToggleGather()">${S.gathered?'解除串珠':'收拢成串'}</button>
    </div>
-   <div class="bs-priceRow"><span class="bs-price">¥ ${total}.0 <small>· ${pair?'对串+选项':'单串+选项'}</small></span><span class="bs-badge ${cur.hasCustom?'custom':'ready'}">${cur.hasCustom?'含定制 · 约15-20天':'现货 · 即时发货'}</span></div>
-   <button class="bs-cta" onclick="fateCheckout()">${pair?'加入定制（你的串 + TA 的串）':'加入定制 · 你的能量串'}</button>
-   <div class="bs-disc">香珠功用为古法香方灵感 / 气味体验，非医疗声称；命理选品仅供自我觉察与决策参考。定制成串约 15-20 天，下单后凭码找客服完成尾款与发货。</div>`;
-  paintBracelet('beadPlate',cur);
-  FATE_PAL.forEach(id=>paintBeadThumb('pal_'+id,id));
-}
-function fateSetWrist(w){state._fateWrist=w;renderBeadshop();}
-function fateSetPkg(v){state._fatePkg=v;renderBeadshop();}
-function fateSetCert(v){state._fateCert=v;renderBeadshop();}
-function fatePairSide(s){state._fatePairSide=s;renderBeadshop();}
-function fateSetEmotion(e){state._fateEmotion=(state._fateEmotion===e?'':e);renderBeadshop();}
-function fatePalAdd(id){if(!BEADS[id])return;const pair=(state._fateSource==='synastry'&&state._synTaBirth);const sideKey=pair?(state._fatePairSide||'her'):'single';if(!state._fateAdd)state._fateAdd={};if(!state._fateAdd[sideKey])state._fateAdd[sideKey]=[];state._fateAdd[sideKey].push(id);toast('已加一颗「'+BEADS[id].n+'」进串');renderBeadshop();}
-async function fateCheckout(){
-  const r=state._fateR||fateCurrentPlans();const pair=(r.mode==='pair');
-  const cur=state._fateCur||(pair?(state._fatePairSide==='ta'?r.ta:r.her):r.plan);
-  const total=fateTotal(r);
-  const name=((pair?'对串·':'命理串·')+(BEADS[cur.mainId]?BEADS[cur.mainId].n:'本命')+'·'+state._fateWrist+'cm').slice(0,40);
-  const usePt=Math.min(state.balance,450),yuanOff=Math.min(Math.round(usePt/15),Math.round(total*0.3));
-  const useReal=usePt>0&&yuanOff>0;const pay=Math.max(0,total-(useReal?yuanOff:0));
-  const custom=cur.hasCustom||(pair&&r.ta&&r.ta.hasCustom);
-  const msg=useReal?`「${name}」¥${total}，用 ${usePt} 积分抵 ¥${yuanOff}，实付 ¥${pay}。${custom?'定制成串约 15-20 天，':''}凭码找客服完成尾款与发货。`:`「${name}」¥${total}。${custom?'定制成串约 15-20 天，':''}凭码找客服完成尾款与发货。`;
-  const ok=await confirmBox(msg,'确认下单','再看看');if(!ok)return;
-  const {ok:o,j}=await apiPost('/api/goods',{action:'redeem',phone:state.phone,goodId:'bead_'+(pair?'pair':'single'),name,ptOff:useReal?usePt:0,yuanOff:useReal?yuanOff:0,price:total});
-  if(o&&j&&j.ok&&j.code){
-    if(typeof j.balance==='number')state.balance=j.balance;
-    if(useReal)state.ledger.unshift({type:'积分抵扣 · '+name,amount:'-'+usePt,when:'刚刚'});
-    refreshBalanceUI();
-    await modal({icon:'📿',title:'定制已下单',msg:(useReal?'已抵扣 '+usePt+' 积分（省 ¥'+yuanOff+'）。\n':'')+'定制码 '+j.code+'\n把码发给客服微信 Syl18268346784，确认净手围与尾款 ¥'+pay+(custom?'，约 15-20 天成串发货。':'。'),okText:'复制码 · 找客服'});
-    copyText(j.code,'定制码已复制，发给客服完成下单～');
-  }else{toast((j&&j.error)||'下单失败，稍后再试');}
+   <button class="st-cart" onclick="studioCheckout()">🛒 加入购物车 · 结算　¥${total} · ${n}颗</button>
+   <div class="st-search"><input placeholder="搜珠子（如 南红 / 月光 / 香珠）" value="${esc(S.q||'')}" oninput="studioSearch(this.value)"></div>
+   <div class="st-cats">${STUDIO_CAT.map(c=>`<b class="${S.cat===c?'on':''}" onclick="studioSetCat('${c}')">${c}</b>`).join('')}</div>
+   <div class="st-catbody">
+     <div class="st-side">${subs.map(s=>`<div class="${S.sub===s?'on':''}" onclick="studioSetSub('${s}')">${s==='all'?'全部':s}</div>`).join('')}</div>
+     <div class="st-grid" id="stGrid">${shown.map(studioCard).join('')||'<div class="st-empty">没有匹配的珠子</div>'}</div>
+   </div>
+   <div class="st-disc">珠子为示意资产（换实拍即照片级）；初始串由你的八字五行预排，可自由增减/调大小/摆位。命理选品仅供自我觉察参考，香珠为古法气味体验、非医疗声称。</div>`;
+  const cv=document.getElementById('studioPlate');if(cv){studioBindCanvas(cv);studioPaint();}
+  shown.forEach(id=>paintBeadThumb2(document.getElementById('stc_'+id),id));
 }
 
 /* ============ 手机号/管理员 + 每日免费单张 ============ */
