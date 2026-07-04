@@ -856,37 +856,43 @@
   #login .wxbtn{background:#2B2B2B!important;box-shadow:0 14px 30px rgba(0,0,0,.18)!important;}
   /* 通用玻璃卡（rgba 白）在中性底上本就读灰白，这里只统一边框/阴影中性 */
   .panel,.card,.exrow,.sec-card{box-shadow:0 10px 26px rgba(0,0,0,.045)!important;}
-  /* ===== 出生信息 · 起牌师引导3步 ===== */
-  #profile .pf-guide{display:flex;gap:12px;align-items:flex-start;background:#F8F8F8;border:1px solid #ECECEC;border-radius:18px;padding:15px 16px;margin:6px 0 18px;box-shadow:0 10px 26px rgba(0,0,0,.04);}
-  #profile .pf-gav{width:40px;height:40px;border-radius:50%;background:#fff;border:1px solid #EAEAEA;display:flex;align-items:center;justify-content:center;flex:none;}
-  #profile .pf-gnm{font-family:var(--serif);font-size:13px;color:var(--ink);font-weight:600;letter-spacing:.02em;}
-  #profile .pf-gtx{font-size:13px;color:var(--ink-soft);line-height:1.7;margin-top:5px;}
-  #profile .pf-dots{display:flex;gap:7px;justify-content:center;margin:0 0 22px;}
-  #profile .pf-dots i{width:22px;height:4px;border-radius:2px;background:#E2E2E2;transition:.3s;}
-  #profile .pf-dots i.on{background:#2B2B2B;}
+  /* ===== 出生信息 · 1:1 对齐参考原型 FateStone（白/朱砂/衬线）===== */
+  #profile{background:#fff;--cin:#B23A2C;--jade:#4F7A5E;--gold2:#C0913A;--card2:#F5F4F1;--line3:#EAE7E0;--soft2:#7A766E;--faint2:#B4B1A9;}
+  #profile .topbar .tt{font-family:var(--serif);font-weight:700;color:var(--ink);letter-spacing:.04em;}
+  #profile .back{color:var(--soft2);}
+  #profile .pf-guide{display:flex;gap:12px;align-items:center;background:var(--card2);border:1px solid var(--line3);border-radius:14px;padding:14px 15px;margin:6px 0 16px;box-shadow:none;}
+  #profile .pf-gav{width:44px;height:44px;border-radius:50%;background:transparent;border:none;box-shadow:none;overflow:visible;display:flex;align-items:center;justify-content:center;flex:none;}
+  #profile .pf-gnm{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-family:var(--serif);font-size:14px;color:var(--ink);font-weight:700;letter-spacing:.02em;}
+  #profile .pf-gtag{font-family:var(--sans);font-size:9.5px;font-weight:600;color:var(--cin);background:#F3E5E0;border-radius:6px;padding:2px 7px;letter-spacing:.02em;}
+  #profile .pf-gtx{font-size:12px;color:var(--soft2);line-height:1.65;margin-top:5px;}
   #profile .pf-step{animation:pfFade .34s ease;}
   @keyframes pfFade{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+  #profile .pf-stepper{display:flex;align-items:center;justify-content:center;gap:9px;margin:6px 0 24px;}
+  #profile .pf-st{display:flex;flex-direction:column;align-items:center;gap:6px;opacity:.45;transition:.3s;}
+  #profile .pf-st.on{opacity:1;}
+  #profile .pf-st b{width:27px;height:27px;border-radius:50%;background:#EDE9E1;color:var(--faint2);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:var(--serif);transition:.3s;}
+  #profile .pf-st.on b{background:var(--cin);color:#fff;box-shadow:0 4px 11px rgba(178,58,44,.24);}
+  #profile .pf-st span{font-size:11px;color:var(--soft2);letter-spacing:.02em;}
+  #profile .pf-st.on span{color:var(--ink);}
+  #profile .pf-stline{width:26px;height:1.5px;background:var(--line3);margin-bottom:17px;}
+  #profile .pf-group{margin-bottom:20px;}
+  #profile .pf-k{font-family:var(--serif);font-size:13px;font-weight:700;color:var(--ink);letter-spacing:.02em;margin-bottom:9px;display:flex;align-items:center;gap:7px;text-transform:none;}
+  #profile .pf-k::before{content:"";width:14px;height:2px;background:var(--cin);border-radius:2px;flex:none;}
+  #profile .seg{display:flex;gap:6px;border:none;border-radius:0;overflow:visible;}
+  #profile .seg b{flex:1;text-align:center;font-weight:400;font-size:12.5px;padding:11px 3px;border:1px solid var(--line3);border-radius:9px;cursor:pointer;color:var(--soft2);background:#fff;}
+  #profile .seg b.on{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:600;}
+  #profile .pf-sel select,#profile .pf-input{background:#fff;border:1px solid var(--line3);border-radius:9px;padding:11px 26px 11px 11px;font-size:13px;color:var(--ink);}
+  #profile .pf-sel select:focus{border-color:var(--ink);}
+  #profile .pf-sel::after{color:var(--faint2);top:12px;}
+  #profile #pfSolarHint{color:var(--cin)!important;}
   #profile .pf-nav{display:flex;gap:12px;align-items:stretch;margin-top:24px;}
-  #profile .pf-prev{flex:none;padding:0 20px;border-radius:26px;background:#F0F0F0;border:1px solid #E6E6E6;color:var(--ink-soft);font-size:14px;font-family:var(--serif);}
-  #profile .pf-next{flex:1;margin-top:0!important;}
+  #profile .pf-prev{flex:none;padding:0 22px;border-radius:25px;background:#fff;border:1px solid var(--line3);color:var(--soft2);font-size:14px;font-family:var(--serif);}
+  #profile .pf-next{flex:1;margin-top:0!important;height:50px;border-radius:25px;background:var(--ink)!important;color:#fff;font-family:var(--serif);font-weight:600;font-size:15px;border:none;letter-spacing:.04em;}
+  #profile .prof-line a{color:var(--soft2);border-bottom:1px solid var(--line3);}
+  #profile .pf-note{text-align:center;font-size:9.5px;color:var(--faint2);line-height:1.7;margin:16px auto 0;max-width:280px;}
   /* ===== 首页封面：心光球 → 一堆塔罗牌 ===== */
   #home .eh-orbf{display:none!important;}
   #home .eh-deck{display:block!important;right:-6px!important;top:calc(50% - 46px)!important;width:134px!important;transform:rotate(4deg)!important;filter:drop-shadow(0 13px 22px rgba(35,30,22,.26))!important;z-index:3!important;}
-  /* ===== 出生向导 · 优化（水晶头像/步骤条/脚注）===== */
-  #profile .pf-guide{align-items:center!important;gap:13px!important;padding:16px 17px!important;}
-  #profile .pf-gav{width:44px!important;height:44px!important;background:transparent!important;border:none!important;box-shadow:none!important;overflow:visible!important;display:flex;align-items:center;justify-content:center;flex:none;}
-  #profile .pf-gnm{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-  #profile .pf-gtag{font-family:var(--sans);font-size:10px;font-weight:400;color:#fff;background:#2B2B2B;border-radius:10px;padding:2px 8px;letter-spacing:.02em;}
-  #profile .pf-gtx{margin-top:6px!important;}
-  #profile .pf-stepper{display:flex;align-items:center;justify-content:center;gap:9px;margin:4px 0 26px;}
-  #profile .pf-st{display:flex;flex-direction:column;align-items:center;gap:6px;opacity:.4;transition:.3s;}
-  #profile .pf-st.on{opacity:1;}
-  #profile .pf-st b{width:27px;height:27px;border-radius:50%;background:#E4E4E4;color:#8f8f8f;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;font-family:var(--serif);transition:.3s;}
-  #profile .pf-st.on b{background:#2B2B2B;color:#fff;box-shadow:0 4px 10px rgba(30,30,30,.18);}
-  #profile .pf-st span{font-size:11px;color:var(--ink-soft);letter-spacing:.02em;}
-  #profile .pf-stline{width:26px;height:1.5px;background:#E0E0E0;margin-bottom:17px;}
-  #profile .pf-note{text-align:center;font-size:11.5px;color:var(--ink-faint);line-height:1.7;margin:22px auto 0;max-width:272px;}
-  #profile .pf-group{margin-bottom:20px;}
   /* ===== 首页背景：去掉色彩，纯净平色 ===== */
   .phone{background-image:none!important;}
   #home{background:#F4F4F4!important;}
@@ -2413,16 +2419,16 @@ function fateCurrentPlans(){
   const plan=fatePlanFor(self,fateSelfTags(),{wristCm:state._fateWrist||15});
   return {mode:'single',plan};
 }
-/* ---- 瓷盘照片合成渲染（1:1 参考原型 drawPlate/drawBeads/drawPendant）---- */
+/* ---- 瓷盘照片合成渲染 + 成串交互（拖动旋转/撤一颗/收拢·移自 参考实现/成串照片合成台）---- */
 function drawPlate(ctx,W,H){ctx.clearRect(0,0,W,H);const cx=W/2,cy=H*.42,pr=Math.min(W,H*1.15)*.44;
   const bg=ctx.createRadialGradient(cx,cy*.85,pr*.2,cx,H*.55,Math.max(W,H)*.8);bg.addColorStop(0,'#f4eee3');bg.addColorStop(1,'#e6dfd1');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
   ctx.save();ctx.beginPath();ctx.ellipse(cx,cy+pr*.14,pr,pr*.82,0,0,7);const g=ctx.createRadialGradient(cx-pr*.2,cy-pr*.28,pr*.1,cx,cy,pr);g.addColorStop(0,'#fdfbf6');g.addColorStop(.7,'#efe9dd');g.addColorStop(1,'#dbd2c2');ctx.fillStyle=g;ctx.fill();ctx.strokeStyle='rgba(120,110,90,.12)';ctx.lineWidth=1.5;ctx.stroke();ctx.restore();}
-function drawBeads(ctx,W,H,seq){const cx=W/2,cy=H*.40,rx=Math.min(W,H*1.15)*.29,ry=rx*.70;
+function drawBeads(ctx,W,H,seq,rot){rot=rot||0;const cx=W/2,cy=H*.40,rx=Math.min(W,H*1.15)*.29,ry=rx*.70;
   const sz=seq.map(id=>{const s=BEADS[id];return (s&&s.kind==='spacer')?.52:1;});
   const units=sz.reduce((a,b)=>a+b,0)||1,circ=2*Math.PI*Math.sqrt((rx*rx+ry*ry)/2),bd=circ/units;
   ctx.save();ctx.strokeStyle='rgba(120,100,72,.55)';ctx.lineWidth=Math.max(1.2,bd*.09);ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,7);ctx.stroke();ctx.restore();
   ctx.save();ctx.filter='blur(13px)';ctx.fillStyle='rgba(58,46,30,.20)';ctx.beginPath();ctx.ellipse(cx,cy+ry+bd*.22,rx*1.05,ry*.5,0,0,7);ctx.fill();ctx.restore();
-  let acc=0;const it=seq.map((id,i)=>{const mid=acc+sz[i]/2;acc+=sz[i];const a=mid/units*6.283-1.57,yb=Math.sin(a),depth=(yb+1)/2;
+  let acc=0;const it=seq.map((id,i)=>{const mid=acc+sz[i]/2;acc+=sz[i];const a=mid/units*6.283-1.57+rot,yb=Math.sin(a),depth=(yb+1)/2;
     return{id,x:cx+rx*Math.cos(a),y:cy+ry*yb,depth,d:bd*sz[i]*(1.12+.16*depth)};}).sort((p,q)=>p.y-q.y);
   it.forEach(o=>{const sku=BEADS[o.id],d=o.d;
     ctx.save();ctx.beginPath();ctx.ellipse(o.x,o.y+d*.4,d*.5,d*.19,0,0,7);ctx.fillStyle='rgba(56,46,34,.24)';ctx.filter='blur(4px)';ctx.fill();ctx.restore();
@@ -2443,16 +2449,40 @@ function drawPendant(ctx,cx,by,bd){const jy=by+bd*.30;
   ctx.save();ctx.strokeStyle='rgba(150,108,66,.82)';ctx.lineWidth=Math.max(1,bd*.05);ctx.lineCap='round';const ty=py+pd*.4;
   for(let i=-2;i<=2;i++){ctx.beginPath();ctx.moveTo(cx,ty);ctx.quadraticCurveTo(cx+i*bd*.1,ty+bd*.5,cx+i*bd*.13,ty+bd*.92);ctx.stroke();}
   ctx.fillStyle='#8a6a42';ctx.beginPath();ctx.ellipse(cx,ty+bd*.04,bd*.12,bd*.1,0,0,7);ctx.fill();ctx.restore();}
-function paintBracelet(cid,plan){
-  const cv=document.getElementById(cid);if(!cv||!plan||!plan.seq)return;
-  const rect=cv.getBoundingClientRect();let W=rect.width||cv.clientWidth||cv.parentNode.clientWidth||330;
+let FATE_PLATE={cid:null,seq:[],rot:0,dirty:false,running:false};
+function fatePlatePaint(cv,seq,rot){
+  const rect=cv.getBoundingClientRect();let W=rect.width||cv.clientWidth||(cv.parentNode&&cv.parentNode.clientWidth)||330;
   let H=rect.height||cv.clientHeight||parseInt(cv.getAttribute('data-h'))||290;
-  const dp=Math.min(window.devicePixelRatio||1,2);cv.width=W*dp;cv.height=H*dp;
-  const ctx=cv.getContext('2d');ctx.setTransform(dp,0,0,dp,0,0);
-  drawPlate(ctx,W,H);drawBeads(ctx,W,H,plan.seq);
-  const seqCopy=plan.seq.slice();
-  FATE_IMG_REDRAW=function(){try{const cv2=document.getElementById(cid);if(!cv2||!cv2.getContext)return;const c2=cv2.getContext('2d');c2.setTransform(dp,0,0,dp,0,0);drawPlate(c2,W,H);drawBeads(c2,W,H,seqCopy);}catch(e){}};
+  const dp=Math.min(window.devicePixelRatio||1,2),nw=Math.round(W*dp),nh=Math.round(H*dp);
+  if(cv.width!==nw||cv.height!==nh){cv.width=nw;cv.height=nh;}
+  const ctx=cv.getContext('2d');ctx.setTransform(dp,0,0,dp,0,0);drawPlate(ctx,W,H);drawBeads(ctx,W,H,seq,rot||0);
 }
+function fatePlateLoop(){
+  const p=FATE_PLATE,scr=document.getElementById('beadshop');
+  if(!scr||!scr.classList.contains('active')){p.running=false;return;}
+  const cv=document.getElementById(p.cid);
+  if(cv&&p.dirty){try{fatePlatePaint(cv,p.seq,p.rot);}catch(e){}p.dirty=false;}
+  requestAnimationFrame(fatePlateLoop);
+}
+function paintBracelet(cid,plan){
+  if(!plan||!plan.seq)return;
+  if(cid==='beadPlate'){
+    const p=FATE_PLATE;p.cid=cid;p.seq=plan.seq.slice();p.dirty=true;
+    const cv=document.getElementById(cid);if(!cv)return;
+    if(!cv._fbound){cv._fbound=1;cv.style.touchAction='pan-y';let drag=false,lx=0;
+      cv.addEventListener('pointerdown',function(e){drag=true;lx=e.clientX;try{cv.setPointerCapture(e.pointerId);}catch(_){}});
+      cv.addEventListener('pointermove',function(e){if(!drag)return;p.rot+=(e.clientX-lx)*0.012;lx=e.clientX;p.dirty=true;});
+      cv.addEventListener('pointerup',function(){drag=false;});cv.addEventListener('pointercancel',function(){drag=false;});}
+    FATE_IMG_REDRAW=function(){FATE_PLATE.dirty=true;};
+    if(!p.running){p.running=true;requestAnimationFrame(fatePlateLoop);}
+  }else{
+    const cv=document.getElementById(cid);if(!cv)return;try{fatePlatePaint(cv,plan.seq,0);}catch(e){}
+    const seqCopy=plan.seq.slice();FATE_IMG_REDRAW=function(){const c=document.getElementById(cid);if(c)try{fatePlatePaint(c,seqCopy,0);}catch(e){}};
+  }
+}
+function fateGather(){FATE_PLATE.rot=0;FATE_PLATE.dirty=true;}
+function fateUndo(){const pair=(state._fateSource==='synastry'&&state._synTaBirth);const k=pair?(state._fatePairSide||'her'):'single';const arr=state._fateAdd&&state._fateAdd[k];if(arr&&arr.length){const id=arr.pop();toast('撤掉一颗「'+(BEADS[id]?BEADS[id].n:'珠')+'」');renderBeadshop();}else{toast('已是为你推荐的配置 · 想少几颗可调小净手围');}}
+function fateReset(){const pair=(state._fateSource==='synastry'&&state._synTaBirth);const k=pair?(state._fatePairSide||'her'):'single';if(state._fateAdd)state._fateAdd[k]=[];state._fateEmotion='';FATE_PLATE.rot=0;toast('已重置为推荐');renderBeadshop();}
 
 /* ---- 商城落地卡（S4 推荐入口·置于商城顶部）---- */
 function renderShopFateCard(){
