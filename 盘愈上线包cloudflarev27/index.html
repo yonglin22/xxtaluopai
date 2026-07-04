@@ -1134,8 +1134,8 @@
     <button class="btn block" id="goBtn" disabled onclick="goReading()">开始解读 →</button>
     <div class="tpl-head" style="margin-top:28px"><div class="tpl-title">常见问题 · 点一下填入</div><div class="tpl-refresh" onclick="cycleTpl('ask')">换一换 ↻</div></div>
     <div id="askTpl"></div>
-    <div class="tpl-head" style="margin-top:30px"><div class="tpl-title">解读记录</div></div>
-    <div id="askHistory"></div>
+    <div class="tpl-head" style="margin-top:30px"><div class="tpl-title">解读记录 <span id="askHistCount" style="color:var(--ink-faint);font-size:12px;font-weight:400"></span></div><div class="tpl-refresh" id="askHistToggle" style="display:none" onclick="toggleAskHist()">展开 ▾</div></div>
+    <div id="askHistory" style="display:none"></div>
     <div class="disclaimer">仅供自我觉察与决策参考，不构成任何确定性预测或投资建议。</div>
   </section>
 
@@ -5700,7 +5700,25 @@ function paintBrandMarks(){document.querySelectorAll('.brand-mark').forEach(el=>
   m.innerHTML='<div class="ledger-sheet"><div class="ls-top"><span>积分明细</span><span class="ls-x" onclick="this.closest(\'.sz-mask\').remove()">✕</span></div><div class="ls-body">'+rows+'</div></div>';
   m.addEventListener('click',function(e){if(e.target===m)m.remove();});document.body.appendChild(m);
  };
- if(typeof renderAsk==='function'){var _ra=window.renderAsk;window.renderAsk=function(){var r=_ra.apply(this,arguments);try{var hh=document.getElementById('askHistory');if(hh)hh.innerHTML=(state.history&&state.history.length)?state.history.map(function(it,i){return '<div class="hist-item" onclick="openHistory('+i+')"><div class="row"><div class="hi-domain">'+it.domain+'</div><div class="hi-when">'+it.when+'</div></div><div class="hi-head">'+((it.data.situation||'').slice(0,32))+'</div></div>';}).join(''):'<div class="empty">还没有解读记录，先问一事吧。</div>';}catch(e){}return r;};}
+ if(typeof renderAsk==='function'){var _ra=window.renderAsk;window.renderAsk=function(){var r=_ra.apply(this,arguments);try{renderAskHist();}catch(e){}return r;};}
+})();
+</script>
+<script>
+(function(){
+ window.renderAskHist=function(){
+  var hh=document.getElementById('askHistory');if(!hh)return;
+  var n=(state.history&&state.history.length)||0;
+  var cnt=document.getElementById('askHistCount'),tg=document.getElementById('askHistToggle');
+  if(cnt)cnt.textContent=n?('· '+n+' 条'):'';
+  if(!n){hh.style.display='block';hh.innerHTML='<div class="empty">还没有解读记录，先问一事吧。</div>';if(tg)tg.style.display='none';return;}
+  hh.innerHTML=state.history.map(function(it,i){return '<div class="hist-item" onclick="openHistory('+i+')"><div class="row"><div class="hi-domain">'+it.domain+'</div><div class="hi-when">'+it.when+'</div></div><div class="hi-head">'+((it.data.situation||'').slice(0,32))+'</div></div>';}).join('');
+  if(tg)tg.style.display='';
+  if(hh.dataset.open==='1'){hh.style.display='block';if(tg)tg.textContent='收起 ▴';}else{hh.style.display='none';if(tg)tg.textContent='展开 ▾';}
+ };
+ window.toggleAskHist=function(){var hh=document.getElementById('askHistory'),tg=document.getElementById('askHistToggle');if(!hh)return;
+  if(hh.dataset.open==='1'){hh.dataset.open='0';hh.style.display='none';if(tg)tg.textContent='展开 ▾';}
+  else{hh.dataset.open='1';hh.style.display='block';if(tg)tg.textContent='收起 ▴';}
+ };
 })();
 </script>
 </body>
