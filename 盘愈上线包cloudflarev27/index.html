@@ -1268,6 +1268,11 @@
     <div id="natalBody"></div>
   </section>
 
+  <section class="screen" id="bazichart">
+    <div class="topbar"><div class="back" onclick="go('natal')">‹</div><div class="tt">八字命盘</div></div>
+    <div id="baziBody"></div>
+  </section>
+
   <section class="screen" id="synastry">
     <div class="topbar"><div class="back" onclick="go('home')">‹</div><div class="tt">关系合盘</div></div>
     <div id="synBody"></div>
@@ -2733,6 +2738,7 @@ function go(id){
   if(id==="readerApply")renderReaderApply();
   if(id==="readerHome")renderReaderHome();
   if(id==="natal")renderNatal();
+  if(id==="bazichart")renderBazichart();
   if(id==="synastry")renderSynastry();
   if(id==="treehole")renderTreehole();
   if(id==="wall")renderWall();
@@ -2874,6 +2880,7 @@ function saveProfile(){
   if(state._pendingNatal){state._pendingNatal=false;go('natal');return;}
   if(state._pendingSyn){state._pendingSyn=false;go('synastry');return;}
   if(state._pendingFate){state._pendingFate=false;go('beadshop');return;}
+  if(state._pendingBazi){state._pendingBazi=false;go('bazichart');return;}
   go('home');
 }
 var pfCur=1;
@@ -2976,6 +2983,7 @@ const FEATURES=[
   {emoji:'🕰️',title:'时光胶囊 · 给未来的自己',desc:'封存此刻的心事与一张牌，让未来的你收到',go:'capsule',bg:'radial-gradient(120% 120% at 80% 0%,#2a2417,#19130b)',c2:'#c7b187',gc:'var(--amber)',cta:'去写 →',badge:1},
   {emoji:'📈',title:'情绪轨迹 · 你的成长曲线',desc:'看见这段时间，你的情绪与成长',go:'trajectory',bg:'radial-gradient(120% 120% at 80% 0%,#1f2330,#12141c)',c2:'#a8b6cc',gc:'#9fb0d0',cta:'去看看 →'},
   {emoji:'⚖️',title:'两难天平 · 帮你做决定',desc:'去留、选 A 还是 B？听见心里的答案',go:'decide',bg:'radial-gradient(120% 120% at 80% 0%,#2a2417,#19130b)',c2:'#c7b187',gc:'var(--amber)',cta:'去理清 →'},
+  {emoji:'🀄',title:'八字命盘 · 五行喜忌',desc:'四柱五行 + 喜用忌神 + 中医体质，一图看懂你',go:'bazichart',bg:'radial-gradient(120% 120% at 80% 0%,#2a2417,#19130b)',c2:'#c7b187',gc:'var(--amber)',cta:'去看命盘 →'},
   {emoji:'📿',title:'命理选品 · 为你排的珠串',desc:'按你的八字五行与此刻议题，为你而选',go:'skinshop',bg:'radial-gradient(120% 120% at 80% 0%,#2a2216,#191207)',c2:'#c7b187',gc:'var(--amber)',cta:'去看看 →'},
 ];
 function renderFeatCarousel(){
@@ -4074,7 +4082,7 @@ function renderNatal(){
   <div class="ns-detail" id="natalDetail"><div class="ns-g" id="nsG">\u2609</div><div class="ns-m"><div class="ns-nm" id="nsNm"></div><div class="ns-d" id="nsD"></div></div></div>
   <div class="ns-three" id="natalThree"></div>`;
   const full=`<div style="text-align:center;margin:2px 0 4px"><button id="natalFullBtn" class="btn ghost" style="font-size:13px;padding:8px 18px;border-color:#6b5a2e;color:#cbb78a" onclick="toggleNatalFull()">查看完整星盘图 ▾</button></div><div id="natalFullWrap" style="display:none"><div style="background:radial-gradient(120% 120% at 50% 40%,#2a2216,#17110a);border-radius:18px;padding:16px 10px;margin:8px 0 4px"><div id="natalWheel" style="width:100%;max-width:360px;margin:0 auto;min-height:200px"></div></div></div>`;
-  body.innerHTML=head+ring+full+`<button class="btn block" style="margin-top:18px;background:linear-gradient(135deg,#E7C892,var(--amber));color:#2a1f10;box-shadow:0 8px 22px rgba(201,162,78,.32);border:none" onclick="go('synastry')">💞 关系合盘 · 测测你和 TA 的契合度</button><button class="btn block" style="margin-top:12px" onclick="natalDeepRead()">🔮 深度人格图谱解读</button><div style="text-align:center;margin-top:14px"><span onclick="personaPoster()" style="font-size:12.5px;color:var(--ink-faint);cursor:pointer;border-bottom:1px solid var(--line)">✦ 生成人格标签海报 · 分享</span></div>${readerHookHTML('natalToReader()','想更懂这份人格图谱、聊聊最近的状态？找 {nick} 深聊一次 →')}<div class="disclaimer">星盘基于公历出生时间排算；时辰越精确，上升与宫位越准。</div><div id="natalDeep" style="margin-top:18px"></div>`;
+  body.innerHTML=head+ring+full+`<button class="btn block" style="margin-top:18px;background:linear-gradient(135deg,#E7C892,var(--amber));color:#2a1f10;box-shadow:0 8px 22px rgba(201,162,78,.32);border:none" onclick="go('bazichart')">🀄 八字命盘 · 五行喜忌与体质</button><button class="btn block" style="margin-top:12px;border:1px solid var(--line);background:transparent;color:var(--ink)" onclick="go('synastry')">💞 八字合盘 · 测测你和 TA</button><button class="btn block" style="margin-top:12px" onclick="natalDeepRead()">🔮 深度人格图谱解读</button><div style="text-align:center;margin-top:14px"><span onclick="personaPoster()" style="font-size:12.5px;color:var(--ink-faint);cursor:pointer;border-bottom:1px solid var(--line)">✦ 生成人格标签海报 · 分享</span></div>${readerHookHTML('natalToReader()','想更懂这份人格图谱、聊聊最近的状态？找 {nick} 深聊一次 →')}<div class="disclaimer">星盘基于公历出生时间排算；时辰越精确，上升与宫位越准。</div><div id="natalDeep" style="margin-top:18px"></div>`;
   startNatalCanvas(ch);
   if(state._natalRead)renderNatalDeep(state._natalRead);
 }
@@ -4223,6 +4231,39 @@ function renderSynastryResult(s,info){
     <button class="btn block" style="margin-top:14px;background:linear-gradient(135deg,#E7C892,var(--amber));color:#2a1f10;border:none" onclick="synastryPoster()">✦ 生成合盘海报 · 分享</button>
     <button class="btn block ghost" style="margin-top:10px" onclick="toast('把海报发给 TA，邀请一起测～')">邀请 TA 一起测</button>
     ${fateHookCard('synastry')}`;
+}
+/* ===== 八字命盘页（八字四柱 + 五行喜忌 + 中医体质，据规格 8 板块）===== */
+const BZ_PERSONA={
+ jin:{强:'金旺·锋芒有主见、认死理、讲原则，做事利落；宜给自己留三分柔软，别把话说太满。',弱:'金弱·外柔内敛、重分寸，对被认真对待很敏感；宜先被托住、被认可，再稳稳发力。'},
+ mu:{强:'木旺·生发有冲劲、想法多、爱主导；宜给情绪留一个疏解的出口，别一味硬扛。',弱:'木弱·心思细、易内耗、常替人着想；宜多晒太阳多走动，把念头落到能做的小事上。'},
+ shui:{强:'水旺·灵活善感、脑子快、点子多；宜把发散的念头收一收，一次定一件事再动。',弱:'水弱·安稳念旧、不爱冒险、慢热；宜给自己一点试错的空间，别怕走弯路。'},
+ huo:{强:'火旺·热情直爽、来得快去得也快；宜把冲劲留三分，别一下烧尽，学会等一等。',弱:'火弱·温吞慢热、易累怕冷场；宜找能点亮你的人和事，让自己慢慢升温。'},
+ tu:{强:'土旺·踏实能扛、重承诺、有担当；宜别把什么都往自己身上揽，学会把事分出去。',弱:'土弱·随和好说话、易心软让步；宜先立住自己的边界，把自己也照顾好。'}
+};
+const BZ_CARE={'平和·守中':'守中即好——作息规律、饮食清淡、动静有度。','阳虚·偏寒':'宜温养、忌生冷；多晒背、喝温水、别贪凉。','阴虚·偏燥':'宜静养滋润、忌熬夜辛燥；早些睡、多补水。','气郁·思虑':'宜疏解舒展、忌闷压；多走动、把心里话找个出口说出来。','痰湿·困重':'宜清爽走动、忌甜腻久坐；饭后走一走。','气虚·易倦':'宜养气缓行、忌过劳；小步慢来，别硬撑。'};
+function bzChartData(){const b=fateSelfBirth();if(!b)return null;const wx=fateWXFromBirth(b);if(!wx)return null;return {wx,tz:fateTizhi(wx)};}
+function renderBazichart(){
+  const box=$("#baziBody");if(!box)return;const d=bzChartData();
+  if(!d){box.innerHTML='<div class="panel" style="text-align:center"><div class="pv-d">补出生信息（含时辰更准），为你排八字命盘。</div><button class="btn block" style="margin-top:12px" onclick="state._pendingBazi=true;go(\'profile\')">去补出生信息 →</button></div>';return;}
+  const wx=d.wx,tz=d.tz,E=FATE_ELCN;
+  const elc={huo:'#d0553a',tu:'#c99a2e',jin:'#9aa0a6',shui:'#3f97a3',mu:'#4f7a5e'};
+  const bars=['jin','mu','shui','huo','tu'].map(e=>`<div style="margin-bottom:9px"><div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink-soft);margin-bottom:4px"><span>${E[e]}</span><span style="color:${elc[e]}">${wx.scores[e]}</span></div><div style="height:7px;background:var(--line-soft);border-radius:4px;overflow:hidden"><div style="height:100%;width:${wx.scores[e]}%;background:${elc[e]};border-radius:4px"></div></div></div>`).join('');
+  const pillars=(wx.pillars||'').split(' '),plabels=['年柱','月柱','日柱','时柱'];
+  const pillarHtml=pillars.map((p,i)=>`<div style="flex:1;text-align:center;padding:10px 2px;border-radius:10px;background:${i===2?'rgba(201,162,78,.12)':'var(--bg)'};border:1px solid ${i===2?'var(--amber)':'var(--line)'}"><div style="font-size:10px;color:var(--ink-faint)">${plabels[i]||''}</div><div class="serif" style="font-size:18px;color:${i===2?'var(--gold-deep)':'var(--ink)'};margin-top:3px">${p==='—'?'未知':p}</div>${i===2?'<div style="font-size:9px;color:var(--gold-deep);margin-top:2px">日主</div>':''}</div>`).join('');
+  const persona=(BZ_PERSONA[wx.dayMaster]&&BZ_PERSONA[wx.dayMaster][wx.shen])||'';
+  const care=BZ_CARE[tz.key]||'作息规律、饮食清淡即养。';
+  box.innerHTML=`${pHero('bā zì mìng pán','八字命盘','四柱五行 · 喜用忌神 · 中医体质')}
+   <div style="font-size:11px;color:var(--ink-faint);letter-spacing:.1em;margin:8px 2px 8px">四 柱 干 支 <span style="color:var(--gold-deep)">· 代码排盘 确定性</span></div>
+   <div style="display:flex;gap:8px">${pillarHtml}</div>
+   <div class="panel" style="margin-top:14px"><div style="font-size:12.5px;color:var(--gold-deep);margin-bottom:10px">五行分布</div>${bars}<div style="font-size:11.5px;color:var(--ink-faint);margin-top:4px">偏旺 ${E[wx.excess&&wx.excess[0]]||'—'} · 偏弱 ${(wx.lack||[]).map(e=>E[e]).join('')||'—'}</div></div>
+   <div class="panel" style="margin-top:12px;display:flex;gap:12px">
+     <div style="flex:1"><div style="font-size:11px;color:var(--ink-faint)">日主 · 强弱</div><div class="serif" style="font-size:17px;color:var(--ink);margin-top:3px">${E[wx.dayMaster]}（身${wx.shen}）</div></div>
+     <div style="width:1px;background:var(--line-soft)"></div>
+     <div style="flex:1.4"><div style="font-size:11px;color:var(--ink-faint)">喜用 / 忌神</div><div class="serif" style="font-size:15px;color:var(--gold-deep);margin-top:4px">喜 ${(wx.favorable||[]).map(e=>E[e]).join('')||'—'}　忌 ${(wx.avoid||[]).map(e=>E[e]).join('')||'—'}</div></div></div>
+   ${persona?`<div class="panel" style="margin-top:12px;background:rgba(201,162,78,.06)"><div style="font-size:12px;color:var(--gold-deep);margin-bottom:6px">一句话性格底色</div><div class="pv-d" style="line-height:1.85;color:var(--ink-soft)">${persona}</div></div>`:''}
+   <div class="panel" style="margin-top:12px"><div style="font-size:12.5px;color:var(--gold-deep);margin-bottom:6px">中医体质倾向 · ${tz.key}</div><div class="pv-d" style="line-height:1.8">对应香承香方「${tz.xf}」——传统香方灵感下的古法气味体验，帮你在忙碌里静下来，<b>不是用来治疗或调理身体</b>。<br>宜养：${care}</div></div>
+   <button class="btn block" style="margin-top:16px;background:linear-gradient(135deg,#E7C892,var(--amber));color:#2a1f10;border:none" onclick="goFateFrom('natal')">📿 按这盘 · 为你排一串（补 ${(wx.favorable||[]).map(e=>E[e]).join('')||'五行'}）→</button>
+   <div class="disclaimer">命理分析仅供文化研究与自我觉察参考，不构成确定性预测；中医体质为生活状态倾向、非体检结论，不替代医学诊断；香方为传统气味养生体验、非医疗用途；人生在于自身的努力与选择。</div>`;
 }
 async function synastryPoster(){
   const L=state._synLast;if(!L){toast('请先合盘');return;}
