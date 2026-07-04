@@ -251,7 +251,7 @@ async function handleWall(request, env, url) {
   return json(400, { error: '未知操作' });
 }
 // ---- 情绪轨迹（KV：键 mood:<手机号> = 情绪记录数组）----
-// ---- 积分钱包（KV：键 wallet:<手机号> = {balance,lastDay,streak}）----
+// ---- 心元钱包（KV：键 wallet:<手机号> = {balance,lastDay,streak}）----
 function cnDayKey(ts) { const d = new Date(ts + 8 * 3600 * 1000); return d.getUTCFullYear() + '-' + (d.getUTCMonth() + 1) + '-' + d.getUTCDate(); }
 async function walletGet(KV, phone) { let w = null; try { const raw = await KV.get('wallet:' + phone); if (raw) w = JSON.parse(raw); } catch (e) {} return w ? { balance: w.balance | 0, lastDay: w.lastDay || '', streak: w.streak | 0 } : { balance: 300, lastDay: '', streak: 0 }; }
 async function walletCheckin(KV, phone) {
@@ -340,7 +340,7 @@ async function handleSkins(request, env, url) {
     const skin = String(body.skin || ''); const price = SKIN_PRICE_W[skin];
     if (price === undefined) return json(400, { error: '皮肤不存在' });
     if (s.owned.indexOf(skin) >= 0) { s.equipped = skin; await skinPut(KV, phone, s); return json(200, Object.assign({ ok: true, already: true }, s)); }
-    const w = await walletGet(KV, phone); if (w.balance < price) return json(200, { ok: false, error: '积分不足' });
+    const w = await walletGet(KV, phone); if (w.balance < price) return json(200, { ok: false, error: '心元不足' });
     const wr = await walletAdjust(KV, phone, -price);
     s.owned.push(skin); s.equipped = skin; await skinPut(KV, phone, s);
     return json(200, { ok: true, owned: s.owned, equipped: s.equipped, balance: wr.balance });
@@ -378,7 +378,7 @@ async function handleGoods(request, env, url) {
   if (String(body.action || '') !== 'redeem') return json(400, { error: '未知操作' });
   const ptOff = Math.max(0, parseInt(body.ptOff, 10) || 0);
   const w = await walletGet(KV, phone);
-  if (w.balance < ptOff) return json(200, { ok: false, error: '积分不足' });
+  if (w.balance < ptOff) return json(200, { ok: false, error: '心元不足' });
   const wr = await walletAdjust(KV, phone, -ptOff);
   let code = rcode(); try { while (await KV.get('gorder:' + code)) code = rcode(); } catch (e) {}
   const order = { phone, goodId: String(body.goodId || ''), name: String(body.name || '').slice(0, 40), ptOff, yuanOff: Math.max(0, +body.yuanOff || 0), price: Math.max(0, +body.price || 0), when: Date.now(), used: '' };
