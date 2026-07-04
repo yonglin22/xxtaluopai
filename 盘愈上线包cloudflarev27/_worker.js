@@ -171,7 +171,7 @@ export default {
     if (url.pathname === '/api/goods') { return handleGoods(request, env, url); }
     if (url.pathname.startsWith('/api/reader/')) { return handleReader(request, env, url.pathname.slice(12), url); }
     if (url.pathname === '/api/bind') { return handleBind(request, env, url); }
-    return env.ASSETS.fetch(request);
+    { const _r = await env.ASSETS.fetch(request); const _ct = _r.headers.get('content-type') || ''; if (_ct.includes('text/html')) { const _h = new Headers(_r.headers); _h.set('cache-control', 'no-cache, must-revalidate'); return new Response(_r.body, { status: _r.status, statusText: _r.statusText, headers: _h }); } return _r; }
   }
 };
 function json(code, obj) { return new Response(JSON.stringify(obj), { status: code, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } }); }
