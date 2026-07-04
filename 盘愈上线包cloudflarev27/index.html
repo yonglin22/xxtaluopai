@@ -5571,7 +5571,10 @@ window.fpSync=function(el){try{var c=el.children[0];if(!c)return;var step=c.offs
 #synastry .sy-dot.her{background:var(--cinnabar,#B23A2C)}
 #synastry .sy-dot.ta{background:#5a6b8c}
 #synastry .sy-lab{font-size:11px;color:var(--ink-faint);margin:8px 2px 4px}
-#synastry .sy-in{width:100%;box-sizing:border-box;padding:10px 11px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);font-size:14px;outline:none}
+#synastry .sy-in{width:100%;min-width:0;box-sizing:border-box;padding:10px 11px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);font-size:14px;outline:none;-webkit-appearance:none;appearance:none;text-overflow:ellipsis}
+#synastry .sy-row2{align-items:flex-end}
+#synastry .sy-row2>div{flex:1 1 0;min-width:0}
+#synastry select.sy-in{padding-right:26px;background-image:linear-gradient(45deg,transparent 50%,var(--ink-faint) 50%),linear-gradient(135deg,var(--ink-faint) 50%,transparent 50%);background-position:calc(100% - 14px) 52%,calc(100% - 9px) 52%;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
 #synastry .sy-in:focus{border-color:var(--amber)}
 #synastry .sy-row2{display:flex;gap:9px}
 #synastry .sy-chk{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-soft);margin-top:9px;cursor:pointer}
