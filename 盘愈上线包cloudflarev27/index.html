@@ -2754,7 +2754,8 @@ const TABS=["home","natal","ask","skinshop","mine"];
 function go(id){
   if(id==='admin'&&!state.isAdmin){toast('仅管理员可进入');id='mine';}
   if(state._pollTimer){clearInterval(state._pollTimer);state._pollTimer=null;}
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  if(!document.getElementById(id)){id=(state&&state.profile)?"home":"home";}
+   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   $("#"+id).classList.add("active");
   window.scrollTo(0,0);
   const tb=$("#tabbar");
