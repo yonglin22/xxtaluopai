@@ -37,7 +37,8 @@ Page({
   onFate(e) {
     const k = e.currentTarget.dataset.k;
     if (k === 'ask') return this.goAsk();
-    const map = { syn: '关系合盘', bazi: '八字命盘' };
+    if (k === 'bazi') return wx.navigateTo({ url: '/pages/bazi/bazi' });
+    const map = { syn: '关系合盘' };
     this.soon(map[k] || '该功能');
   },
   onMood(e) {

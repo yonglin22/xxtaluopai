@@ -6,5 +6,9 @@ Page({
       { k: '关系合盘', d: '和 TA 的八字契合度' }
     ]
   },
-  tap(e) { wx.navigateTo({ url: '/pages/soon/soon?title=' + encodeURIComponent(e.currentTarget.dataset.k) }); }
+  tap(e) {
+    const k = e.currentTarget.dataset.k;
+    if (k === '八字命盘') return wx.navigateTo({ url: '/pages/bazi/bazi' });
+    wx.navigateTo({ url: '/pages/soon/soon?title=' + encodeURIComponent(k) });
+  }
 });

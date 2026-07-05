@@ -5,6 +5,7 @@
     "pages/ask/ask",
     "pages/shop/shop",
     "pages/mine/mine",
+    "pages/bazi/bazi",
     "pages/login/login",
     "pages/soon/soon"
   ],
