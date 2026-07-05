@@ -17,5 +17,5 @@ Page({
         content: '后端统一下单 /api/wxpay 尚未接入（需商户号 + API 密钥/证书）。接好后这里用 wx.requestPayment 拉起微信支付。\n订单 ' + (this.data.orderNo || '—') + ' · ¥' + (this.data.amount || '—') });
     }
   },
-  back() { const p = getCurrentPages(); if (p.length > 1) wx.navigateBack(); else wx.switchTab({ url: '/pages/mine/mine' }); }
+  back() { const p = getCurrentPages(); if (p.length > 1) wx.navigateBack(); else wx.reLaunch({ url: '/pages/webview/webview' }); }
 });
