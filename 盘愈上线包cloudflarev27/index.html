@@ -5669,7 +5669,21 @@ window.fpSync=function(el){try{var c=el.children[0];if(!c)return;var step=c.offs
 <style>
 /* ===== 关系合盘 v3（P0 内容 · 盘愈风）===== */
 #synastry .sy-who{background:var(--bg-raise);border:1px solid var(--line);border-radius:16px;padding:14px 14px 12px;margin-top:12px}
-#synastry .sy-who h4{display:flex;align-items:center;gap:7px;font-size:14px;color:var(--ink);margin:0 0 10px;font-weight:600}
+#synastry .sy-who h4{display:flex;align-items:center;justify-content:space-between;gap:7px;font-size:14px;color:var(--ink);margin:0 0 12px;padding-bottom:11px;border-bottom:1px solid var(--line-soft);font-weight:600}
+#synastry .sy-inm{display:flex;align-items:center;gap:7px}
+#synastry .sy-arch-btn{flex:none;font-family:inherit;font-size:11.5px;font-weight:600;color:var(--gold-deep);background:rgba(201,162,78,.09);border:1px solid rgba(201,162,78,.34);border-radius:14px;padding:5px 12px;cursor:pointer;letter-spacing:.02em;line-height:1;white-space:nowrap}
+#synastry .sy-arch-btn:active{background:rgba(201,162,78,.2)}
+/* 档案选择底部弹层（全局，挂在 body 上） */
+.sas-ov{position:fixed;inset:0;z-index:200;background:rgba(30,26,20,.44);display:flex;align-items:flex-end;justify-content:center;animation:sasFade .18s ease}
+@keyframes sasFade{from{opacity:0}to{opacity:1}}
+.sas-sheet{width:100%;max-width:440px;background:var(--bg-raise,#fbf8f1);border-radius:20px 20px 0 0;padding:0 0 calc(6px + env(safe-area-inset-bottom));max-height:72vh;overflow:auto;box-shadow:0 -14px 40px rgba(30,26,20,.28);animation:sasUp .24s cubic-bezier(.2,.8,.2,1)}
+@keyframes sasUp{from{transform:translateY(28px)}to{transform:translateY(0)}}
+.sas-hd{font-family:var(--serif,serif);font-size:15px;color:var(--ink);text-align:center;padding:16px 16px 10px;font-weight:700}
+.sas-item{padding:13px 20px;border-top:1px solid var(--line-soft);cursor:pointer;display:flex;flex-direction:column;gap:3px}
+.sas-item:active{background:rgba(201,162,78,.08)}
+.sas-nm{font-size:14.5px;color:var(--ink);font-weight:600}
+.sas-sub{font-size:12px;color:var(--ink-faint)}
+.sas-cancel{text-align:center;padding:15px;font-size:14px;color:var(--ink-soft);border-top:6px solid var(--line-soft);cursor:pointer}
 #synastry .sy-dot{width:9px;height:9px;border-radius:50%}
 #synastry .sy-dot.her{background:var(--cinnabar,#B23A2C)}
 #synastry .sy-dot.ta{background:#5a6b8c}
@@ -5745,11 +5759,11 @@ window.fpSync=function(el){try{var c=el.children[0];if(!c)return;var step=c.offs
   var cityOpts=function(sel){return provs.map(function(pv){return '<option'+(pv===sel?' selected':'')+'>'+pv+'</option>';}).join('');};
   box.innerHTML=pHero('bā zì hé pán','关系合盘','走心合拍 · 相位实算 · 八字五行喜忌')
    +'<div id="synInputs">'
-   +'<div class="sy-who"><h4><span class="sy-dot her"></span>你</h4>'
+   +'<div class="sy-who"><h4><span class="sy-inm"><span class="sy-dot her"></span>你</span><button type="button" class="sy-arch-btn" onclick="synPickArch(\'h\')">📁 从档案选择</button></h4>'
      +'<div class="sy-lab">出生日期</div><input class="sy-in" type="date" id="h_date" value="'+hd+'">'
      +'<div class="sy-row2" style="margin-top:8px"><div style="flex:1"><div class="sy-lab">时间</div><input class="sy-in" type="time" id="h_time" value="'+ht+'"></div><div style="flex:1"><div class="sy-lab">城市</div><select class="sy-in" id="h_city">'+cityOpts(hProv)+'</select></div></div>'
      +'<label class="sy-chk"><input type="checkbox" id="h_unk"'+((p&&p.bh>0)?'':' checked')+'> 不知道时辰</label></div>'
-   +'<div class="sy-who"><h4><span class="sy-dot ta"></span>TA</h4>'
+   +'<div class="sy-who"><h4><span class="sy-inm"><span class="sy-dot ta"></span>TA</span><button type="button" class="sy-arch-btn" onclick="synPickArch(\'t\')">📁 从档案选择</button></h4>'
      +'<div class="sy-lab">出生日期</div><input class="sy-in" type="date" id="t_date" value="'+_td+'">'
      +'<div class="sy-row2" style="margin-top:8px"><div style="flex:1"><div class="sy-lab">时间</div><input class="sy-in" type="time" id="t_time" value="'+_tt+'"></div><div style="flex:1"><div class="sy-lab">城市</div><select class="sy-in" id="t_city">'+cityOpts(_tProv)+'</select></div></div>'
      +'<label class="sy-chk"><input type="checkbox" id="t_unk"'+_tUnk+'> 不知道时辰（降级为性格契合）</label></div>'
@@ -5764,6 +5778,29 @@ window.fpSync=function(el){try{var c=el.children[0];if(!c)return;var step=c.offs
   var seg=document.getElementById('synSeg');if(seg)seg.addEventListener('click',function(e){var b=e.target.closest('b');if(!b)return;seg.querySelectorAll('b').forEach(function(x){x.classList.remove('on');});b.classList.add('on');state._synScene=b.dataset.v;});
   state._synScene=state._synScene||'暧昧';
   if(state._synLast)renderSynastryResult(state._synLast.s,state._synLast.info);
+ };
+
+ function synArchSub(p){var hasT=p.bh>0&&typeof SHICHEN_HOUR!=='undefined'&&SHICHEN_HOUR[p.bh]!=null;var t=hasT?(' '+pad(SHICHEN_HOUR[p.bh])+':00'):' 时辰未知';return (p.sy?(p.sy+'-'+pad(p.sm)+'-'+pad(p.sd)):'未填写')+t+(p.prov?(' · '+p.prov):'');}
+ window.synPickArch=function(side){
+  var list=[];var p=state.profile;
+  if(p&&p.sy)list.push({nm:((p.nick||p.name)||'我的档案')+' · 我',src:p});
+  (state.archives||[]).forEach(function(a){if(a&&a.sy)list.push({nm:(a.name||a.nick||'未命名'),src:a});});
+  if(!list.length){if(typeof toast==='function')toast('还没有可用档案，先到「档案管理」添加');return;}
+  var items=list.map(function(it,i){return '<div class="sas-item" data-i="'+i+'"><div class="sas-nm">'+esc(it.nm)+'</div><div class="sas-sub">'+esc(synArchSub(it.src))+'</div></div>';}).join('');
+  var ov=document.createElement('div');ov.className='sas-ov';ov.id='synArchSheet';
+  ov.innerHTML='<div class="sas-sheet"><div class="sas-hd">选择档案 · 填入'+(side==='h'?'「你」':'「TA」')+'</div>'+items+'<div class="sas-cancel">取消</div></div>';
+  document.body.appendChild(ov);
+  var close=function(){try{document.body.removeChild(ov);}catch(_){}};
+  ov.addEventListener('click',function(e){if(e.target===ov||e.target.classList.contains('sas-cancel')){close();return;}var it=e.target.closest('.sas-item');if(!it)return;synApplyArch(side,list[+it.getAttribute('data-i')].src);close();});
+ };
+ window.synApplyArch=function(side,p){
+  if(!p||!p.sy)return;
+  var d=document.getElementById(side+'_date');if(d)d.value=p.sy+'-'+pad(p.sm)+'-'+pad(p.sd);
+  var hasT=p.bh>0&&typeof SHICHEN_HOUR!=='undefined'&&SHICHEN_HOUR[p.bh]!=null;
+  var tm=document.getElementById(side+'_time');if(tm&&hasT)tm.value=pad(SHICHEN_HOUR[p.bh])+':00';
+  var unk=document.getElementById(side+'_unk');if(unk)unk.checked=!hasT;
+  var city=document.getElementById(side+'_city');if(city&&p.prov){for(var i=0;i<city.options.length;i++){if(city.options[i].value===p.prov||city.options[i].text===p.prov){city.selectedIndex=i;break;}}}
+  if(typeof toast==='function')toast('已填入 '+((p.nick||p.name)||'该档案')+' 的出生信息');
  };
 
  function readSyn(pfx){var dv=(document.getElementById(pfx+'_date').value||'').split('-').map(Number);var tv=(document.getElementById(pfx+'_time').value||'12:00').split(':').map(Number);var unk=document.getElementById(pfx+'_unk').checked;var prov=document.getElementById(pfx+'_city').value;return {y:dv[0],mo:dv[1],d:dv[2],hh:tv[0],mm:tv[1]||0,unk:unk,prov:prov};}
@@ -6112,8 +6149,10 @@ function studioIntroClose(){var ov=document.getElementById('diyIntro');if(window
 #archedit .af-row{display:flex;align-items:center;gap:12px;padding:15px 0;border-bottom:1px solid var(--line-soft)}
 #archedit .af-row:last-child{border-bottom:none}
 #archedit .af-lb{flex:none;width:100px;font-size:14px;color:var(--ink)}
-#archedit .af-ctrl{flex:1;min-width:0;display:flex;justify-content:flex-end}
-#archedit .af-in{width:100%;min-width:0;box-sizing:border-box;text-align:right;border:none;background:transparent;font-size:14px;color:var(--ink);outline:none;-webkit-appearance:none;appearance:none}
+#archedit .af-ctrl{flex:1;min-width:0;display:flex;justify-content:flex-end;cursor:text}
+#archedit .af-in{width:100%;min-width:0;box-sizing:border-box;text-align:right;border:none;background:transparent;font-size:14px;color:var(--ink);outline:none;-webkit-appearance:none;appearance:none;pointer-events:auto}
+/* 让文本输入框的可点区域填满整行，避免上下留白处点击无反应 */
+#archedit input.af-in{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default;cursor:text;padding:15px 0;margin:-15px 0;min-height:24px;position:relative;z-index:2}
 #archedit .af-in::placeholder{color:var(--ink-faint)}
 #archedit select.af-in{text-align-last:right;direction:rtl}
 #archedit .af-lunar{display:flex;gap:6px;justify-content:flex-end;flex-wrap:nowrap}
@@ -6209,6 +6248,8 @@ window.renderArchEdit=function(){
    +'<div class="arch-note">* 依据出生时间与地点排盘；时辰不确定可选「不确定 / 未知」，仅本机保存。</div>';
   var _sx=document.getElementById('afSex');if(_sx)_sx.addEventListener('click',function(e){var b=e.target.closest('b');if(!b)return;_sx.querySelectorAll('b').forEach(function(x){x.classList.remove('on');});b.classList.add('on');});
   var _cl=document.getElementById('afCal');if(_cl)_cl.addEventListener('click',function(e){var b=e.target.closest('b');if(!b)return;_cl.querySelectorAll('b').forEach(function(x){x.classList.remove('on');});b.classList.add('on');var w=document.getElementById('afDateWrap');if(w)w.innerHTML=archDateCtrl(b.getAttribute('data-v'),null);});
+  // 名称/市区两个文本框太矮，点行内留白无反应——整行任意处点击都聚焦到输入框
+  ['afName','afRegion'].forEach(function(id){var inp=document.getElementById(id);if(!inp)return;var row=inp.closest('.af-row');if(!row)return;row.style.cursor='text';row.addEventListener('click',function(e){if(e.target===inp)return;try{inp.focus();var v=inp.value;inp.value='';inp.value=v;}catch(_){}});});
 };
 window.archSave=function(){
   var g=function(id){return document.getElementById(id);};
