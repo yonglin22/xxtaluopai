@@ -2577,6 +2577,25 @@ function fateHookCard(source){
     <div style="flex:1"><div style="font-size:14px;color:#f4ecd8;line-height:1.55">${cop[source]||cop.natal}</div><div style="font-size:11.5px;color:#b8ad91;margin-top:3px">命理选品 · 为你而选的意义，戴在手上</div></div>
     <div style="color:#E7C892;font-size:18px">›</div></div>`;
 }
+function baziDeepHTML(wx,tz,persona){
+  var E=FATE_ELCN,dm=wx.dayMaster;
+  var TR={jin:'重义讲原则、决断力强，认准的事很难被劝动；留意太硬、不肯示弱。',mu:'向上有生长欲、心软讲情面，愿意成全人；留意想太多、易心累。',shui:'灵活善感、思路多、藏得深，适应力强；留意情绪内耗、犹豫不决。',huo:'热烈直接、表达力强、行动快；留意来得快去得也快、耐性不足。',tu:'厚重踏实、能扛事、守承诺；留意什么都往自己身上揽、不懂拒绝。'};
+  var CAR={jin:'金融、法律、机械五金、审计——需要决断与标准的岗位',mu:'教育、文创、医疗、公益——能陪伴人成长的行业',shui:'贸易流通、传媒、咨询、物流——灵活变动、靠脑子的行业',huo:'营销、文娱、餐饮、培训——靠热情与表达的行业',tu:'地产建筑、农业、仓储、后勤——稳健积累型行业'};
+  var COL={jin:'白 / 银 / 金',mu:'青 / 绿',shui:'黑 / 蓝 / 灰',huo:'红 / 橙 / 紫',tu:'黄 / 棕 / 咖'};
+  var DIR={jin:'西方',mu:'东方',shui:'北方',huo:'南方',tu:'中部 / 本地'};
+  var LOVE={jin:'关系里讲道理也讲义气，认定就长久；对方需要你多给一点软和温度。',mu:'温柔体贴、愿意付出，容易为对方委屈自己；学会先照顾好自己的需要。',shui:'心思细、懂共情，但把情绪藏太深；把话说出口，比一个人反复揣测更好。',huo:'热情主动、表达直接、来得快；耐心与稳定是你要补的功课。',tu:'踏实可靠、给人安全感；但别把爱都变成默默扛事，也要让对方懂你的累。'};
+  var favEls=(wx.favorable||[]),f0=favEls[0]||dm,favCN=favEls.map(function(e){return E[e];}).join('')||'—';
+  var strong=(wx.shen==='强');
+  var wealth=strong?'你身旺担得起财，靠专业、决断与主动出击聚财；但财来财去要有度，别在冲动里散掉。':'你身偏弱，宜先稳根基、借力借势，稳中求进；不宜一次压太重，积小胜为大胜。';
+  function panel(t,b){return '<div class="panel" style="margin-top:12px"><div style="font-size:12.5px;color:var(--gold-deep);margin-bottom:6px">'+t+'</div><div class="pv-d" style="line-height:1.85;color:var(--ink-soft)">'+b+'</div></div>';}
+  return '<div style="font-size:11px;color:var(--gold-deep);letter-spacing:.12em;margin:18px 2px 6px">八 字 深 度 解 读 · 已解锁</div>'
+   +panel('性格底色',(persona?persona+'<br>':'')+(TR[dm]||''))
+   +panel('事业方向','你八字喜用 <b>'+favCN+'</b>；顺着喜用走，'+(CAR[f0]||'适合能发挥所长的方向')+'更容易顺。与其硬补短板，不如把喜用这条线做深。')
+   +panel('财富节奏',wealth)
+   +panel('婚恋相处',(LOVE[dm]||''))
+   +panel('健康养生','中医体质偏「'+tz.key+'」。'+(tz.xf?('宜以「'+tz.xf+'」香方气味调心；'):'')+'作息与饮食顺体质来，比一时进补更长久。')
+   +panel('开运小建议','幸运色 <b>'+(COL[f0]||'—')+'</b> · 有利方位 <b>'+(DIR[f0]||'—')+'</b> · 随身可戴补「'+favCN+'」的珠串。命理为自我觉察参考，路终究在自己脚下。');
+}
 function fateHookTop(source){
   if(!state.phone)return '';
   var cop={natal:'读懂你的人格图谱，也为你排了一串——补你命里最缺的那口气',bazi:'按你的八字喜用五行，为你排一串补气的珠',synastry:'按你俩的盘，给你们各排了一串·共嵌一颗关系锚珠'};
@@ -5126,9 +5145,9 @@ async function interpret(dm,text,cards){
     await sleep(1400);
     return demoReading(dm,text,cards);
   }
-  if(!res.ok)throw new Error("API "+res.status);
-  const data=await res.json();
-  if(data&&data.error)throw new Error(data.error);
+  if(!res.ok){await sleep(600);return demoReading(dm,text,cards);}
+  let data=null;try{data=await res.json();}catch(e){}
+  if(!data||data.error||!data.perspective){await sleep(600);return demoReading(dm,text,cards);}
   return data;
 }
 
@@ -5535,8 +5554,9 @@ window.fpSync=function(el){try{var c=el.children[0];if(!c)return;var step=c.offs
    +(persona?'<div class="panel" style="margin-top:12px;background:rgba(201,162,78,.06)"><div style="font-size:12px;color:var(--gold-deep);margin-bottom:6px">一句话性格底色</div><div class="pv-d" style="line-height:1.85;color:var(--ink-soft)">'+persona+'</div></div>':'')
    +'<div class="panel" style="margin-top:12px"><div style="font-size:12.5px;color:var(--gold-deep);margin-bottom:6px">中医体质倾向 · '+tz.key+'</div><div class="pv-d" style="line-height:1.8">对应香承香方「'+tz.xf+'」——传统香方灵感下的古法气味体验，帮你在忙碌里静下来，<b>不是用来治疗或调理身体</b>。<br>宜养：'+care+'</div></div>';
   var _disc='<div class="disclaimer">命理分析仅供文化研究与自我觉察参考，不构成确定性预测；中医体质为生活状态倾向、非体检结论，不替代医学诊断；香方为传统气味养生体验、非医疗用途；人生在于自身的努力与选择。</div>';
-  if(state.baziUnlocked){box.innerHTML=_head+_deep+_disc;var cv=document.getElementById('bzWheel');if(cv)baziWheel(cv,wx);}
-  else{box.innerHTML=_head+'<div class="bz-lock"><div class="bz-lock-prev">'+_deep+'</div><div class="bz-lock-mask"><div class="bz-lock-t">🔒 解锁完整解读</div><div class="bz-lock-d">五行大环 · 日主强弱 · 喜用忌神 · 性格底色 · 中医体质与香方</div><button class="btn block bz-lock-btn" onclick="baziUnlock()">🔓 解锁八字命盘 · 80 心元</button></div></div>'+_disc;}
+  var _deepRead=state.baziUnlocked?baziDeepHTML(wx,tz,persona):('<button class="btn block" style="margin-top:18px;background:linear-gradient(135deg,#F0D79B,#D9A84E)!important;color:#2a1f10!important;border:none!important;box-shadow:0 12px 26px rgba(201,162,78,.3)!important" onclick="baziUnlock()">🔮 八字深度解读 · 80 心元</button><div style="font-size:11px;color:var(--ink-faint);text-align:center;margin-top:8px">四柱 / 五行 / 喜用 / 体质 免费看；深度解读（性格·事业·财运·婚恋·养生·开运）解锁</div>');
+  box.innerHTML=_head+_deep+_deepRead+_disc;
+  var cv=document.getElementById('bzWheel');if(cv)baziWheel(cv,wx);
  };
 })();
 </script>
