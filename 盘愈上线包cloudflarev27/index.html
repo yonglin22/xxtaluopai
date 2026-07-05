@@ -1214,6 +1214,7 @@
       <div class="pv-d">更深的牌阵与 1 对 1 解读，加微信解锁。</div>
       <div class="pv-wx" onclick="copyText('Syl18268346784','客服微信已复制')">微信：Syl18268346784（点此复制）</div>
     </div>
+    <div class="exrow" onclick="go('bizconsole')" style="margin-top:4px"><div class="ex-ic"><svg viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="6" rx="1.2"/><rect x="3.5" y="14" width="7.5" height="6" rx="1.2"/><rect x="13" y="14" width="7.5" height="6" rx="1.2"/></svg></div><div class="ex-main"><div class="ex-t">运营后台 · 分销</div><div class="ex-d">平台 / 代理商 / 门店 · 四层分销与分佣（演示）</div></div><div class="ex-chev">›</div></div>
     <div id="adminWrap" style="text-align:center;margin-top:22px;display:none"><button class="btn" style="background:transparent;color:var(--ink-faint);border:1px solid var(--line);font-size:13px;padding:12px 26px" onclick="go('admin')">🛠 管理后台</button></div>
     <div style="text-align:center;margin-top:14px"><button class="btn" style="background:transparent;color:var(--ink-faint);border:1px solid var(--line);font-size:13px;padding:12px 30px;border-radius:24px" onclick="logout()">退出登录</button></div>
   </section>
@@ -2855,6 +2856,7 @@ function go(id){
   $("#orb").classList.remove("pulse");
   if(id==="home")renderHome();
   if(id==="archive"&&typeof renderArchive==='function')renderArchive();
+  if(id==="bizconsole"&&typeof renderBizConsole==='function')renderBizConsole();
   if(id==="archedit"&&typeof renderArchEdit==='function')renderArchEdit();
   if(id==="ask")renderAsk();
   if(id==="mine")renderMine();
@@ -6207,6 +6209,116 @@ window.archSave=function(){
     else{var idx=state.archives.findIndex(function(a){return a.id===t;});obj.id=t;if(idx>=0)state.archives[idx]=obj;else state.archives.push(obj);}
     archPersist();if(typeof toast==='function')toast('档案已保存');go('archive');
   }
+};
+</script>
+<style>
+/* ===== 运营/分销后台（H5 前端演示：平台-代理商-门店-用户 四层 + 三角色）===== */
+#bizconsole{background:var(--bg)}
+#bizBody{padding:0 16px 46px}
+#bizconsole .bz-roles{display:flex;gap:8px;margin:12px 0 4px}
+#bizconsole .bz-role{flex:1;text-align:center;padding:10px 0;border-radius:13px;border:1px solid var(--line);background:var(--bg-raise);font-size:13px;color:var(--ink-soft);cursor:pointer}
+#bizconsole .bz-role.on{border-color:var(--amber);color:#2a1f10;background:linear-gradient(135deg,#F0D79B,#D9A84E);font-weight:600}
+#bizconsole .bz-crumb{font-size:12px;color:var(--ink-faint);margin:14px 2px 8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+#bizconsole .bz-crumb a{color:var(--gold-deep);cursor:pointer}
+#bizconsole .bz-kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:4px 0 6px}
+#bizconsole .bz-kpi{background:var(--bg-raise);border:1px solid var(--line);border-radius:15px;padding:14px 15px;box-shadow:0 8px 22px rgba(70,62,48,.05)}
+#bizconsole .bz-kpi .k{font-size:11.5px;color:var(--ink-faint)}
+#bizconsole .bz-kpi .v{font-family:var(--serif);font-size:24px;color:var(--ink);font-weight:700;margin-top:4px;letter-spacing:.02em}
+#bizconsole .bz-kpi .v small{font-size:12px;color:var(--ink-faint);font-weight:400;margin-left:3px}
+#bizconsole .bz-kpi.gold .v{color:var(--gold-deep)}
+#bizconsole .bz-sec{font-size:12px;color:var(--ink-faint);letter-spacing:.12em;margin:18px 2px 10px}
+#bizconsole .bz-row{display:flex;align-items:center;gap:12px;background:var(--bg-raise);border:1px solid var(--line);border-radius:15px;padding:14px 15px;margin-bottom:9px;cursor:pointer}
+#bizconsole .bz-row:active{transform:scale(.99)}
+#bizconsole .bz-av{flex:none;width:40px;height:40px;border-radius:11px;background:linear-gradient(160deg,#f4ecd9,#e7dcc2);display:flex;align-items:center;justify-content:center;font-size:18px}
+#bizconsole .bz-main{flex:1;min-width:0}
+#bizconsole .bz-nm{font-size:15px;color:var(--ink);font-weight:600}
+#bizconsole .bz-sub{font-size:11.5px;color:var(--ink-faint);margin-top:3px}
+#bizconsole .bz-right{flex:none;text-align:right}
+#bizconsole .bz-amt{font-family:var(--serif);font-size:16px;color:var(--gold-deep);font-weight:700}
+#bizconsole .bz-amt-l{font-size:10.5px;color:var(--ink-faint);margin-top:2px}
+#bizconsole .bz-chev{flex:none;color:var(--ink-faint);font-size:18px}
+#bizconsole .bz-rule{background:linear-gradient(160deg,#fbf5e9,#f4ebd9);border:1px solid rgba(201,162,78,.26);border-radius:14px;padding:13px 15px;margin-top:6px;font-size:12px;color:#5a4a2a;line-height:1.75}
+#bizconsole .bz-rule b{color:var(--gold-deep)}
+#bizconsole .bz-note{font-size:11px;color:var(--ink-faint);text-align:center;margin-top:18px;line-height:1.6}
+#bizconsole .bz-badge{display:inline-block;font-size:10px;color:var(--gold-deep);background:rgba(201,162,78,.14);border-radius:6px;padding:1px 7px;margin-left:6px;vertical-align:middle}
+</style>
+<script>
+(function(){
+  var host=document.getElementById('home')&&document.getElementById('home').parentNode;
+  if(host&&!document.getElementById('bizconsole')){var a=document.createElement('section');a.className='screen';a.id='bizconsole';a.innerHTML='<div id="bizBody"></div>';host.appendChild(a);}
+})();
+var BIZ_RULE={agent:0.15,store:0.10};
+function bizData(){
+  if(state._biz)return state._biz;
+  var anames=['星野文化(华东代理)','南山运营(华南代理)','长风数科(华北代理)'];
+  var snames=['西湖旗舰店','钱塘体验店','苍南加盟店','珠江新城店','天河直营店','望京心屋','中关村店','和平里店'];
+  var nicks=['林仔','阿柚','小满','子期','半夏','南乔','时衍','阿柯','拾光','темп'];
+  var agents=[],si=0,uid=0;
+  for(var a=0;a<3;a++){
+    var stores=[],nStore=2+(a%2);
+    for(var st=0;st<nStore;st++){
+      var users=[],nU=6+((a*3+st*5)%12);
+      for(var u=0;u<nU;u++){var spent=80+((uid*137+st*53+a*29)%920);users.push({id:'u'+(uid++),nick:'用户'+(6000+uid),spent:spent,days:(uid*7%90)+1});}
+      var gmv=users.reduce(function(x,y){return x+y.spent;},0);
+      stores.push({id:'s'+(si++),name:snames[(a*3+st)%snames.length],phone:'138****'+((1000+si*7)%9000),users:users,gmv:gmv,commission:Math.round(gmv*BIZ_RULE.store)});
+    }
+    var agmv=stores.reduce(function(x,y){return x+y.gmv;},0);
+    agents.push({id:'a'+a,name:anames[a],phone:'139****'+((2000+a*111)%9000),stores:stores,gmv:agmv,commission:Math.round(agmv*BIZ_RULE.agent)});
+  }
+  state._biz={agents:agents};return state._biz;
+}
+function bizMoney(n){return '¥'+(n||0).toLocaleString('en-US');}
+function bizKpi(k,v,unit,gold){return '<div class="bz-kpi'+(gold?' gold':'')+'"><div class="k">'+k+'</div><div class="v">'+v+(unit?'<small>'+unit+'</small>':'')+'</div></div>';}
+function bizSetRole(r){state._bizRole=r;state._bizAgent=null;state._bizStore=null;renderBizConsole();}
+function bizOpenAgent(id){state._bizAgent=id;state._bizStore=null;renderBizConsole();}
+function bizOpenStore(id){state._bizStore=id;renderBizConsole();}
+function bizCrumbHome(){state._bizAgent=null;state._bizStore=null;renderBizConsole();}
+function bizCrumbAgent(){state._bizStore=null;renderBizConsole();}
+window.renderBizConsole=function(){
+  var box=document.getElementById('bizBody');if(!box)return;
+  var D=bizData();var role=state._bizRole||'platform';
+  var agents=D.agents;
+  // resolve scope by role + drill focus
+  var agent=null,store=null;
+  if(role==='agent'){agent=agents[0];} // 代理商视角默认第一个代理
+  if(role==='store'){agent=agents[0];store=agents[0].stores[0];}
+  if(state._bizAgent){var fa=agents.filter(function(x){return x.id===state._bizAgent;})[0];if(fa)agent=fa;}
+  if(state._bizStore&&agent){var fs=agent.stores.filter(function(x){return x.id===state._bizStore;})[0];if(fs)store=fs;}
+  var roles='<div class="bz-roles">'
+   +'<div class="bz-role'+(role==='platform'?' on':'')+'" onclick="bizSetRole(\'platform\')">平台</div>'
+   +'<div class="bz-role'+(role==='agent'?' on':'')+'" onclick="bizSetRole(\'agent\')">代理商</div>'
+   +'<div class="bz-role'+(role==='store'?' on':'')+'" onclick="bizSetRole(\'store\')">商家/门店</div></div>';
+  var html='<div class="topbar"><div class="back" onclick="go(\'mine\')">‹</div><div class="tt">运营后台 · 分销</div><div style="width:24px"></div></div>'+roles;
+  // ===== level: users (store focused) =====
+  if(store){
+    var uGmv=store.gmv, uComm=store.commission;
+    var crumb='<div class="bz-crumb">'+(role==='platform'?'<a onclick="bizCrumbHome()">全部代理商</a> › <a onclick="bizCrumbAgent()">'+esc(agent.name)+'</a> › ':(role==='agent'?'<a onclick="bizCrumbAgent()">我的门店</a> › ':''))+'<b style="color:var(--ink)">'+esc(store.name)+'</b></div>';
+    html+=crumb+'<div class="bz-kpis">'+bizKpi('门店 GMV',bizMoney(uGmv))+bizKpi('用户数',store.users.length,'人')+bizKpi('门店分佣',bizMoney(uComm),'',true)+bizKpi('客单价',bizMoney(Math.round(uGmv/store.users.length)))+'</div>';
+    html+='<div class="bz-sec">用户列表 · '+store.users.length+' 人</div>';
+    html+=store.users.map(function(u){return '<div class="bz-row" style="cursor:default"><div class="bz-av">🙂</div><div class="bz-main"><div class="bz-nm">'+esc(u.nick)+'</div><div class="bz-sub">加入 '+u.days+' 天 · 累计消费 '+bizMoney(u.spent)+'</div></div><div class="bz-right"><div class="bz-amt">'+bizMoney(Math.round(u.spent*BIZ_RULE.store))+'</div><div class="bz-amt-l">贡献分佣</div></div></div>';}).join('');
+  }
+  // ===== level: stores (agent focused) =====
+  else if(agent){
+    var crumb2='<div class="bz-crumb">'+(role==='platform'?'<a onclick="bizCrumbHome()">全部代理商</a> › ':'')+'<b style="color:var(--ink)">'+esc(agent.name)+(role==='agent'?'（我）':'')+'</b></div>';
+    var nUsers=agent.stores.reduce(function(x,y){return x+y.users.length;},0);
+    html+=crumb2+'<div class="bz-kpis">'+bizKpi('代理 GMV',bizMoney(agent.gmv))+bizKpi('门店数',agent.stores.length,'家')+bizKpi('用户数',nUsers,'人')+bizKpi('代理分佣',bizMoney(agent.commission),'',true)+'</div>';
+    html+='<div class="bz-rule">分佣规则 · 代理商 <b>'+(BIZ_RULE.agent*100)+'%</b> / 门店 <b>'+(BIZ_RULE.store*100)+'%</b>（下级 GMV 逐级上分，规则可后台配）</div>';
+    html+='<div class="bz-sec">门店 · '+agent.stores.length+' 家</div>';
+    html+=agent.stores.map(function(st){return '<div class="bz-row" onclick="bizOpenStore(\''+st.id+'\')"><div class="bz-av">🏪</div><div class="bz-main"><div class="bz-nm">'+esc(st.name)+'</div><div class="bz-sub">'+st.phone+' · '+st.users.length+' 用户 · GMV '+bizMoney(st.gmv)+'</div></div><div class="bz-right"><div class="bz-amt">'+bizMoney(st.commission)+'</div><div class="bz-amt-l">门店分佣</div></div><div class="bz-chev">›</div></div>';}).join('');
+  }
+  // ===== level: agents (platform top) =====
+  else {
+    var tGmv=agents.reduce(function(x,y){return x+y.gmv;},0);
+    var tStores=agents.reduce(function(x,y){return x+y.stores.length;},0);
+    var tUsers=agents.reduce(function(x,y){return x+y.stores.reduce(function(m,n){return m+n.users.length;},0);},0);
+    var tComm=agents.reduce(function(x,y){return x+y.commission+y.stores.reduce(function(m,n){return m+n.commission;},0);},0);
+    html+='<div class="bz-kpis">'+bizKpi('平台总 GMV',bizMoney(tGmv))+bizKpi('代理商',agents.length,'家')+bizKpi('门店',tStores,'家')+bizKpi('用户',tUsers,'人')+bizKpi('累计分佣',bizMoney(tComm),'',true)+bizKpi('分佣占比',(tGmv?Math.round(tComm/tGmv*100):0)+'%')+'</div>';
+    html+='<div class="bz-rule">四层结构 <b>平台 → 代理商 → 门店 → 用户</b>；分佣：代理商 <b>'+(BIZ_RULE.agent*100)+'%</b> · 门店 <b>'+(BIZ_RULE.store*100)+'%</b>。点代理商可逐级下钻到门店 / 用户。</div>';
+    html+='<div class="bz-sec">代理商 · '+agents.length+' 家</div>';
+    html+=agents.map(function(a){var nu=a.stores.reduce(function(x,y){return x+y.users.length;},0);return '<div class="bz-row" onclick="bizOpenAgent(\''+a.id+'\')"><div class="bz-av">🏢</div><div class="bz-main"><div class="bz-nm">'+esc(a.name)+'</div><div class="bz-sub">'+a.phone+' · '+a.stores.length+' 门店 · '+nu+' 用户</div></div><div class="bz-right"><div class="bz-amt">'+bizMoney(a.gmv)+'</div><div class="bz-amt-l">代理 GMV</div></div><div class="bz-chev">›</div></div>';}).join('');
+  }
+  html+='<div class="bz-note">演示数据（mock）· 结构确认后接入后端：多层数据 / 邀请绑定 / 分佣结算 / 多角色鉴权。</div>';
+  box.innerHTML=html;
 };
 </script>
 </body>
