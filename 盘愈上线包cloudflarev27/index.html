@@ -5471,9 +5471,15 @@ function paintBrandMarks(){document.querySelectorAll('.brand-mark').forEach(el=>
 #home .fate-poster-car{display:flex;gap:13px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:2px -4px 4px;padding:2px 4px 10px}
 #home .fate-poster-car::-webkit-scrollbar{display:none}
 #home .fp-slide{flex:0 0 79%;scroll-snap-align:center;cursor:pointer}
-#home .fp-card{position:relative;overflow:hidden;height:198px;box-sizing:border-box;border-radius:20px;padding:16px 20px 16px;display:flex;flex-direction:column;background:linear-gradient(158deg,#322819 0%,#1d160d 56%,#130d06 100%);border:1px solid rgba(201,162,78,.26);box-shadow:0 18px 40px rgba(22,18,12,.3)}
+#home .fp-card{position:relative;overflow:hidden;height:198px;box-sizing:border-box;border-radius:20px;padding:16px 20px 16px;display:flex;flex-direction:column;background:linear-gradient(158deg,#322819 0%,#1d160d 56%,#130d06 100%);border:1px solid rgba(201,162,78,.26);box-shadow:0 18px 40px rgba(22,18,12,.3);transform:scale(.945);opacity:.72;filter:saturate(.92);transition:transform .42s cubic-bezier(.2,.8,.2,1),opacity .42s,box-shadow .42s,filter .42s}
 #home .fp-card::before{content:'';position:absolute;inset:0;border-radius:20px;box-shadow:inset 0 1px 0 rgba(233,203,130,.15),inset 0 0 66px rgba(0,0,0,.3);pointer-events:none;z-index:1}
+/* 居中卡片高亮：放大、提亮、金边泛光 */
+#home .fp-slide.fp-cur .fp-card{transform:scale(1);opacity:1;filter:none;border-color:rgba(201,162,78,.5);box-shadow:0 22px 50px rgba(22,18,12,.42),0 0 26px rgba(201,162,78,.16)}
+/* 金色流光扫过 */
+#home .fp-slide.fp-cur .fp-card::after{content:'';position:absolute;top:0;left:-70%;width:48%;height:100%;background:linear-gradient(105deg,transparent,rgba(247,226,170,.18),transparent);transform:skewX(-18deg);z-index:2;pointer-events:none;animation:fpSheen 4.2s ease-in-out infinite}
+@keyframes fpSheen{0%{left:-70%}22%{left:135%}100%{left:135%}}
 #home .fp-card:active{transform:scale(.988)}
+@media (prefers-reduced-motion:reduce){#home .fp-slide.fp-cur .fp-card::after{animation:none;display:none}}
 #home .fp-glow{position:absolute;width:140px;height:140px;border-radius:50%;filter:blur(36px);top:-50px;right:-36px;opacity:.3;background:radial-gradient(circle,#caa24e,transparent 70%);pointer-events:none}
 #home .fp-glow-rose{background:radial-gradient(circle,#c98895,transparent 70%)}
 #home .fp-glow-gold{background:radial-gradient(circle,#caa24e,transparent 70%)}
@@ -5507,8 +5513,30 @@ function paintBrandMarks(){document.querySelectorAll('.brand-mark').forEach(el=>
 #home .hd-cta{position:relative;z-index:2;margin-top:14px;text-align:center;padding:12px 0;border-radius:13px;background:linear-gradient(135deg,#F0D79B,#D9A84E);color:#2a1f10;font-weight:700;font-size:14.5px;letter-spacing:.04em;box-shadow:0 10px 24px rgba(201,162,78,.3)}
 </style>
 <script>
-/* 命理海报轮播 · 圆点联动 */
-window.fpSync=function(el){try{var c=el.children[0];if(!c)return;var step=c.offsetWidth+12;var i=Math.round(el.scrollLeft/step);var n=document.querySelectorAll('#fpDots i');i=Math.max(0,Math.min(n.length-1,i));n.forEach(function(d,k){d.classList.toggle('on',k===i);});}catch(e){}};
+/* 命理海报轮播 · 圆点联动 + 居中卡片高亮 */
+window.fpSync=function(el){try{var c=el.children[0];if(!c)return;var step=c.offsetWidth+13;var i=Math.round(el.scrollLeft/step);var n=document.querySelectorAll('#fpDots i');i=Math.max(0,Math.min(n.length-1,i));n.forEach(function(d,k){d.classList.toggle('on',k===i);});var sl=el.children;for(var k=0;k<sl.length;k++){sl[k].classList.toggle('fp-cur',k===i);}}catch(e){}};
+/* 命理海报轮播 · 自动播放（首页可见时循环，触摸/滑动后暂停 7s） */
+(function(){
+  var car=document.getElementById('fatePosterCar');if(!car)return;
+  var pauseUntil=0;
+  function mark(){pauseUntil=Date.now()+7000;}
+  ['pointerdown','touchstart','wheel','mousedown','keydown'].forEach(function(ev){car.addEventListener(ev,mark,{passive:true});});
+  function step(){return (car.children[0]?car.children[0].offsetWidth:0)+13;}
+  function cur(){var s=step();return s?Math.round(car.scrollLeft/s):0;}
+  // 初始高亮第一张
+  try{window.fpSync(car);}catch(e){}
+  function tick(){
+    try{
+      var a=document.querySelector('.screen.active');
+      if(a&&a.id==='home'&&Date.now()>=pauseUntil&&document.visibilityState!=='hidden'){
+        var n=car.children.length;
+        if(n>1){var i=(cur()+1)%n;car.scrollTo({left:i*step(),behavior:'smooth'});}
+      }
+    }catch(e){}
+    setTimeout(tick,4200);
+  }
+  setTimeout(tick,4200);
+})();
 </script>
 <style>
 /* 首页顶部更紧凑（能量卡） */
