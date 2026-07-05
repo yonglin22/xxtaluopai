@@ -763,14 +763,17 @@ async function handle(request, env, mode) {
   const persona = reader ? reader.persona : null;
   if (mode === 'tarot') {
     const domain = String((pl && pl.domain) || '').trim(), situation = String((pl && pl.situation) || '').trim(), cardsText = String((pl && pl.cardsText) || '').trim();
-    if (!['姻缘', '事业', '财运'].includes(domain) || situation.length < 4 || !cardsText) return json(400, { error: '参数不完整' });
+    if (!['姻缘', '事业', '财运', '运势'].includes(domain) || situation.length < 4 || !cardsText) return json(400, { error: '参数不完整' });
     const astro = String((pl && pl.astro) || '').trim();
     const userMsg = `领域：${domain}\n我的处境：${situation}\n${astro ? ('我的本命星盘：' + astro + '\n') : ''}\n抽到的牌：${cardsText}\n\n请结合处境${astro ? '与我的本命星盘特质（并填好 starEcho，把牌面与我的星盘对照）' : ''}，按系统设定的 JSON 结构给出解读。`;
     const chunks = reader ? await kbRetrieve(env, reader.id, situation, 3) : [];
     const qa = reader ? await qaRetrieve(env, reader.id, situation, 2) : [];
     const cMean = reader ? cardMeaningText(await cardsGet(env, reader.id), pl.cards) : '';
     const sysFull = personaText(persona) + cMean + kbText(chunks) + qaText(qa) + SYSTEM_PROMPT;
-    try { return json(200, await callAI(env, KEY, sysFull, userMsg, 1500)); } catch (e) { return json(502, { error: '解读没接上，再试一次' }); }
+    let rep = null, rerr = '';
+    for (let i = 0; i < 2 && !rep; i++) { try { rep = await callAI(env, KEY, sysFull, userMsg, 1500); } catch (e) { rerr = (e && e.message) || ''; } }
+    if (!rep) return json(502, { error: '解读没接上：' + rerr });
+    return json(200, rep);
   } else if (mode === 'report') {
     const year = String((pl && pl.year) || '').trim(), sex = String((pl && pl.sex) || '未知').trim(), zodiac = String((pl && pl.zodiac) || '').trim(), cons = String((pl && pl.cons) || '').trim(), birth = String((pl && pl.birth) || '').trim(), cardsText = String((pl && pl.cardsText) || '').trim();
     if (!year || (!zodiac && !birth)) return json(400, { error: '参数不完整' });
