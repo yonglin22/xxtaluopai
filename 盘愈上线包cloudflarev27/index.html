@@ -6612,5 +6612,52 @@ window.diyOrderContact=function(code){if(code&&typeof copyText==='function')copy
   }catch(e){}},350);});
 })();
 </script>
+<style id="zav-style">
+/* 生肖头像：新水墨插画 + 玻璃白/毛玻璃底（覆盖旧 SVG 版）*/
+#home .hp-av{background:rgba(252,248,240,.5)!important;border:1px solid rgba(255,255,255,.72)!important;
+  -webkit-backdrop-filter:blur(11px) saturate(1.4);backdrop-filter:blur(11px) saturate(1.4);overflow:hidden;}
+#archive .arch-zod{background:rgba(252,248,240,.5)!important;border:1px solid rgba(201,162,80,.28)!important;
+  -webkit-backdrop-filter:blur(11px) saturate(1.4);backdrop-filter:blur(11px) saturate(1.4);overflow:hidden;
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.6),0 3px 10px rgba(80,60,20,.06)!important;}
+.zav-img{width:92%;height:92%;object-fit:contain;display:block;}
+/* 八字命盘：生肖头像悬浮在标题卡右上角 */
+#bazichart .ask-premium{position:relative;}
+.bazi-zod{position:absolute;top:16px;right:16px;width:54px;height:54px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;z-index:3;
+  background:rgba(252,248,240,.5);border:1px solid rgba(201,162,80,.3);
+  -webkit-backdrop-filter:blur(11px) saturate(1.4);backdrop-filter:blur(11px) saturate(1.4);
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.6),0 3px 10px rgba(80,60,20,.07);}
+</style>
+<script>
+/* 生肖头像最终版：改用新插画 PNG（zodiac/<生肖>.png）+ 玻璃白毛玻璃底 */
+(function(){
+  var ZBASE='zodiac/';
+  var ZPY={'鼠':'shu','牛':'niu','虎':'hu','兔':'tu','龙':'long','蛇':'she','马':'ma','羊':'yang','猴':'hou','鸡':'ji','狗':'gou','猪':'zhu'};
+  window.zodiacImgSrc=function(z){return (z&&ZPY[z])?(ZBASE+ZPY[z]+'.png'):'';};
+  function zodOf(p){return (p&&(p.zodiac||(p.sy&&typeof zodiacOf==='function'&&zodiacOf(p.sy))||(p.by&&typeof zodiacOf==='function'&&zodiacOf(p.by))))||'';}
+  window.setHomeZodiac=function(){
+    var av=document.getElementById('homeAv');if(!av)return;
+    var zc=zodOf(state.profile);
+    if(zc){av.innerHTML='<img class="zav-img" src="'+zodiacImgSrc(zc)+'" alt="属'+zc+'" title="属'+zc+'">';}
+    else{av.innerHTML='<span class="brand-mark" data-size="24"></span>';if(typeof paintBrandMarks==='function')paintBrandMarks();}
+  };
+  window.archZodSvg=function(z){return z?('<span class="arch-zod" title="属'+z+'"><img class="zav-img" src="'+zodiacImgSrc(z)+'" alt="属'+z+'"></span>'):'';};
+  var _rb=window.renderBazichart;
+  if(typeof _rb==='function'){
+    window.renderBazichart=function(){
+      _rb.apply(this,arguments);
+      try{
+        var box=document.getElementById('baziBody');if(!box)return;
+        var hero=box.querySelector('.ask-premium');if(!hero)return;
+        var old=hero.querySelector('.bazi-zod');if(old)old.parentNode.removeChild(old);
+        var zc=zodOf(state.profile);
+        if(zc){var d=document.createElement('div');d.className='bazi-zod';d.title='属'+zc;
+          d.innerHTML='<img class="zav-img" src="'+zodiacImgSrc(zc)+'" alt="属'+zc+'">';hero.appendChild(d);}
+      }catch(e){}
+    };
+  }
+  try{if(typeof setHomeZodiac==='function')setHomeZodiac();}catch(e){}
+})();
+</script>
 </body>
 </html>
