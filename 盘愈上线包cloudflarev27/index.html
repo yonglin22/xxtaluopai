@@ -187,7 +187,7 @@
   .card-back::before{content:"";position:absolute;inset:9px;border-radius:7px;border:1px solid rgba(201,163,106,.28);}
   .cb-mark{display:none;}
   .card-face{background:var(--face);transform:rotateY(180deg);border:1px solid var(--line);box-shadow:0 12px 30px rgba(30,26,22,.13);overflow:hidden;}
-  .cf-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
+  .cf-img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;background:#fff;}
   .card-face.rev .cf-img{transform:none;}
   .cf-fallback{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:var(--face);text-align:center;padding:8px;}
   .card-face.noimg .cf-fallback{display:flex;}
@@ -662,7 +662,7 @@
   .daily-draw .dd-glow{position:absolute;left:50%;top:42%;width:360px;height:360px;transform:translate(-50%,-50%);border-radius:50%;filter:blur(40px);background:radial-gradient(circle,rgba(226,168,88,.42),rgba(226,168,88,0) 70%);opacity:0;transition:opacity 1s ease .3s;pointer-events:none;}
   .daily-draw.show .dd-glow{opacity:1;}
   .daily-draw .dd-dl{font-family:"Courier New",monospace;font-size:10.5px;letter-spacing:.3em;color:var(--ink-faint);margin-bottom:20px;position:relative;z-index:2;}
-  .daily-draw .dd-card{width:180px;height:284px;perspective:1300px;position:relative;z-index:2;}
+  .daily-draw .dd-card{width:180px;height:304px;perspective:1300px;position:relative;z-index:2;}
   .daily-draw .dd-dealer{position:absolute;top:12%;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:9px;z-index:3;opacity:0;transition:opacity .5s;}
   .daily-draw.show .dd-dealer{opacity:1;}
   .daily-draw .dd-dav{width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 34% 30%,#3a3020,#181207);display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 6px 16px rgba(30,26,22,.28);}
@@ -679,7 +679,7 @@
   .daily-draw .dd-cb::after{display:none;}
   .daily-draw .dd-cf{transform:rotateY(180deg);background:#fff;border:1px solid #E5E1D8;box-shadow:0 28px 58px rgba(40,36,28,.32);}
   .daily-draw .dd-cf .card-face{position:absolute;inset:0;border-radius:16px;overflow:hidden;transform:none!important;-webkit-backface-visibility:visible;backface-visibility:visible;border:none;box-shadow:none;}
-  .daily-draw .dd-cf .cf-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .daily-draw .dd-cf .cf-img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff;}
   .daily-draw .dd-cf::after{content:"";position:absolute;inset:0;z-index:3;background:linear-gradient(120deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.5) 50%,rgba(255,255,255,0) 70%);transform:translateX(-120%);pointer-events:none;}
   .daily-draw.flipped .dd-cf::after{animation:shimmer 1.4s ease .3s;}
   .daily-draw .dd-res{text-align:center;margin-top:22px;opacity:0;transform:translateY(10px);transition:all .6s ease .25s;position:relative;z-index:2;}
