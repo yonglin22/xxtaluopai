@@ -1,0 +1,17 @@
+<scroll-view scroll-y class="page">
+  <view class="mh" style="text-align:center;padding:40rpx 0 20rpx">
+    <view class="hero-eyebrow">astrology · bazi</view>
+    <view class="hero-title serif">星 盘</view>
+    <view style="font-size:24rpx;color:var(--ink-faint);margin-top:12rpx">看你的星盘与八字，读懂天生的样子</view>
+  </view>
+
+  <view wx:for="{{items}}" wx:key="k" class="exrow" data-k="{{item.k}}" bindtap="tap">
+    <view class="ex-main">
+      <view class="ex-t">{{item.k}}</view>
+      <view class="ex-d">{{item.d}}</view>
+    </view>
+    <view class="ex-chev">›</view>
+  </view>
+
+  <view class="disclaimer">星盘 / 八字页面正在原生开发中，将陆续上线。</view>
+</scroll-view>

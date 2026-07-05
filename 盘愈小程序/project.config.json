@@ -1,0 +1,15 @@
+{
+  "appid": "wxc4cb1b6a1c959d58",
+  "compileType": "miniprogram",
+  "projectname": "盘愈PANYU",
+  "libVersion": "3.5.5",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "bigPackageSizeSupport": true
+  },
+  "condition": {}
+}

@@ -1,0 +1,18 @@
+<view class="page login">
+  <view class="lg-hero">
+    <view class="hero-eyebrow">pán yù · PANYU</view>
+    <view class="hero-title serif">盘愈</view>
+    <view class="lg-tip">自我探索 · 情绪疏导 · 稳住心神</view>
+  </view>
+
+  <view class="glass lg-box">
+    <view class="lg-label">手机号登录</view>
+    <input class="lg-in" type="number" placeholder="请输入手机号" maxlength="11" value="{{phone}}" bindinput="onPhone" />
+    <view class="btn btn-gold lg-btn" bindtap="doLogin">登 录</view>
+
+    <view class="lg-or">或</view>
+    <button class="btn btn-ghost lg-wx" open-type="getPhoneNumber" bindgetphonenumber="onGetPhone">微信一键登录</button>
+  </view>
+
+  <view class="disclaimer">登录即代表同意《用户协议》与《隐私政策》。<br/>出生信息仅用于排盘与自我觉察，不外传。</view>
+</view>

@@ -1,0 +1,54 @@
+<scroll-view scroll-y class="page mine">
+
+  <view class="mh">
+    <view class="hero-eyebrow">pán yù · self exploration</view>
+    <view class="hero-title serif" style="font-size:44rpx">盘愈 PANYU</view>
+    <view class="mh-tip">专注自我探索与情绪疏导的心理陪伴工具</view>
+  </view>
+
+  <!-- 心元卡 -->
+  <view class="panel wallet">
+    <view class="w-row">
+      <view>
+        <view class="w-label">我的心元</view>
+        <view class="w-bal serif">{{balance}}</view>
+      </view>
+      <view class="btn btn-gold w-btn" bindtap="goRecharge">充值</view>
+    </view>
+    <view class="w-name">{{nick}}</view>
+    <view wx:if="{{loggedIn}}" class="w-edit" bindtap="onEntry" data-k="archive">⚙ 出生档案 / 编辑 →</view>
+    <view wx:else class="w-edit" bindtap="goLogin">→ 去登录 / 绑定手机号</view>
+  </view>
+
+  <view class="section-h">定 制 · 订 单</view>
+  <view class="exrow" data-k="cart" bindtap="onEntry">
+    <view class="ex-main"><view class="ex-t">我的购物车<text wx:if="{{cartCount}}" class="cart-badge">{{cartCount}}</text></view><view class="ex-d">已加入的定制珠串，随时结算</view></view>
+    <view class="ex-chev">›</view>
+  </view>
+  <view class="exrow" data-k="orders" bindtap="onEntry">
+    <view class="ex-main"><view class="ex-t">我的订单</view><view class="ex-d">定制珠串的提交记录与定制码</view></view>
+    <view class="ex-chev">›</view>
+  </view>
+
+  <view class="section-h">探 索 · 自 我 与 关 系</view>
+  <view class="exrow" bindtap="goShop">
+    <view class="ex-main"><view class="ex-t">命理选品 · 为你排的珠串</view><view class="ex-d">按你的八字五行 + 此刻议题，为你而选</view></view>
+    <view class="ex-chev">›</view>
+  </view>
+  <view class="exrow" data-k="orb" bindtap="onEntry">
+    <view class="ex-main"><view class="ex-t">我的心光球</view><view class="ex-d">每天陪它说一句话，看它一点点长亮</view></view>
+    <view class="ex-chev">›</view>
+  </view>
+  <view class="exrow" data-k="invite" bindtap="onEntry">
+    <view class="ex-main"><view class="ex-t">邀请好友 · 得心元</view><view class="ex-d">拉一个好友，双方各得心元</view></view>
+    <view class="ex-chev">›</view>
+  </view>
+
+  <view class="panel wx-card">
+    <view class="wx-t serif">加我，聊得更深</view>
+    <view class="wx-d">更深的牌阵与 1 对 1 解读，加微信解锁。</view>
+    <view class="wx-id">微信：Syl18268346784</view>
+  </view>
+
+  <view wx:if="{{loggedIn}}" class="logout" bindtap="logout">退出登录</view>
+</scroll-view>

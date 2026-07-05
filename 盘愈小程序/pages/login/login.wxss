@@ -1,0 +1,11 @@
+.login { padding-top: 120rpx; }
+.lg-hero { text-align: center; margin-bottom: 50rpx; }
+.lg-hero .hero-title { font-size: 72rpx; letter-spacing: .2em; }
+.lg-tip { font-size: 24rpx; color: var(--ink-faint); margin-top: 16rpx; letter-spacing: .1em; }
+
+.lg-box { padding: 40rpx 34rpx; }
+.lg-label { font-size: 24rpx; color: var(--ink-faint); margin-bottom: 16rpx; }
+.lg-in { height: 96rpx; border: 1rpx solid var(--line); border-radius: 20rpx; background: #fff; padding: 0 26rpx; font-size: 32rpx; color: var(--ink); }
+.lg-btn { margin-top: 28rpx; }
+.lg-or { text-align: center; color: var(--ink-faint); font-size: 24rpx; margin: 28rpx 0; }
+.lg-wx { width: 100%; }

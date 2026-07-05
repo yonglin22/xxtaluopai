@@ -1,0 +1,54 @@
+.ask { padding-top: 20rpx; }
+.mh { text-align: center; padding: 30rpx 0 6rpx; }
+.ask-tip { font-size: 24rpx; color: var(--ink-faint); margin-top: 12rpx; }
+
+/* 领域选择 */
+.dom-row { display: flex; gap: 16rpx; }
+.dom { flex: 1; text-align: center; padding: 22rpx 0; border-radius: 22rpx; border: 1rpx solid var(--line); background: var(--bg-raise); }
+.dom.on { border-color: var(--amber); background: rgba(201,162,78,.08); }
+.dom-c { font-size: 30rpx; color: var(--ink-soft); font-weight: 600; }
+.dom.on .dom-c { color: var(--gold-deep); }
+.dom-en { font-size: 18rpx; color: var(--ink-faint); letter-spacing: .1em; margin-top: 4rpx; }
+
+.ask-box { margin-top: 20rpx; padding: 24rpx 26rpx; }
+.ask-ta { width: 100%; min-height: 200rpx; font-size: 28rpx; color: var(--ink); line-height: 1.7; }
+.ask-go { margin-top: 26rpx; }
+
+/* 加载 */
+.loading { text-align: center; padding: 160rpx 0; }
+.load-orb { font-size: 96rpx; color: var(--amber); animation: spin 1.4s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.load-tx { font-size: 36rpx; color: var(--ink); margin-top: 30rpx; }
+.load-sub { font-size: 24rpx; color: var(--ink-faint); margin-top: 12rpx; }
+
+/* 珠串置顶 */
+.fatetop { display: flex; align-items: center; gap: 22rpx; background: linear-gradient(135deg,#F3DFA3,#DCAE52); border: 1rpx solid rgba(201,162,78,.5); border-radius: 30rpx; padding: 26rpx 28rpx; margin-top: 14rpx; box-shadow: 0 24rpx 50rpx rgba(201,162,78,.28); }
+.ft-b { flex: none; width: 76rpx; height: 76rpx; border-radius: 20rpx; background: rgba(255,255,255,.4); display: flex; align-items: center; justify-content: center; font-size: 40rpx; }
+.ft-x { flex: 1; }
+.ft-t { font-size: 27rpx; color: #3a2c10; font-weight: 700; line-height: 1.4; }
+.ft-s { font-size: 21rpx; color: #6b551f; margin-top: 6rpx; }
+.ft-a { color: #6b551f; font-size: 40rpx; }
+
+/* 三张牌 */
+.cards { display: flex; gap: 16rpx; margin-top: 24rpx; }
+.card { flex: 1; text-align: center; padding: 30rpx 8rpx; border-radius: 22rpx; background: linear-gradient(180deg,#fdfaf4,#f4eddf); border: 1rpx solid rgba(180,158,112,.3); }
+.card-nm { font-size: 30rpx; color: var(--ink); font-weight: 700; }
+.card.rev .card-nm { color: #9a6a3a; }
+.card-pos { font-size: 20rpx; color: var(--ink-faint); margin-top: 8rpx; }
+
+/* 解读 */
+.rd-sec { margin-top: 34rpx; }
+.rd-label { font-size: 24rpx; color: var(--ink-faint); letter-spacing: .12em; margin-bottom: 14rpx; }
+.rd-persp { font-size: 30rpx; color: var(--ink); line-height: 1.95; }
+.rd-action { font-size: 30rpx; color: var(--ink); line-height: 1.9; padding: 26rpx 28rpx; }
+.rd-more { display: flex; align-items: center; justify-content: space-between; margin-top: 30rpx; padding: 26rpx 28rpx; border: 1rpx solid var(--line); border-radius: 24rpx; background: var(--bg-raise); font-size: 27rpx; color: var(--ink); }
+.rd-more .chev { color: var(--ink-faint); transition: transform .3s; }
+.rd-more .chev.open { transform: rotate(180deg); }
+.ins { display: flex; gap: 16rpx; margin-top: 18rpx; }
+.ins-n { flex: none; width: 40rpx; height: 40rpx; border-radius: 50%; background: rgba(201,162,78,.14); color: var(--gold-deep); font-size: 24rpx; display: flex; align-items: center; justify-content: center; }
+.ins-t { flex: 1; font-size: 27rpx; color: var(--ink-soft); line-height: 1.8; }
+
+.wx-line { text-align: center; font-size: 25rpx; color: var(--ink-faint); margin-top: 40rpx; }
+.rd-fab-spacer { height: 160rpx; }
+.rd-fab { position: fixed; left: 30rpx; right: 30rpx; bottom: 30rpx; display: flex; gap: 20rpx; z-index: 60; }
+.fab-b { flex: 1; height: 96rpx; }

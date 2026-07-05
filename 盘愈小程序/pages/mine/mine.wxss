@@ -1,0 +1,20 @@
+.mine { padding-top: 20rpx; }
+.mh { text-align: center; padding: 30rpx 0 6rpx; }
+
+.wallet { margin-top: 18rpx; }
+.w-row { display: flex; align-items: center; justify-content: space-between; }
+.w-label { font-size: 24rpx; color: var(--ink-faint); }
+.w-bal { font-size: 64rpx; color: var(--ink); font-weight: 700; margin-top: 4rpx; }
+.w-btn { width: 150rpx; height: 72rpx; font-size: 28rpx; }
+.w-name { font-size: 28rpx; color: var(--ink); margin-top: 14rpx; }
+.w-edit { margin-top: 20rpx; padding-top: 20rpx; border-top: 1rpx solid var(--line-soft); font-size: 26rpx; color: var(--amber); }
+
+.cart-badge { display: inline-block; margin-left: 12rpx; min-width: 32rpx; height: 32rpx; line-height: 32rpx; padding: 0 10rpx; border-radius: 16rpx; background: var(--amber); color: #fff; font-size: 20rpx; text-align: center; vertical-align: middle; }
+
+.ex-main { flex: 1; }
+.wx-card { margin-top: 30rpx; text-align: center; }
+.wx-t { font-size: 32rpx; color: var(--ink); }
+.wx-d { font-size: 24rpx; color: var(--ink-faint); margin-top: 8rpx; }
+.wx-id { font-size: 26rpx; color: var(--gold-deep); margin-top: 12rpx; }
+
+.logout { text-align: center; margin-top: 30rpx; padding: 26rpx; color: var(--ink-faint); font-size: 26rpx; border: 1rpx solid var(--line); border-radius: 40rpx; }
