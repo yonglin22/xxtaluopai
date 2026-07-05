@@ -1014,7 +1014,7 @@
       <div class="home-greet"><div class="hg-hi serif" id="homeGreet">你好</div><div class="hg-date" id="homeDate"></div></div>
       <div class="home-tr">
         <button class="hp-bal" id="signinBtn" onclick="go('mine')"><span class="brand-mark" data-size="15" style="margin-right:5px"></span><span id="homeTopBal">300</span></button>
-        <div class="hp-av" id="homeAv" onclick="go('mine')"><span class="brand-mark" data-size="24"></span></div>
+        <div class="hp-av" id="homeAv" onclick="go('archive')"><span class="brand-mark" data-size="24"></span></div>
       </div>
     </div>
     <div class="prof-line" id="profLine"></div>
@@ -2738,9 +2738,10 @@ function studioBindCanvas(cv){
 }
 /* ---- 目录点选：调珠大小弹窗 → 加进盘 ---- */
 function studioAdd(id){const b=STUDIO_BEADS[id];if(!b)return;studioSizeModal(id,b.mm,mm=>{const S=studioState();studioAudioArm();
-  if(S.gathered){S.beads.push({id,mm,x:0,y:0});studioGather(true);}
-  else{S.beads.push({id,mm,x:(Math.random()*0.34-0.17),y:0.8,vx:(Math.random()*0.03-0.015),vy:-(0.058+Math.random()*0.036)});}
-  toast('加了一颗「'+b.n+'」'+mm+'mm');renderBeadshop();if(!S.gathered)studioPhysKick();});}
+  // 加珠一律以弹珠方式从盘底向上发射滚入；成串态先自动散开（完成后点“收拢成串”串起来）
+  S.gathered=false;
+  S.beads.push({id,mm,x:(Math.random()*0.36-0.18),y:0.84,vx:(Math.random()*0.032-0.016),vy:-(0.072+Math.random()*0.04)});
+  toast('加了一颗「'+b.n+'」'+mm+'mm · 滚进盘里啦');renderBeadshop();studioPhysKick();});}
 function studioSizeModal(id,mm0,cb){
   const b=STUDIO_BEADS[id];let mm=mm0;
   const host=document.getElementById('toast');
@@ -2851,6 +2852,8 @@ function go(id){
   $("#orb").classList.toggle("show", id==="home"||id==="login");
   $("#orb").classList.remove("pulse");
   if(id==="home")renderHome();
+  if(id==="archive"&&typeof renderArchive==='function')renderArchive();
+  if(id==="archedit"&&typeof renderArchEdit==='function')renderArchEdit();
   if(id==="ask")renderAsk();
   if(id==="mine")renderMine();
   if(id==="recharge")renderRecharge();
@@ -3073,7 +3076,7 @@ function renderHome(){
   if(!todaySign)todaySign=buildSign();
   try{const _os=orbCompute(orbLocalLog());state.streak=(state._walletStreak!=null)?state._walletStreak:_os.streak;state.signedToday=(state.phone&&state._walletSignedToday!=null)?state._walletSignedToday:_os.fedToday;}catch(e){}
   const s=todaySign,p=state.profile,pl=$("#profLine");
-  if(pl)pl.innerHTML=p?`<span>属${p.zodiac||zodiacOf(p.sy||p.by)} · ${p.cons||constOf(p.sm||p.bm,p.sd||p.bd)}座${p.region?(' · '+p.region):''} · <a onclick="go('profile')">编辑档案</a></span>`:`<span><a onclick="go('profile')">＋ 完善出生信息，运势更贴合你 →</a></span>`;
+  if(pl)pl.innerHTML=p?`<span>属${p.zodiac||zodiacOf(p.sy||p.by)} · ${p.cons||constOf(p.sm||p.bm,p.sd||p.bd)}座${p.region?(' · '+p.region):''} · <a onclick="go('archive')">编辑档案</a></span>`:`<span><a onclick="go('profile')">＋ 完善出生信息，运势更贴合你 →</a></span>`;
   const eb=$("#homeEyebrow");if(eb)eb.textContent='TODAY · 今日牌'+(state.streak>0?(' · 连签'+state.streak+'天'):'');
   const en=s.energy, lvl=en>=75?'充盈':en>=55?'平稳':'偏低', theme=en>=75?'顺势而为':en>=55?'稳中有进':'宜静不宜动';
   const enNum=$("#homeEnergyNum");if(enNum)enNum.textContent=en;
@@ -5694,6 +5697,11 @@ window.fpSync=function(el){try{var c=el.children[0];if(!c)return;var step=c.offs
   var hd=(p&&p.sy)?(p.sy+'-'+pad(p.sm)+'-'+pad(p.sd)):'1996-08-12';
   var ht=(p&&p.bh>0&&typeof SHICHEN_HOUR!=='undefined')?pad(SHICHEN_HOUR[p.bh])+':00':'12:00';
   var hProv=(p&&p.prov)||'北京市';
+  var taPre=state._synPrefillTa;
+  var _td=(taPre&&taPre.sy)?(taPre.sy+'-'+pad(taPre.sm)+'-'+pad(taPre.sd)):'1994-03-05';
+  var _tt=(taPre&&taPre.bh>0&&typeof SHICHEN_HOUR!=='undefined')?pad(SHICHEN_HOUR[taPre.bh])+':00':'09:00';
+  var _tProv=(taPre&&taPre.prov)||'上海市';
+  var _tUnk=taPre?(taPre.bh>0?'':' checked'):' checked';
   var cityOpts=function(sel){return provs.map(function(pv){return '<option'+(pv===sel?' selected':'')+'>'+pv+'</option>';}).join('');};
   box.innerHTML=pHero('bā zì hé pán','关系合盘','走心合拍 · 相位实算 · 八字五行喜忌')
    +'<div id="synInputs">'
@@ -5702,9 +5710,9 @@ window.fpSync=function(el){try{var c=el.children[0];if(!c)return;var step=c.offs
      +'<div class="sy-row2" style="margin-top:8px"><div style="flex:1"><div class="sy-lab">时间</div><input class="sy-in" type="time" id="h_time" value="'+ht+'"></div><div style="flex:1"><div class="sy-lab">城市</div><select class="sy-in" id="h_city">'+cityOpts(hProv)+'</select></div></div>'
      +'<label class="sy-chk"><input type="checkbox" id="h_unk"'+((p&&p.bh>0)?'':' checked')+'> 不知道时辰</label></div>'
    +'<div class="sy-who"><h4><span class="sy-dot ta"></span>TA</h4>'
-     +'<div class="sy-lab">出生日期</div><input class="sy-in" type="date" id="t_date" value="1994-03-05">'
-     +'<div class="sy-row2" style="margin-top:8px"><div style="flex:1"><div class="sy-lab">时间</div><input class="sy-in" type="time" id="t_time" value="09:00"></div><div style="flex:1"><div class="sy-lab">城市</div><select class="sy-in" id="t_city">'+cityOpts('上海市')+'</select></div></div>'
-     +'<label class="sy-chk"><input type="checkbox" id="t_unk" checked> 不知道时辰（降级为性格契合）</label></div>'
+     +'<div class="sy-lab">出生日期</div><input class="sy-in" type="date" id="t_date" value="'+_td+'">'
+     +'<div class="sy-row2" style="margin-top:8px"><div style="flex:1"><div class="sy-lab">时间</div><input class="sy-in" type="time" id="t_time" value="'+_tt+'"></div><div style="flex:1"><div class="sy-lab">城市</div><select class="sy-in" id="t_city">'+cityOpts(_tProv)+'</select></div></div>'
+     +'<label class="sy-chk"><input type="checkbox" id="t_unk"'+_tUnk+'> 不知道时辰（降级为性格契合）</label></div>'
    +'<div class="sy-lab" style="margin-top:14px">你们现在是</div>'
    +'<div class="sy-seg" id="synSeg"><b class="on" data-v="暧昧">暧昧中</b><b data-v="在一起">在一起</b><b data-v="复合">分手/复合</b></div>'
    +'<button class="btn block" style="margin-top:16px;background:linear-gradient(135deg,#E7C892,var(--amber));color:#2a1f10;border:none;box-shadow:0 8px 22px rgba(201,162,78,.3)" onclick="doSynastry()">❤ 开始合盘'+((typeof FEAT_COST!=='undefined'&&FEAT_COST.synastry>0)?(' · '+FEAT_COST.synastry+' 心元'):'')+'</button>'
@@ -5712,6 +5720,7 @@ window.fpSync=function(el){try{var c=el.children[0];if(!c)return;var step=c.offs
    +'<div id="synInputBar" class="sy-inbar" style="display:none" onclick="synEditInputs()"><div class="sy-inbar-tx"><div class="sy-inbar-t">出生信息 · 已填写</div><div class="sy-inbar-sub" id="synInbarSub"></div></div><div class="sy-inbar-edit">✎ 修改</div></div>'
    +'<div id="synResult" style="margin-top:16px"></div>'
    +'<div class="disclaimer">相位/契合分为示例实算，解读语气为规则模板；仅供自我觉察与关系参考，不构成对关系走向的确定性预测。出生信息仅本机计算，不上传。</div>';
+  state._synPrefillTa=null;
   var seg=document.getElementById('synSeg');if(seg)seg.addEventListener('click',function(e){var b=e.target.closest('b');if(!b)return;seg.querySelectorAll('b').forEach(function(x){x.classList.remove('on');});b.classList.add('on');state._synScene=b.dataset.v;});
   state._synScene=state._synScene||'暧昧';
   if(state._synLast)renderSynastryResult(state._synLast.s,state._synLast.info);
@@ -6039,6 +6048,140 @@ function studioIntroFlip(){
   setTimeout(function(){var cc=document.getElementById('diCard');if(cc){cc.innerHTML=window._diyBack||'';cc.classList.remove('flipping');}},300);
 }
 function studioIntroClose(){var ov=document.getElementById('diyIntro');if(window._diyCd){clearInterval(window._diyCd);window._diyCd=null;}if(window._diyT){clearTimeout(window._diyT);window._diyT=null;}if(ov){ov.classList.remove('show');setTimeout(function(){if(ov.parentNode)ov.parentNode.removeChild(ov);},300);}}
+</script>
+<style>
+/* ===== 档案管理（多命盘）===== */
+#archive,#archedit{background:var(--bg)}
+#archBody,#archEditBody{padding:0 18px 46px}
+#archive .arch-sec-h{font-size:12px;color:var(--ink-faint);letter-spacing:.14em;margin:18px 2px 10px}
+#archive .arch-card{position:relative;display:flex;align-items:center;gap:12px;background:var(--bg-raise);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 10px 26px rgba(70,62,48,.06);cursor:pointer;overflow:hidden;margin-bottom:10px}
+#archive .arch-card:active{transform:scale(.99)}
+#archive .arch-card-main{flex:1;min-width:0;position:relative;z-index:1}
+#archive .arch-nm{font-size:19px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px}
+#archive .arch-self{font-size:10px;font-weight:600;color:var(--gold-deep);background:rgba(201,162,78,.14);border-radius:6px;padding:1px 7px}
+#archive .arch-birth{font-size:12.5px;color:var(--ink-soft);margin-top:5px;letter-spacing:.02em}
+#archive .arch-bazi{font-size:12.5px;color:var(--gold-deep);margin-top:4px;font-family:var(--serif);letter-spacing:.04em}
+#archive .arch-card-acts{display:flex;gap:10px;margin-top:10px}
+#archive .arch-card-acts span{font-size:12px;color:var(--ink-soft);border:1px solid var(--line);border-radius:14px;padding:5px 13px;background:var(--bg)}
+#archive .arch-zod{flex:none;width:56px;height:56px;border-radius:50%;background:linear-gradient(160deg,#f7f2e6,#e9e0cd);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 1px 0 #fff}
+#archive .arch-chev{flex:none;color:var(--ink-faint);font-size:20px;margin-left:-2px}
+#archive .arch-add{margin-top:6px;text-align:center;padding:15px 0;border:1px dashed rgba(201,162,78,.55);border-radius:16px;color:var(--gold-deep);font-size:14px;font-weight:600;cursor:pointer;background:rgba(201,162,78,.05)}
+#archive .arch-add:active{background:rgba(201,162,78,.12)}
+#archive .arch-empty{background:var(--bg-raise);border:1px solid var(--line);border-radius:16px;padding:18px;text-align:center;color:var(--ink-faint);font-size:13px;cursor:pointer}
+#archive .arch-none{color:var(--ink-faint);font-size:12.5px;padding:6px 2px 8px}
+#archive .arch-note{font-size:11px;color:var(--ink-faint);text-align:center;margin-top:18px;line-height:1.6}
+/* form */
+#archedit .arch-form{background:var(--bg-raise);border:1px solid var(--line);border-radius:18px;padding:2px 16px;margin-top:14px;box-shadow:0 10px 26px rgba(70,62,48,.06)}
+#archedit .af-row{display:flex;align-items:center;gap:12px;padding:15px 0;border-bottom:1px solid var(--line-soft)}
+#archedit .af-row:last-child{border-bottom:none}
+#archedit .af-lb{flex:none;width:100px;font-size:14px;color:var(--ink)}
+#archedit .af-ctrl{flex:1;min-width:0;display:flex;justify-content:flex-end}
+#archedit .af-in{width:100%;min-width:0;box-sizing:border-box;text-align:right;border:none;background:transparent;font-size:14px;color:var(--ink);outline:none;-webkit-appearance:none;appearance:none}
+#archedit .af-in::placeholder{color:var(--ink-faint)}
+#archedit select.af-in{text-align-last:right;direction:rtl}
+#archedit select.af-in option{direction:ltr}
+#archedit .af-seg{display:flex;gap:8px}
+#archedit .af-seg b{font-weight:400;font-size:13px;padding:7px 15px;border:1px solid var(--line);border-radius:16px;color:var(--ink-soft);background:var(--bg);cursor:pointer}
+#archedit .af-seg b.on{border-color:var(--amber);color:var(--gold-deep);font-weight:600;background:rgba(201,162,78,.08)}
+#archedit .af-toggle{justify-content:space-between}
+#archedit .af-toggle>.af-lb{width:auto}
+#archedit .af-sw{position:relative;display:inline-block;width:46px;height:26px}
+#archedit .af-sw input{display:none}
+#archedit .af-sw i{position:absolute;inset:0;border-radius:20px;background:var(--line);transition:.2s}
+#archedit .af-sw i:before{content:'';position:absolute;width:20px;height:20px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+#archedit .af-sw input:checked+i{background:var(--amber)}
+#archedit .af-sw input:checked+i:before{transform:translateX(20px)}
+#archedit .af-save{margin-top:16px;background:linear-gradient(135deg,#F0D79B,#D9A84E)!important;color:#2a1f10!important;border:none!important;box-shadow:0 12px 26px rgba(201,162,78,.3)!important}
+#archedit .arch-note{font-size:11px;color:var(--ink-faint);text-align:center;margin-top:14px;line-height:1.6}
+</style>
+<script>
+(function(){
+  try{var raw=localStorage.getItem('ft_archives');if(raw)state.archives=JSON.parse(raw)||[];}catch(e){}
+  if(!state.archives)state.archives=[];
+  var host=document.getElementById('home')&&document.getElementById('home').parentNode;
+  if(host){
+    if(!document.getElementById('archive')){var a=document.createElement('section');a.className='screen';a.id='archive';a.innerHTML='<div id="archBody"></div>';host.appendChild(a);}
+    if(!document.getElementById('archedit')){var e=document.createElement('section');e.className='screen';e.id='archedit';e.innerHTML='<div id="archEditBody"></div>';host.appendChild(e);}
+  }
+})();
+var ARCH_SH=['不确定 / 未知','子时 23:00–01:00','丑时 01:00–03:00','寅时 03:00–05:00','卯时 05:00–07:00','辰时 07:00–09:00','巳时 09:00–11:00','午时 11:00–13:00','未时 13:00–15:00','申时 15:00–17:00','酉时 17:00–19:00','戌时 19:00–21:00','亥时 21:00–23:00'];
+function archPad(n){return (n<10?'0':'')+n;}
+function archPersist(){try{localStorage.setItem('ft_archives',JSON.stringify(state.archives||[]));}catch(e){}}
+function archZodSvg(z){var e=(typeof ZODIAC_SVG!=='undefined')&&z&&ZODIAC_SVG[z];return e?('<span class="arch-zod"><svg viewBox="0 0 64 64" width="52" height="52">'+e+'</svg></span>'):'';}
+function archBirthStr(p){if(!p||!p.sy)return '未填写出生信息';var t=(p.bh>0&&typeof SHICHEN_HOUR!=='undefined'&&SHICHEN_HOUR[p.bh]!=null)?(' '+archPad(SHICHEN_HOUR[p.bh])+':00'):'';return p.sy+'-'+archPad(p.sm)+'-'+archPad(p.sd)+t+(p.region?('  ·  '+p.region):'');}
+function archBaziStr(p){try{if(!p||!p.sy||typeof fateWXFromBirth!=='function')return '';var wx=fateWXFromBirth({sy:p.sy,sm:p.sm,sd:p.sd,bh:p.bh});return wx?wx.pillars:'';}catch(e){return '';}}
+function archCardHTML(id,p,isSelf){
+  var nm=(p&&p.name)?p.name:(isSelf?'我的档案':'未命名');
+  var zod=(p&&(p.zodiac||(p.sy&&zodiacOf(p.sy))))||'';var bazi=archBaziStr(p);
+  var acts=isSelf?'':('<div class="arch-card-acts"><span onclick="event.stopPropagation();archToSynastry(\''+id+'\')">💞 合盘</span><span onclick="event.stopPropagation();archDel(\''+id+'\')">删除</span></div>');
+  return '<div class="arch-card" onclick="archEdit(\''+id+'\')"><div class="arch-card-main"><div class="arch-nm serif">'+esc(nm)+(isSelf?'<span class="arch-self">我</span>':'')+'</div><div class="arch-birth">'+archBirthStr(p)+'</div>'+(bazi?('<div class="arch-bazi">'+bazi+'</div>'):'')+acts+'</div>'+archZodSvg(zod)+'<div class="arch-chev">›</div></div>';
+}
+window.renderArchive=function(){
+  var box=document.getElementById('archBody');if(!box)return;var self=state.profile;
+  var selfCard=(self&&self.sy)?archCardHTML('self',self,true):('<div class="arch-empty" onclick="archEdit(\'self\')">＋ 还没填你的出生信息 · 点此完善 →</div>');
+  var others=(state.archives||[]).map(function(a){return archCardHTML(a.id,a,false);}).join('')||'<div class="arch-none">还没有其他人的档案，点下方创建</div>';
+  box.innerHTML='<div class="topbar"><div class="back" onclick="go(\'home\')">‹</div><div class="tt">档案管理</div><div style="width:24px"></div></div>'
+   +'<div class="arch-sec-h">我的档案</div>'+selfCard
+   +'<div class="arch-sec-h">其他档案</div>'+others
+   +'<div class="arch-add" onclick="archEdit(\'new\')">＋ 创建新档案</div>'
+   +'<div class="arch-note">出生信息仅本机保存，用于排盘与合盘，不外传。</div>';
+};
+window.archEdit=function(target){state._archEditing=target;go('archedit');};
+window.archToSynastry=function(id){var a=(state.archives||[]).find(function(x){return x.id===id;});if(!a)return;state._synPrefillTa=a;go('synastry');};
+window.archDel=function(id){var run=function(ok){if(!ok)return;state.archives=(state.archives||[]).filter(function(a){return a.id!==id;});archPersist();if(typeof toast==='function')toast('已删除该档案');if(document.getElementById('archive')&&document.getElementById('archive').classList.contains('active'))renderArchive();else go('archive');};
+  if(typeof confirmBox==='function')confirmBox('删除这个档案？','删除','取消').then(run);else run(confirm('删除这个档案？'));};
+function archRow(label,ctrl){return '<div class="af-row"><span class="af-lb">'+label+'</span><span class="af-ctrl">'+ctrl+'</span></div>';}
+window.renderArchEdit=function(){
+  var box=document.getElementById('archEditBody');if(!box)return;
+  var t=state._archEditing,p=null,isSelf=false;
+  if(t==='self'){p=state.profile||{};isSelf=true;}else if(t==='new'){p={};}else{p=(state.archives||[]).find(function(a){return a.id===t;})||{};}
+  var provs=(typeof PROVINCE_COORDS!=='undefined')?Object.keys(PROVINCE_COORDS):['北京市'];
+  var provOpts='<option value="">选择省份</option>'+provs.map(function(pv){return '<option'+(pv===p.prov?' selected':'')+'>'+pv+'</option>';}).join('');
+  var dateVal=p.by?(p.by+'-'+archPad(p.bm)+'-'+archPad(p.bd)):'';
+  var shOpts=ARCH_SH.map(function(l,i){return '<option value="'+i+'"'+((p.bh||0)===i?' selected':'')+'>'+l+'</option>';}).join('');
+  var regionDetail=(p.region&&p.prov)?p.region.replace(p.prov,'').trim():(p.region||'');
+  box.innerHTML='<div class="topbar"><div class="back" onclick="go(\'archive\')">‹</div><div class="tt">'+(t==='new'?'创建档案':(isSelf?'编辑我的档案':'编辑档案'))+'</div><div style="width:24px"></div></div>'
+   +'<div class="arch-form">'
+     +archRow('名称','<input id="afName" class="af-in" placeholder="填写姓名 / 称呼" value="'+(p.name?esc(p.name):'')+'">')
+     +archRow('性别','<div class="af-seg" id="afSex"><b data-v="female"'+(p.sex==='female'?' class="on"':'')+'>女</b><b data-v="male"'+(p.sex==='male'?' class="on"':'')+'>男</b></div>')
+     +archRow('历法','<div class="af-seg" id="afCal"><b data-v="solar"'+(p.cal!=='lunar'?' class="on"':'')+'>公历</b><b data-v="lunar"'+(p.cal==='lunar'?' class="on"':'')+'>农历</b></div>')
+     +archRow('出生日期','<input id="afDate" class="af-in" type="date" value="'+dateVal+'">')
+     +archRow('出生时辰','<select id="afSh" class="af-in">'+shOpts+'</select>')
+     +archRow('出生地','<select id="afProv" class="af-in">'+provOpts+'</select>')
+     +archRow('市 / 区（可选）','<input id="afRegion" class="af-in" placeholder="如 温州市 苍南县" value="'+esc(regionDetail)+'">')
+     +'<div class="af-row af-toggle"><span class="af-lb">真太阳时</span><label class="af-sw"><input type="checkbox" id="afTrue"'+(p.trueSolar?' checked':'')+'><i></i></label></div>'
+   +'</div>'
+   +'<button class="btn block af-save" onclick="archSave()">保存</button>'
+   +((isSelf||t==='new')?'':'<button class="btn block ghost" style="margin-top:10px" onclick="archDel(\''+t+'\')">删除此档案</button>')
+   +'<div class="arch-note">* 依据出生时间与地点排盘；时辰不确定可选「不确定 / 未知」，仅本机保存。</div>';
+  ['afSex','afCal'].forEach(function(sid){var el=document.getElementById(sid);if(el)el.addEventListener('click',function(e){var b=e.target.closest('b');if(!b)return;el.querySelectorAll('b').forEach(function(x){x.classList.remove('on');});b.classList.add('on');});});
+};
+window.archSave=function(){
+  var g=function(id){return document.getElementById(id);};
+  var name=(g('afName').value||'').trim();
+  var sexEl=document.querySelector('#afSex b.on'),sex=sexEl?sexEl.getAttribute('data-v'):'';
+  var calEl=document.querySelector('#afCal b.on'),cal=calEl?calEl.getAttribute('data-v'):'solar';
+  var dv=g('afDate').value,bh=+g('afSh').value||0,prov=g('afProv').value,region=(g('afRegion').value||'').trim(),trueSolar=g('afTrue').checked;
+  if(!dv){if(typeof toast==='function')toast('请选择出生日期');return;}
+  var parts=dv.split('-'),by=+parts[0],bm=+parts[1],bd=+parts[2];
+  if(!by||!bm||!bd){toast('出生日期格式有误');return;}
+  var sy=by,sm=bm,sd=bd,leap=false;
+  if(cal==='lunar'){try{var r=(typeof SL==='function')&&SL()&&SL().lunar2solar(by,bm,bd,false);if(r&&r.cYear){sy=r.cYear;sm=r.cMonth;sd=r.cDay;}}catch(e){}}
+  var obj={name:name,cal:cal,sex:sex,by:by,bm:bm,bd:bd,leap:leap,sy:sy,sm:sm,sd:sd,bh:bh,prov:prov,region:(prov?((prov+(region?(' '+region):'')).trim()):region),trueSolar:trueSolar,zodiac:zodiacOf(sy),cons:constOf(sm,sd)};
+  var t=state._archEditing;
+  if(t==='self'){
+    state.profile=Object.assign({},state.profile||{},obj);
+    try{todaySign=null;}catch(e){}
+    try{if(typeof setHomeZodiac==='function')setHomeZodiac();}catch(e){}
+    if(typeof toast==='function')toast('已保存我的档案');
+    go('archive');
+    try{if(typeof renderHome==='function')renderHome();}catch(e){}
+  }else{
+    if(t==='new'){obj.id='a'+Date.now()+Math.floor(Math.random()*1000);state.archives.push(obj);}
+    else{var idx=state.archives.findIndex(function(a){return a.id===t;});obj.id=t;if(idx>=0)state.archives[idx]=obj;else state.archives.push(obj);}
+    archPersist();if(typeof toast==='function')toast('档案已保存');go('archive');
+  }
+};
 </script>
 </body>
 </html>
