@@ -1095,6 +1095,29 @@
     </div>
     <div class="fp-dots" id="fpDots"><i class="on"></i><i></i><i></i></div>
 
+    <!-- DIY 命理选品 · 海报 -->
+    <div class="home-fate-h">命 理 · 选 品</div>
+    <div class="home-diy" onclick="goFateFrom('shop')">
+      <div class="hd-glow"></div>
+      <div class="hd-top"><span class="hd-en">STONE LAB · 命理选品</span><span class="hd-seal">串</span></div>
+      <div class="hd-body">
+        <div class="hd-cv"><svg viewBox="0 0 80 80" width="74" height="74" fill="none" aria-hidden="true">
+          <defs><radialGradient id="hdBead" cx="38%" cy="30%" r="72%"><stop offset="0" stop-color="#F6E4B6"/><stop offset="55%" stop-color="#D9AE5C"/><stop offset="100%" stop-color="#9A7226"/></radialGradient>
+          <radialGradient id="hdJade" cx="38%" cy="30%" r="72%"><stop offset="0" stop-color="#CDE6CE"/><stop offset="60%" stop-color="#6F9E78"/><stop offset="100%" stop-color="#3F5F49"/></radialGradient></defs>
+          <circle cx="40" cy="40" r="25" stroke="rgba(201,162,78,.32)" stroke-width="1"/>
+          <circle cx="40" cy="15" r="4.2" fill="url(#hdBead)"/><circle cx="52.5" cy="18.35" r="4.2" fill="url(#hdBead)"/><circle cx="61.65" cy="27.5" r="4.2" fill="url(#hdBead)"/><circle cx="65" cy="40" r="4.2" fill="url(#hdBead)"/><circle cx="61.65" cy="52.5" r="4.2" fill="url(#hdBead)"/><circle cx="52.5" cy="61.65" r="4.2" fill="url(#hdBead)"/><circle cx="27.5" cy="61.65" r="4.2" fill="url(#hdBead)"/><circle cx="18.35" cy="52.5" r="4.2" fill="url(#hdBead)"/><circle cx="15" cy="40" r="4.2" fill="url(#hdBead)"/><circle cx="18.35" cy="27.5" r="4.2" fill="url(#hdBead)"/><circle cx="27.5" cy="18.35" r="4.2" fill="url(#hdBead)"/>
+          <circle cx="40" cy="65" r="5.6" fill="url(#hdJade)"/>
+          <path d="M40 70.6v6" stroke="#C9A24E" stroke-width="1.4" stroke-linecap="round"/><circle cx="40" cy="78" r="2.2" fill="url(#hdBead)"/>
+        </svg></div>
+        <div class="hd-tx">
+          <div class="hd-title serif">DIY 命理选品 · 心元石验室</div>
+          <div class="hd-sub">按你的八字五行 + 此刻议题，为你预排一串专属珠串 · 可自由增减、调色、成串</div>
+          <div class="hd-price">为你预排 · 可自由定制</div>
+        </div>
+      </div>
+      <div class="hd-cta">✦ 进工作室 · 开始定制 →</div>
+    </div>
+
     <!-- 情绪陪伴 -->
     <div id="featCarouselWrap"></div>
 
@@ -5468,6 +5491,20 @@ function paintBrandMarks(){document.querySelectorAll('.brand-mark').forEach(el=>
 #home .fp-dots{display:flex;justify-content:center;gap:6px;margin:4px 0 2px}
 #home .fp-dots i{width:6px;height:6px;border-radius:50%;background:rgba(140,120,80,.32);transition:.25s}
 #home .fp-dots i.on{width:18px;border-radius:3px;background:var(--amber)}
+/* DIY 命理选品 · 首页海报 */
+#home .home-diy{position:relative;overflow:hidden;cursor:pointer;border-radius:20px;padding:17px 18px 15px;background:radial-gradient(135% 120% at 18% 0%,#2c2417,#161009);border:1px solid rgba(201,162,78,.34);box-shadow:0 18px 44px rgba(30,26,22,.22),inset 0 1px 0 rgba(230,196,106,.12)}
+#home .home-diy:active{transform:scale(.992)}
+#home .home-diy .hd-glow{position:absolute;width:170px;height:170px;border-radius:50%;filter:blur(34px);top:-56px;right:-44px;opacity:.42;background:radial-gradient(circle,#caa24e,transparent 70%);pointer-events:none}
+#home .hd-top{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:2}
+#home .hd-en{font-size:10px;letter-spacing:.22em;color:var(--amber);opacity:.85}
+#home .hd-seal{width:26px;height:26px;border-radius:7px;border:1px solid rgba(201,162,78,.5);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:12px;color:#e9cf90;background:rgba(201,162,78,.1)}
+#home .hd-body{display:flex;gap:14px;align-items:center;position:relative;z-index:2;margin-top:12px}
+#home .hd-cv{flex:none;width:96px;height:96px;border-radius:16px;background:radial-gradient(120% 120% at 50% 35%,#3a2f1d,#1b140b);border:1px solid rgba(201,162,78,.24);display:flex;align-items:center;justify-content:center}
+#home .hd-tx{flex:1;min-width:0}
+#home .hd-title{font-size:17.5px;font-weight:700;color:#f4ead2;letter-spacing:.03em;line-height:1.3}
+#home .hd-sub{font-size:11.5px;color:#c3ac82;margin-top:5px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#home .hd-price{font-size:12.5px;color:#E7C892;font-weight:600;margin-top:7px}
+#home .hd-cta{position:relative;z-index:2;margin-top:14px;text-align:center;padding:12px 0;border-radius:13px;background:linear-gradient(135deg,#F0D79B,#D9A84E);color:#2a1f10;font-weight:700;font-size:14.5px;letter-spacing:.04em;box-shadow:0 10px 24px rgba(201,162,78,.3)}
 </style>
 <script>
 /* 命理海报轮播 · 圆点联动 */
