@@ -1,39 +1,40 @@
 # 盘愈 PANYU · 微信小程序（混合：原生外壳 + web-view 内容）
 
-**架构**：原生小程序做「壳」（容器 / 登录 / 支付桥），**内容页用 `<web-view>` 内嵌已上线的 H5** ——
-因此小程序里的观感、配色、动效、功能与 H5 **完全一致**（因为加载的就是 H5 本体）。
+**APPID** `wxc4cb1b6a1c959d58`（已认证 + 微信支付已开通）
 
-- **APPID**：`wxc4cb1b6a1c959d58`（已认证 + 微信支付已开通）
+## 架构
+原生小程序做「壳」（原生 tabBar / 登录 / 支付 / 分享），**内容用 `<web-view>` 内嵌已上线 H5**，
+观感与 H5 完全一致。5 个原生底部 tab 各内嵌 H5 对应页面（隐藏 H5 自带导航，避免双导航）：
 
-## 如何运行（开发者工具预览）
-1. 微信开发者工具 → 导入项目 → 选 `盘愈小程序/` 文件夹（能直接看到 app.json 的那层）。
-2. **详情 → 本地设置 → 勾选「不校验合法域名、web-view（业务域名）、TLS…」**（预览必须勾，否则 web-view 打不开）。
-3. 编译 → 直接进入 H5 首页，和 H5 长得一模一样。
+| 原生 tab | H5 screen |
+|---|---|
+| 首页 | home |
+| 星盘 | natal |
+| 问 | ask |
+| 商城 | skinshop |
+| 我的 | mine |
 
-## 目录
-```
-app.json                    入口=webview，无原生 tabBar（H5 自带导航）
-pages/webview               全屏 <web-view> 内嵌 H5（H5_BASE 可改成你的备案域名）
-pages/login                 原生手机号登录 + 微信一键登录按钮（阶段二对接后端）
-pages/pay                   原生微信支付桥（阶段二对接后端统一下单）
-utils/*                     请求/存储/八字引擎（原生页备用，当前主流程走 web-view）
-（home/ask/mine/bazi/astro/shop/soon 为早期纯原生页，保留备用，未接入主流程）
-```
+## 已完成
+- **原生底部 tabBar**（首页/星盘/问/商城/我的），每个 tab 一个 web-view 页深链到 H5 对应屏。
+- **H5 小程序模式**（`?mp=1&tab=1&screen=X&phone=Y`）：自动登录、进指定屏、隐藏 H5 自带 tabbar。作用域仅限 `?mp=1`，独立 H5 不受影响。
+- **微信一键登录**：`pages/wxlogin` 用 `getPhoneNumber` 拿 code → 后端换手机号 → 存本地 → 各 tab web-view 带 phone 自动登录。H5 里点登录会跳到原生登录页。
+- **微信支付**：H5 充值下单 → `wx.miniProgram.navigateTo('/pages/pay/pay?...')` → 原生 `wx.requestPayment`。
+- **微信分享**：每个 tab 页 `onShareAppMessage` / `onShareTimeline`（自定义标题）。
 
-## 上线前置（重要）
-- **业务域名备案**：`<web-view>` 只能加载**已 ICP 备案**的域名。`taluo-b76.pages.dev` 不能备案，
-  正式上线前需把 H5 部署到**你自己的备案域名**，并在小程序后台
-  「开发管理 → 开发设置 → 业务域名」添加该域名（需下载校验文件放到域名根目录）。
-- 备案完成后，把 `pages/webview/webview.js` 里的 `H5_BASE` 改成你的域名即可。
+## 需你配合的两处后端（Cloudflare Worker，已加接口框架）
+1. **一键登录** `/api/wxphone`：已写好用 `code` 换手机号的完整逻辑，只需在 Worker 环境变量配 `WX_APPID`、`WX_APPSECRET`。
+2. **微信支付** `/api/wxpay`：已留统一下单框架，需配 `WX_MCHID`、`WX_PAY_KEY`（+证书），并补 JSAPI 下单实现（见 `_worker.js` 注释）。
+未配置时：登录/支付会弹提示说明，不影响其他功能。
 
-## 阶段二：原生登录 & 支付桥（需 H5 少量改动 + 后端接口）
-H5 运行在小程序 web-view 内时，可用微信 JSSDK 与小程序通信：
-1. H5 引入 `https://res.wx.qq.com/open/js/jweixin-1.6.0.js`，用 `wx.miniProgram` 判断环境。
-2. **登录**：小程序原生 `getPhoneNumber` 拿手机号 → 通过 URL 参数 / postMessage 传给 H5 自动登录
-   （后端加 `/api/wxphone`：用 code 换手机号）。
-3. **支付**：H5 需付款时 `wx.miniProgram.navigateTo('/pages/pay/pay?orderNo=..&amount=..')`
-   → 原生 `pay` 页调后端统一下单 `/api/wxpay` → `wx.requestPayment` 拉起微信支付。
+## 如何运行
+1. 开发者工具导入 `盘愈小程序/`（AppID 已内置）。
+2. 详情 → 本地设置 → 勾选「不校验合法域名、web-view（业务域名）、TLS…」（预览必须）。
+3. 编译 → 底部 5 个原生 tab，点开各是对应的 H5 页面。
 
-## 审核类目建议
-走「工具 / 心理测评（自我认知·情绪·性格）」方向，产品定位统一为「自我探索·情绪疏导·心理陪伴」，
-弱化「占卜/算命/预测」字样，每页保留免责声明。（详见对话说明）
+## 上线前置
+- **业务域名备案**：`<web-view>` 只能加载已 ICP 备案域名。把 H5 部署到你的备案域名，配到小程序后台「业务域名」，再改 `utils/mp.js` 的 `H5_BASE`。
+- 服务器域名（request 合法域名）加上后端 API 域名。
+
+## 说明：每个 tab 是独立 web-view
+原生 tabBar 下每个 tab 各自加载一次 H5（登录态通过手机号在各 tab 间保持一致）。
+若想更省流/无重载，也可回到单 web-view（整页 H5 + H5 自带 tabbar）——`pages/webview` 已保留。

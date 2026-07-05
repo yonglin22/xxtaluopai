@@ -1,14 +1,13 @@
+const mp = require('../../utils/mp.js');
 Page({
-  data: {
-    items: [
-      { k: '本命星盘', d: '日月升 · 十星 · 相位' },
-      { k: '八字命盘', d: '四柱五行 · 喜用忌神 · 中医体质' },
-      { k: '关系合盘', d: '和 TA 的八字契合度' }
-    ]
+  data: { url: '' },
+  onLoad() { this.setData({ url: mp.url('natal') }); },
+  onShow() {
+    try { wx.showShareMenu({ withShareTicket: true, menus: ['shareAppMessage', 'shareTimeline'] }); } catch (e) {}
+    const u = mp.url('natal');
+    if (u !== this.data.url) this.setData({ url: u }); // 登录态变化时刷新
   },
-  tap(e) {
-    const k = e.currentTarget.dataset.k;
-    if (k === '八字命盘') return wx.navigateTo({ url: '/pages/bazi/bazi' });
-    wx.navigateTo({ url: '/pages/soon/soon?title=' + encodeURIComponent(k) });
-  }
+  onErr() { wx.showToast({ title: '加载失败：检查网络/业务域名白名单', icon: 'none' }); },
+  onShareAppMessage() { return { title: '盘愈 · 本命星盘与八字', path: '/pages/astro/astro' }; },
+  onShareTimeline() { return { title: '盘愈 · 本命星盘与八字' }; }
 });

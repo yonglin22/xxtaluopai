@@ -1,1 +1,1 @@
-.ex-main { flex: 1; }
+page { height: 100%; background: #F1EADC; }

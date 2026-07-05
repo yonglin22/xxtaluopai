@@ -171,6 +171,8 @@ export default {
     if (url.pathname === '/api/goods') { return handleGoods(request, env, url); }
     if (url.pathname.startsWith('/api/reader/')) { return handleReader(request, env, url.pathname.slice(12), url); }
     if (url.pathname === '/api/bind') { return handleBind(request, env, url); }
+    if (url.pathname === '/api/wxphone') { if (request.method !== 'POST') return json(405, { error: 'Method Not Allowed' }); return handleWxPhone(request, env); }
+    if (url.pathname === '/api/wxpay') { if (request.method !== 'POST') return json(405, { error: 'Method Not Allowed' }); return handleWxPay(request, env); }
     { const _r = await env.ASSETS.fetch(request); const _ct = _r.headers.get('content-type') || ''; if (_ct.includes('text/html')) { const _h = new Headers(_r.headers); _h.set('cache-control', 'no-cache, must-revalidate'); return new Response(_r.body, { status: _r.status, statusText: _r.statusText, headers: _h }); } return _r; }
   }
 };
@@ -186,6 +188,32 @@ async function callAI(env, KEY, sys, userMsg, maxTokens) {
   let s = String(raw).replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
   const a = s.indexOf('{'), b = s.lastIndexOf('}'); if (a >= 0 && b > a) s = s.slice(a, b + 1);
   return JSON.parse(s);
+}
+// ===== 微信一键登录：用 getPhoneNumber 的 code 换手机号 =====
+// 需配置 env.WX_APPID + env.WX_APPSECRET（小程序后台）。
+async function handleWxPhone(request, env) {
+  let body = {}; try { body = await request.json(); } catch (e) {}
+  const code = body.code;
+  if (!code) return json(400, { error: 'missing code' });
+  const APPID = env.WX_APPID, SECRET = env.WX_APPSECRET;
+  if (!APPID || !SECRET) return json(200, { ok: false, error: 'not_configured', hint: '后端未配置 WX_APPID / WX_APPSECRET' });
+  try {
+    const t = await (await fetch('https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=' + APPID + '&secret=' + SECRET)).json();
+    if (!t.access_token) return json(200, { ok: false, error: 'token_failed', detail: t });
+    const r = await (await fetch('https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token=' + t.access_token, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code }) })).json();
+    const phone = r && r.phone_info && r.phone_info.purePhoneNumber;
+    if (phone) return json(200, { ok: true, phone });
+    return json(200, { ok: false, error: 'phone_failed', detail: r });
+  } catch (e) { return json(200, { ok: false, error: String(e) }); }
+}
+// ===== 微信支付统一下单（待接入）=====
+// 需配置 商户号 env.WX_MCHID + APIv3 密钥 env.WX_PAY_KEY + 证书序列号/私钥。
+// JSAPI 下单 https://api.mch.weixin.qq.com/v3/pay/transactions/jsapi 拿 prepay_id，
+// 再生成 { timeStamp, nonceStr, package:'prepay_id=...', signType:'RSA', paySign }。
+async function handleWxPay(request, env) {
+  let body = {}; try { body = await request.json(); } catch (e) {}
+  if (!env.WX_MCHID || !env.WX_PAY_KEY) return json(200, { ok: false, error: 'not_configured', hint: '后端未配置微信支付商户号/密钥' });
+  return json(200, { ok: false, error: 'not_implemented', hint: '统一下单待实现（见注释）', order: body.orderNo || '' });
 }
 async function handleConfig(request, env) {
   const KV = env.CONFIG_KV || null;

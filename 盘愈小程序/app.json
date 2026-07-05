@@ -1,8 +1,13 @@
 {
   "pages": [
-    "pages/webview/webview",
-    "pages/login/login",
-    "pages/pay/pay"
+    "pages/home/home",
+    "pages/astro/astro",
+    "pages/ask/ask",
+    "pages/shop/shop",
+    "pages/mine/mine",
+    "pages/wxlogin/wxlogin",
+    "pages/pay/pay",
+    "pages/webview/webview"
   ],
   "window": {
     "navigationBarBackgroundColor": "#F1EADC",
@@ -10,6 +15,19 @@
     "navigationBarTitleText": "盘愈 PANYU",
     "backgroundColor": "#F1EADC",
     "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "color": "#9a8f7e",
+    "selectedColor": "#A5813A",
+    "backgroundColor": "#FAF5EB",
+    "borderStyle": "white",
+    "list": [
+      { "pagePath": "pages/home/home", "text": "首页" },
+      { "pagePath": "pages/astro/astro", "text": "星盘" },
+      { "pagePath": "pages/ask/ask", "text": "问" },
+      { "pagePath": "pages/shop/shop", "text": "商城" },
+      { "pagePath": "pages/mine/mine", "text": "我的" }
+    ]
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json"

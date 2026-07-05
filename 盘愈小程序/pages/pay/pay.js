@@ -1,21 +1,21 @@
-// ============================================================
-// 原生支付页（桥）——H5 在 web-view 里需要付款时，通过
-// wx.miniProgram.navigateTo('/pages/pay/pay?orderNo=..&amount=..') 跳到这里，
-// 由小程序原生调 wx.requestPayment 拉起微信支付。
-// 阶段二：需后端加统一下单接口 /api/wxpay（返回 timeStamp/nonceStr/package/paySign）。
-// ============================================================
+const { apiPost } = require('../../utils/request.js');
+const mp = require('../../utils/mp.js');
 Page({
-  data: { orderNo: '', amount: '' },
-  onLoad(q) { this.setData({ orderNo: (q && q.orderNo) || '', amount: (q && q.amount) || '' }); },
-
-  pay() {
-    wx.showModal({
-      title: '微信支付', showCancel: false, confirmText: '知道了',
-      content: '支付桥已就绪。接入后端统一下单接口后，这里用 wx.requestPayment 拉起微信支付（订单号 ' + (this.data.orderNo || '—') + '，金额 ¥' + (this.data.amount || '—') + '）。'
-    });
-    // 阶段二示例：
-    // const { j } = await apiPost('/api/wxpay', { orderNo, amount, openid });
-    // wx.requestPayment({ timeStamp:j.timeStamp, nonceStr:j.nonceStr, package:j.package, signType:'RSA', paySign:j.paySign, success(){...} });
+  data: { orderNo: '', amount: '', desc: '' },
+  onLoad(q) { this.setData({ orderNo: (q && q.orderNo) || '', amount: (q && q.amount) || '', desc: (q && q.desc) || '' }); },
+  async pay() {
+    const r = await apiPost('/api/wxpay', { orderNo: this.data.orderNo, amount: this.data.amount, phone: mp.getPhone() });
+    if (r.ok && r.j && r.j.timeStamp) {
+      wx.requestPayment({
+        timeStamp: r.j.timeStamp, nonceStr: r.j.nonceStr, package: r.j.package,
+        signType: r.j.signType || 'RSA', paySign: r.j.paySign,
+        success: () => { wx.showToast({ title: '支付成功', icon: 'success' }); setTimeout(() => this.back(), 700); },
+        fail: () => { wx.showToast({ title: '支付未完成', icon: 'none' }); }
+      });
+    } else {
+      wx.showModal({ title: '支付未接入', showCancel: false, confirmText: '知道了',
+        content: '后端统一下单 /api/wxpay 尚未接入（需商户号 + API 密钥/证书）。接好后这里用 wx.requestPayment 拉起微信支付。\n订单 ' + (this.data.orderNo || '—') + ' · ¥' + (this.data.amount || '—') });
+    }
   },
-  back() { wx.navigateBack(); }
+  back() { const p = getCurrentPages(); if (p.length > 1) wx.navigateBack(); else wx.switchTab({ url: '/pages/mine/mine' }); }
 });
