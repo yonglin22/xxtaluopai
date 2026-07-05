@@ -171,14 +171,14 @@
   .card{width:100px;aspect-ratio:100/166;position:relative;opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.8,.2,1);}
   .cards-row.multi .cf-fallback .cf-mark{font-size:30px;}
   .pick-hint{text-align:center;font-size:13.5px;color:var(--ink-soft);margin:20px 0 8px;line-height:1.7;}
-  .pickbar{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:430px;height:195px;z-index:15;}
+  .pickbar{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:430px;height:262px;z-index:15;}
   .pickbar::before{content:"";position:absolute;inset:0;background:linear-gradient(to top,var(--bg) 32%,rgba(244,242,238,0));pointer-events:none;}
-  .fan{position:absolute;left:50%;bottom:18px;width:0;height:0;}
-  .fan-card{position:absolute;left:0;bottom:0;width:54px;height:86px;margin-left:-27px;border-radius:8px;background:radial-gradient(120% 80% at 50% -10%,var(--card-back-2),var(--card-back));border:1px solid #1d1916;box-shadow:0 7px 16px rgba(30,26,22,.26);transform-origin:50% 320px;transform:rotate(var(--r));transition:transform .5s cubic-bezier(.2,.8,.2,1),opacity .5s;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-  .fan-card::before{content:"";position:absolute;inset:6px;border-radius:5px;border:1px solid rgba(201,163,106,.26);}
-  .fan-card::after{content:"";width:20px;height:20px;border-radius:50%;border:1px solid rgba(232,226,216,.4);}
-  .fan-card:active:not(.taken){transform:rotate(var(--r)) translateY(-16px);z-index:3;}
-  .fan-card.taken{transform:rotate(var(--r)) translateY(-330px) scale(.32);opacity:0;pointer-events:none;}
+  .fan{position:absolute;left:50%;bottom:24px;width:0;height:0;}
+  .fan-card{position:absolute;left:0;bottom:0;width:74px;height:118px;margin-left:-37px;border-radius:9px;background:#211B14 url('cards/back.jpg') center/cover no-repeat;border:1px solid #1d1916;box-shadow:0 9px 20px rgba(30,26,22,.3);transform-origin:50% 432px;transform:rotate(var(--r));transition:transform .5s cubic-bezier(.2,.8,.2,1),opacity .5s;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .fan-card::before{content:"";position:absolute;inset:7px;border-radius:6px;border:1px solid rgba(201,163,106,.32);}
+  .fan-card::after{display:none;}
+  .fan-card:active:not(.taken){transform:rotate(var(--r)) translateY(-22px);z-index:3;}
+  .fan-card.taken{transform:rotate(var(--r)) translateY(-450px) scale(.32);opacity:0;pointer-events:none;}
   .card.in{opacity:1;transform:translateY(0);}
   .card-inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform 1.05s cubic-bezier(.16,1,.3,1);}
   .card.flip .card-inner{transform:rotateY(180deg);}
@@ -294,9 +294,9 @@
 
   /* ---- 洗牌动画 ---- */
   .shufbar{position:fixed;left:50%;top:44%;width:0;height:0;z-index:14;}
-  .shuf-card{position:absolute;left:0;top:0;width:56px;height:90px;margin:-45px 0 0 -28px;border-radius:8px;background:radial-gradient(120% 80% at 50% -10%,var(--card-back-2),var(--card-back));border:1px solid #1d1916;box-shadow:0 8px 18px rgba(30,26,22,.28);display:flex;align-items:center;justify-content:center;}
+  .shuf-card{position:absolute;left:0;top:0;width:72px;height:116px;margin:-58px 0 0 -36px;border-radius:9px;background:#211B14 url('cards/back.jpg') center/cover no-repeat;border:1px solid #1d1916;box-shadow:0 9px 20px rgba(30,26,22,.3);display:flex;align-items:center;justify-content:center;}
   .shuf-card::before{content:"";position:absolute;inset:6px;border-radius:5px;border:1px solid rgba(201,163,106,.26);}
-  .shuf-card::after{content:"";width:20px;height:20px;border-radius:50%;border:1px solid rgba(232,226,216,.4);}
+  .shuf-card::after{display:none;}
   /* ---- HOME 紧凑改版 ---- */
   .home-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
   .signin-btn{flex:none;margin-top:16px;background:var(--ink);color:var(--face);border:none;border-radius:30px;font-family:var(--serif);font-size:12.5px;padding:9px 16px;cursor:pointer;line-height:1;white-space:nowrap;transition:opacity .3s;}
@@ -674,9 +674,9 @@
   @keyframes ddFlipLift{0%{transform:translateY(0)}44%{transform:translateY(-40px) scale(1.12)}100%{transform:translateY(0)}}
 
   .daily-draw .dd-ci>div{position:absolute;inset:0;border-radius:16px;-webkit-backface-visibility:hidden;backface-visibility:hidden;overflow:hidden;}
-  .daily-draw .dd-cb{background:linear-gradient(155deg,#26221a,#1a1712);border:1px solid #4a3a20;box-shadow:0 24px 50px rgba(0,0,0,.34);}
-  .daily-draw .dd-cb::before{content:"";position:absolute;inset:10px;border-radius:10px;border:1px solid rgba(201,162,78,.5);}
-  .daily-draw .dd-cb::after{content:"\2726";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:rgba(201,162,78,.9);font-size:30px;}
+  .daily-draw .dd-cb{background:#211B14 url('cards/back.jpg') center/cover no-repeat;border:1px solid #4a3a20;box-shadow:0 24px 50px rgba(0,0,0,.34);}
+  .daily-draw .dd-cb::before{content:"";position:absolute;inset:10px;border-radius:10px;border:1px solid rgba(201,162,78,.28);}
+  .daily-draw .dd-cb::after{display:none;}
   .daily-draw .dd-cf{transform:rotateY(180deg);background:#fff;border:1px solid #E5E1D8;box-shadow:0 28px 58px rgba(40,36,28,.32);}
   .daily-draw .dd-cf .card-face{position:absolute;inset:0;border-radius:16px;overflow:hidden;transform:none!important;-webkit-backface-visibility:visible;backface-visibility:visible;border:none;box-shadow:none;}
   .daily-draw .dd-cf .cf-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
@@ -700,8 +700,8 @@
   #dealZone .dd-av{width:38px;height:38px;border-radius:50%;background:radial-gradient(circle at 34% 30%,#3a3020,#181207);display:flex;align-items:center;justify-content:center;font-size:19px;box-shadow:0 6px 16px rgba(30,26,22,.28);}
   #dealZone .dd-nm{font-family:var(--serif);font-size:14.5px;color:var(--ink);line-height:1.2;}
   #dealZone .dd-nm small{display:block;font-family:"Courier New",monospace;font-size:9px;letter-spacing:.14em;color:var(--ink-faint);margin-top:3px;}
-  #dealZone .deal-deck{position:relative;width:62px;height:98px;}
-  #dealZone .deal-deck i{position:absolute;inset:0;border-radius:9px;background:radial-gradient(120% 80% at 50% -10%,var(--card-back-2),var(--card-back));border:1px solid #1d1916;box-shadow:0 8px 20px rgba(30,26,22,.26);}
+  #dealZone .deal-deck{position:relative;width:80px;height:126px;}
+  #dealZone .deal-deck i{position:absolute;inset:0;border-radius:10px;background:#211B14 url('cards/back.jpg') center/cover no-repeat;border:1px solid #1d1916;box-shadow:0 9px 22px rgba(30,26,22,.28);}
   #dealZone .deal-deck i::before{content:"";position:absolute;inset:7px;border-radius:6px;border:1px solid rgba(201,163,106,.26);}
   #dealZone .deal-deck i:nth-child(1){transform:translate(-3px,3px) rotate(-4deg);}
   #dealZone .deal-deck i:nth-child(2){transform:translate(0,1.5px) rotate(-1.6deg);}
