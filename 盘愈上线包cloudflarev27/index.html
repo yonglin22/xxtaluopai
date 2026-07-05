@@ -14,7 +14,7 @@
     if(window.__MP_TAB__)css+='#tabbar{display:none!important}.screen{padding-bottom:26px!important}';
     if(safetop>0)css+='.phone{padding-top:'+safetop+'px;box-sizing:border-box}.orb{top:'+(safetop+40)+'px!important}';
     /* 子页返回栏固定在顶部 + 毛玻璃（tab 主页返回栏在下方全局隐藏） */
-    css+='.topbar{position:-webkit-sticky!important;position:sticky!important;top:0!important;z-index:60;margin:0 -30px 8px!important;padding:10px 30px 8px!important;height:auto!important;min-height:50px;background:rgba(241,234,220,.86);-webkit-backdrop-filter:saturate(1.5) blur(16px);backdrop-filter:saturate(1.5) blur(16px);border-bottom:1px solid rgba(225,215,195,.5);}';
+    css+='.topbar{position:-webkit-sticky!important;position:sticky!important;top:0!important;z-index:60;margin:0 -30px 8px!important;padding:10px 30px 8px!important;height:auto!important;min-height:50px;background:rgba(255,255,255,.72);-webkit-backdrop-filter:saturate(1.4) blur(18px);backdrop-filter:saturate(1.4) blur(18px);border-bottom:1px solid rgba(0,0,0,.05);}';
     if(css){var st=document.createElement('style');st.textContent=css;(document.head||document.documentElement).appendChild(st);}}
 }catch(e){}})();
 </script>

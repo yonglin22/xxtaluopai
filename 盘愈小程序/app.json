@@ -5,7 +5,7 @@
     "pages/pay/pay"
   ],
   "window": {
-    "navigationBarBackgroundColor": "#FAF5EB",
+    "navigationBarBackgroundColor": "#FFFFFF",
     "navigationBarTextStyle": "black",
     "navigationBarTitleText": "盘愈 PANYU",
     "backgroundColor": "#F1EADC",
