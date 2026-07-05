@@ -1221,6 +1221,11 @@
       <div class="exrow" onclick="personaPoster()"><div class="ex-ic"><svg viewBox="0 0 24 24"><path d="M12 3.2l1.9 6L20 11l-6.1 1.8L12 19l-1.9-6.2L4 11l6.1-1.8z"/></svg></div><div class="ex-main"><div class="ex-t">我的人格标签 · 海报</div><div class="ex-d">一句被说中的标签，免费生成可分享</div></div><div class="ex-chev">›</div></div>
       <div class="exrow" onclick="go('synastry')"><div class="ex-ic"><svg viewBox="0 0 24 24"><circle cx="9.2" cy="12" r="5.2"/><circle cx="14.8" cy="12" r="5.2"/></svg></div><div class="ex-main"><div class="ex-t">关系合盘</div><div class="ex-d">测测你和 TA 的契合度，拉 TA 一起</div></div><div class="ex-chev">›</div></div>
     </div>
+    <div style="font-size:12px;color:var(--ink-faint);letter-spacing:.18em;margin:22px 2px 10px">定 制 · 订 单</div>
+    <div class="exlist">
+      <div class="exrow" onclick="go('diycart')"><div class="ex-ic"><svg viewBox="0 0 24 24"><path d="M4 5h2l2.1 10.4a1.5 1.5 0 0 0 1.5 1.2h7.2a1.5 1.5 0 0 0 1.5-1.2L20.5 8H7.2"/><circle cx="10" cy="20" r="1.3"/><circle cx="17.5" cy="20" r="1.3"/></svg></div><div class="ex-main"><div class="ex-t">我的购物车<span id="mineCartBadge"></span></div><div class="ex-d">已加入的定制珠串，随时结算</div></div><div class="ex-chev">›</div></div>
+      <div class="exrow" onclick="go('diyorders')"><div class="ex-ic"><svg viewBox="0 0 24 24"><rect x="5" y="3.5" width="14" height="17" rx="1.6"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4.5"/></svg></div><div class="ex-main"><div class="ex-t">我的订单</div><div class="ex-d">定制珠串的提交记录与定制码</div></div><div class="ex-chev">›</div></div>
+    </div>
     <div style="font-size:12px;color:var(--ink-faint);letter-spacing:.18em;margin:22px 2px 10px">情 绪 陪 伴 · 有 我 在</div>
     <div class="exlist">
       <div class="exrow" onclick="go('treehole')"><div class="ex-ic"><svg viewBox="0 0 24 24"><path d="M16.5 13A6.2 6.2 0 1 1 11 6.2a5 5 0 0 0 5.5 6.8z"/></svg></div><div class="ex-main"><div class="ex-t">情绪树洞</div><div class="ex-d">匿名写下纠结，抽牌 + 陪伴回信</div></div><div class="ex-chev">›</div></div>
@@ -1385,6 +1390,10 @@
   #beadshop .st-tool{font-size:11px;padding:8px 10px;border:1px solid var(--line3);border-radius:20px;background:#fff;color:var(--soft2);cursor:pointer}
   #beadshop .st-gather{margin-left:auto;font-size:12px;padding:9px 14px;white-space:nowrap;border-radius:20px;background:var(--ink);color:#fff;border:none;font-weight:600;cursor:pointer}
   #beadshop .st-cart{width:100%;box-sizing:border-box;height:48px;border-radius:24px;background:linear-gradient(135deg,#F0D79B,#D9A84E);color:#2a1f10;border:none;font-family:var(--serif);font-size:15px;font-weight:700;cursor:pointer;margin-bottom:12px;box-shadow:0 12px 26px rgba(201,162,78,.3)}
+  #beadshop .st-cartrow{display:flex;gap:10px;margin-bottom:12px}
+  #beadshop .st-cartrow .st-cart{margin-bottom:0;width:auto;flex:1}
+  #beadshop .st-cart-add{flex:none;box-sizing:border-box;height:48px;padding:0 18px;border-radius:24px;background:rgba(201,162,78,.1);color:var(--gold-deep,#a5813a);border:1px solid rgba(201,162,78,.5);font-family:var(--serif);font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap}
+  #beadshop .st-cart-add:active{background:rgba(201,162,78,.2)}
   #beadshop .st-search input{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line3);border-radius:10px;font-size:13px;background:#fff;color:var(--ink);outline:none}
   #beadshop .st-search input:focus{border-color:var(--ink)}
   #beadshop .st-cats{display:flex;gap:16px;margin:12px 2px 4px;border-bottom:1px solid var(--line3)}
@@ -2914,6 +2923,8 @@ function go(id){
   if(id==="archive"&&typeof renderArchive==='function')renderArchive();
   if(id==="bizconsole"&&typeof renderBizConsole==='function')renderBizConsole();
   if(id==="archedit"&&typeof renderArchEdit==='function')renderArchEdit();
+  if(id==="diycart"&&typeof renderDiyCart==='function')renderDiyCart();
+  if(id==="diyorders"&&typeof renderDiyOrders==='function')renderDiyOrders();
   if(id==="ask")renderAsk();
   if(id==="mine")renderMine();
   if(id==="recharge")renderRecharge();
@@ -3602,6 +3613,7 @@ function renderMine(){
   $("#mineStreak").textContent="连续签到 "+state.streak+" 天";
 
   const aw=$("#adminWrap");if(aw)aw.style.display=state.isAdmin?'block':'none';
+  const cb=$("#mineCartBadge");if(cb){const c=(typeof diyCartCount==='function')?diyCartCount():0;cb.innerHTML=c?('<span>'+c+'</span>'):'';}
   renderMyReader();
   renderReaderEntry();
 }
@@ -5351,7 +5363,7 @@ function paintBrandMarks(){document.querySelectorAll('.brand-mark').forEach(el=>
   var pe=q('.st-price');if(pe)pe.textContent='¥ '+t+'.0';
   var ce=q('.st-cnt');if(ce)ce.textContent=n+' 颗';
   var se=q('.st-sugg');if(se)se.textContent='建议净手围 '+w+'cm';
-  var ca=q('.st-cart');if(ca)ca.innerHTML='🛒 加入购物车 · 结算　¥'+t+' · '+n+'颗';
+  var ca=q('.st-cart');if(ca)ca.innerHTML='结算　¥'+t+' · '+n+'颗';
   var eh=document.getElementById('stEmptyHint');if(eh)eh.style.display=n?'none':'';
   studioGrid().shown.forEach(function(id){var el=document.getElementById('stq_'+id);if(el)el.textContent=studioCountOf(id);var card=el&&el.parentNode&&el.parentNode.parentNode;if(card&&card.classList)card.classList.toggle('has',studioCountOf(id)>0);});};
 
@@ -5425,9 +5437,20 @@ function paintBrandMarks(){document.querySelectorAll('.brand-mark').forEach(el=>
   var usePt=Math.min(state.balance,450),yuanOff=Math.min(Math.round(usePt/15),Math.round(total*0.3)),useReal=usePt>0&&yuanOff>0,pay=Math.max(0,pay0-(useReal?yuanOff:0));
   var r=await apiPost('/api/goods',{action:'redeem',phone:state.phone,goodId:'studio',name:name,ptOff:useReal?usePt:0,yuanOff:useReal?yuanOff:0,price:pay0});
   var o=r.ok,j=r.j;
-  if(o&&j&&j.ok&&j.code){if(typeof j.balance==='number')state.balance=j.balance;if(useReal)state.ledger.unshift({type:'心元抵扣 · '+name,amount:'-'+usePt,when:'刚刚'});refreshBalanceUI();studioClosePrev();
-   await modal({icon:'📿',title:'订单已提交',msg:(useReal?'已抵扣 '+usePt+' 心元。\n':'')+'定制码 '+j.code+'\n'+(pkg==='gift'?'（含精美礼盒 +¥15）\n':'')+'发客服微信 Syl18268346784 确认净手围与尾款 ¥'+pay+'。',okText:'复制码 · 找客服'});copyText(j.code,'定制码已复制～');
+  if(o&&j&&j.ok&&j.code){if(typeof j.balance==='number')state.balance=j.balance;if(useReal)state.ledger.unshift({type:'心元抵扣 · '+name,amount:'-'+usePt,when:'刚刚'});refreshBalanceUI();
+   try{var _g={};S.beads.forEach(function(b){var k=b.id+'@'+b.mm;if(!_g[k])_g[k]={id:b.id,mm:b.mm,n:0};_g[k].n++;});var _its=Object.keys(_g).map(function(k){var r=_g[k];return {name:STUDIO_BEADS[r.id].n,mm:r.mm,n:r.n,price:studioPrice(r.id,r.mm)*r.n};});var _ords=(typeof diyOrdersGet==='function')?diyOrdersGet():[];_ords.unshift({id:'o'+Date.now(),code:j.code,name:name,items:_its,count:S.beads.length,total:total,pay:pay,pkg:pkg,wrist:wrist,status:'待客服确认',when:Date.now()});if(typeof diyOrdersSet==='function')diyOrdersSet(_ords);if(S._fromCartId&&typeof diyCartGet==='function'){diyCartSet(diyCartGet().filter(function(x){return x.id!==S._fromCartId;}));S._fromCartId=null;}}catch(e){}
+   studioClosePrev();
+   await modal({icon:'📿',title:'订单已提交',msg:(useReal?'已抵扣 '+usePt+' 心元。\n':'')+'定制码 '+j.code+'\n'+(pkg==='gift'?'（含精美礼盒 +¥15）\n':'')+'发客服微信 Syl18268346784 确认净手围与尾款 ¥'+pay+'。\n\n订单已存入「我的 · 我的订单」。',okText:'复制码 · 找客服'});copyText(j.code,'定制码已复制～');
   }else toast((j&&j.error)||'提交失败');};
+ window.studioAddToCart=function(){var S=studioState();if(!S.beads.length){toast('先加几颗珠子');return;}
+  var total=studioTotal(),pkg=S.pkg||'std',wrist=(S.wristCm||studioWristCm());
+  var g={};S.beads.forEach(function(b){var k=b.id+'@'+b.mm;if(!g[k])g[k]={id:b.id,mm:b.mm,n:0};g[k].n++;});
+  var its=Object.keys(g).map(function(k){var r=g[k];return {name:STUDIO_BEADS[r.id].n,mm:r.mm,n:r.n,price:studioPrice(r.id,r.mm)*r.n};});
+  var nm=('灵感定制·'+(STUDIO_BEADS[S.beads[0].id]?STUDIO_BEADS[S.beads[0].id].n:'串')+'·'+wrist+'cm').slice(0,40);
+  var item={id:'c'+Date.now()+Math.floor(Math.random()*1000),name:nm,items:its,count:S.beads.length,total:total,pkg:pkg,wrist:wrist,beads:S.beads.map(function(b){return {id:b.id,mm:b.mm};}),when:Date.now()};
+  var cart=(typeof diyCartGet==='function')?diyCartGet():[];cart.unshift(item);if(typeof diyCartSet==='function')diyCartSet(cart);
+  if(typeof confirmBox==='function'){confirmBox('已加入购物车 · 共 '+cart.length+' 件','去购物车','继续设计').then(function(ok){if(ok)go('diycart');});}else if(typeof toast==='function')toast('已加入购物车');
+ };
 
  /* 重建 renderBeadshop：换盘钮 + 空态提示 + −/＋ 素材栏 */
  window.renderBeadshop=function(){var box=document.getElementById('beadBody');if(!box)return;var back=state._fateBack||'skinshop';
@@ -5443,7 +5466,7 @@ function paintBrandMarks(){document.querySelectorAll('.brand-mark').forEach(el=>
      +'<div class="st-undo" onclick="studioUndo()">↩</div>'
      +'<div class="st-empty-hint" id="stEmptyHint" style="'+(n?'display:none':'')+'">轻点下方素材，<br>添加第一颗珠子 ✧</div></div>'
    +'<div class="st-tools"><button class="st-tool" onclick="studioSetWrist()">📏 '+(S.wristCm?S.wristCm+'cm':'手围')+'</button><button class="st-tool" onclick="studioClear()">🗑</button><button class="st-tool" onclick="studioSave()">💾</button><button class="st-gather" onclick="studioToggleGather()">'+(S.gathered?'解除串珠':'收拢成串')+'</button></div>'
-   +'<button class="st-cart" onclick="studioCheckout()">🛒 加入购物车 · 结算　¥'+total+' · '+n+'颗</button>'+studioVecCard()
+   +'<div class="st-cartrow"><button class="st-cart-add" onclick="studioAddToCart()">🛒 加入购物车</button><button class="st-cart" onclick="studioCheckout()">结算　¥'+total+' · '+n+'颗</button></div>'+studioVecCard()
    +'<div class="st-search"><input placeholder="搜珠子（如 南红 / 月光 / 香珠）" value="'+esc(S.q||'')+'" oninput="studioSearch(this.value)"></div>'
    +'<div class="st-cats">'+STUDIO_CAT.map(function(c){return '<b class="'+(S.cat===c?'on':'')+'" onclick="studioSetCat(\''+c+'\')">'+c+'</b>';}).join('')+'</div>'
    +'<div class="st-catbody"><div class="st-side">'+subs.map(function(s){return '<div class="'+(S.sub===s?'on':'')+'" onclick="studioSetSub(\''+s+'\')">'+studioSubLabel(s)+'</div>';}).join('')+'</div>'
@@ -6219,8 +6242,13 @@ function studioIntroClose(){var ov=document.getElementById('diyIntro');if(window
 #archedit .af-lb{flex:none;width:100px;font-size:14px;color:var(--ink)}
 #archedit .af-ctrl{flex:1;min-width:0;display:flex;justify-content:flex-end;cursor:text}
 #archedit .af-in{width:100%;min-width:0;box-sizing:border-box;text-align:right;border:none;background:transparent;font-size:14px;color:var(--ink);outline:none;-webkit-appearance:none;appearance:none;pointer-events:auto}
-/* 让文本输入框的可点区域填满整行，避免上下留白处点击无反应 */
-#archedit input.af-in{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default;cursor:text;padding:15px 0;margin:-15px 0;min-height:24px;position:relative;z-index:2}
+/* 让文本输入框的可点区域填满整行，避免上下留白处点击无反应（仅文本框，排除原生日期框）*/
+#archedit input.af-in{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default;cursor:text}
+#archedit input.af-in:not([type=date]){padding:15px 0;margin:-15px 0;min-height:24px;position:relative;z-index:2}
+/* iOS Safari 下 appearance:none 会让原生日期框的值不显示——显式给高度与值样式，保证公历日期可见 */
+#archedit input[type=date].af-in{min-height:22px;line-height:22px;cursor:pointer}
+#archedit input[type=date].af-in::-webkit-date-and-time-value{text-align:right;margin:0;min-height:20px}
+#archedit input[type=date].af-in::-webkit-datetime-edit{text-align:right}
 #archedit .af-in::placeholder{color:var(--ink-faint)}
 #archedit select.af-in{text-align-last:right;direction:rtl}
 #archedit .af-lunar{display:flex;gap:6px;justify-content:flex-end;flex-wrap:nowrap}
@@ -6489,6 +6517,63 @@ window.renderBizConsole=function(){
 #reading .rd-fab-b.gold{background:linear-gradient(135deg,#F0D79B,#D9A84E);color:#2a1f10;box-shadow:0 14px 30px rgba(201,162,78,.4)}
 #reading .rd-fab-b.light{background:var(--bg-raise);color:var(--ink);border:1px solid rgba(201,162,78,.5);box-shadow:0 10px 24px rgba(70,58,40,.14)}
 .rd-fab-spacer{height:80px}
+/* ===== 购物车 / 我的订单 ===== */
+#diycart,#diyorders{background:var(--bg)}
+#diycartBody,#diyordersBody{padding:0 18px 46px}
+.dc-empty{text-align:center;color:var(--ink-faint);font-size:13px;padding:54px 20px 10px;line-height:2}
+.dc-card{background:var(--bg-raise);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-top:12px;box-shadow:0 10px 26px rgba(70,62,48,.05)}
+.dc-hd{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.dc-nm{font-family:var(--serif);font-size:15.5px;color:var(--ink);font-weight:700;line-height:1.3}
+.dc-price{font-family:var(--serif);font-size:16px;color:var(--gold-deep);font-weight:700;flex:none}
+.dc-meta{font-size:11.5px;color:var(--ink-faint);margin-top:5px;line-height:1.6}
+.dc-items{margin-top:11px;padding-top:10px;border-top:1px solid var(--line-soft);font-size:12px;color:var(--ink-soft);line-height:2}
+.dc-acts{display:flex;gap:10px;margin-top:13px}
+.dc-acts button{flex:1;height:40px;border-radius:20px;font-size:13.5px;font-weight:600;font-family:var(--serif);cursor:pointer;border:none}
+.dc-buy{background:linear-gradient(135deg,#F0D79B,#D9A84E);color:#2a1f10}
+.dc-del{background:var(--bg);color:var(--ink-soft);border:1px solid var(--line)}
+.dc-status{font-size:11px;padding:4px 11px;border-radius:11px;border:1px solid rgba(201,162,78,.42);color:var(--gold-deep);background:rgba(201,162,78,.08);white-space:nowrap}
+#mineCartBadge span,.mine-cart-n{display:inline-block;margin-left:6px;min-width:16px;height:16px;line-height:16px;padding:0 5px;border-radius:8px;background:var(--amber);color:#fff;font-size:10px;text-align:center;vertical-align:middle}
 </style>
+<script>
+/* ===== 购物车 / 订单：本地持久化 + 视图 ===== */
+(function(){
+  var host=document.getElementById('home')&&document.getElementById('home').parentNode;
+  if(host){
+    if(!document.getElementById('diycart')){var a=document.createElement('section');a.className='screen';a.id='diycart';a.innerHTML='<div id="diycartBody"></div>';host.appendChild(a);}
+    if(!document.getElementById('diyorders')){var e=document.createElement('section');e.className='screen';e.id='diyorders';e.innerHTML='<div id="diyordersBody"></div>';host.appendChild(e);}
+  }
+})();
+function diyPad(n){return (n<10?'0':'')+n;}
+function diyDateStr(ts){try{var d=new Date(ts||0);return d.getFullYear()+'-'+diyPad(d.getMonth()+1)+'-'+diyPad(d.getDate())+' '+diyPad(d.getHours())+':'+diyPad(d.getMinutes());}catch(e){return '';}}
+function diyCartGet(){try{return JSON.parse(localStorage.getItem('ft_diycart')||'[]')||[];}catch(e){return [];}}
+function diyCartSet(a){try{localStorage.setItem('ft_diycart',JSON.stringify(a||[]));}catch(e){}try{state.diyCart=a;}catch(e){}}
+function diyOrdersGet(){try{return JSON.parse(localStorage.getItem('ft_diyorders')||'[]')||[];}catch(e){return [];}}
+function diyOrdersSet(a){try{localStorage.setItem('ft_diyorders',JSON.stringify(a||[]));}catch(e){}try{state.diyOrders=a;}catch(e){}}
+window.diyCartCount=function(){return diyCartGet().length;};
+function diyItemsHTML(list){return (list||[]).map(function(it){return '<div>'+esc(it.name)+' '+it.mm+'mm ×'+it.n+'　¥'+it.price+'</div>';}).join('');}
+window.renderDiyCart=function(){
+  var box=document.getElementById('diycartBody');if(!box)return;var cart=diyCartGet();
+  var body=cart.map(function(c){
+    return '<div class="dc-card"><div class="dc-hd"><div><div class="dc-nm">'+esc(c.name)+'</div><div class="dc-meta">'+c.count+' 颗 · 手围 '+c.wrist+'cm · '+(c.pkg==='gift'?'精美礼盒':'普通包装')+'<br>'+diyDateStr(c.when)+'</div></div><div class="dc-price">¥'+c.total+'</div></div><div class="dc-items">'+diyItemsHTML(c.items)+'</div><div class="dc-acts"><button class="dc-del" onclick="diyCartRemove(\''+c.id+'\')">删除</button><button class="dc-buy" onclick="diyCartCheckout(\''+c.id+'\')">去结算 →</button></div></div>';
+  }).join('');
+  box.innerHTML='<div class="topbar"><div class="back" onclick="go(\'mine\')">‹</div><div class="tt">我的购物车</div><div style="width:24px"></div></div>'
+   +(cart.length?body:'<div class="dc-empty">购物车还是空的<br>去「心元石验室」设计一串，加入购物车吧</div><div style="text-align:center;margin-top:8px"><button class="dc-buy" style="padding:11px 24px;border-radius:22px;border:none;font-family:var(--serif);font-weight:700;cursor:pointer" onclick="goFateFrom(\'shop\')">＋ 去定制珠串</button></div>');
+};
+window.diyCartRemove=function(id){var run=function(ok){if(!ok)return;diyCartSet(diyCartGet().filter(function(x){return x.id!==id;}));if(typeof toast==='function')toast('已从购物车移除');renderDiyCart();};if(typeof confirmBox==='function')confirmBox('从购物车移除这一件？','移除','再想想').then(run);else run(true);};
+window.diyCartCheckout=function(id){var it=diyCartGet().find(function(x){return x.id===id;});if(!it){toast('该商品已不在购物车');return;}
+  try{var S=studioState();S.beads=(it.beads||[]).map(function(b){return {id:b.id,mm:b.mm,x:0,y:0,vx:0,vy:0,gathered:true};});S.pkg=it.pkg||'std';if(it.wrist)S.wristCm=it.wrist;S._fromCartId=id;S._seeded=true;S.gathered=true;}catch(e){}
+  if(typeof goFateFrom==='function'){state._fateSource='shop';state._fateBack='diycart';}
+  go('beadshop');setTimeout(function(){try{if(typeof studioGather==='function')studioGather(true);}catch(e){}if(typeof studioCheckout==='function')studioCheckout();},280);
+};
+window.renderDiyOrders=function(){
+  var box=document.getElementById('diyordersBody');if(!box)return;var ords=diyOrdersGet();
+  var body=ords.map(function(o){
+    return '<div class="dc-card"><div class="dc-hd"><div><div class="dc-nm">'+esc(o.name)+'</div><div class="dc-meta">定制码 '+esc(o.code||'—')+'<br>'+diyDateStr(o.when)+'</div></div><div class="dc-price">¥'+o.pay+'</div></div><div class="dc-items">'+diyItemsHTML(o.items)+(o.pkg==='gift'?'<div>精美礼盒 +¥15</div>':'')+'</div><div class="dc-hd" style="margin-top:13px;align-items:center"><span class="dc-status">'+esc(o.status||'待客服确认')+'</span><button class="dc-buy" style="flex:none;padding:9px 16px;border-radius:18px;border:none;font-family:var(--serif);font-weight:700;font-size:12.5px;cursor:pointer" onclick="diyOrderContact(\''+esc(o.code||'')+'\')">复制码 · 找客服</button></div></div>';
+  }).join('');
+  box.innerHTML='<div class="topbar"><div class="back" onclick="go(\'mine\')">‹</div><div class="tt">我的订单</div><div style="width:24px"></div></div>'
+   +(ords.length?body:'<div class="dc-empty">还没有订单<br>定制一串专属珠串，提交后就能在这看到</div><div style="text-align:center;margin-top:8px"><button class="dc-buy" style="padding:11px 24px;border-radius:22px;border:none;font-family:var(--serif);font-weight:700;cursor:pointer" onclick="goFateFrom(\'shop\')">＋ 去定制珠串</button></div>');
+};
+window.diyOrderContact=function(code){if(code&&typeof copyText==='function')copyText(code,'定制码已复制，发客服微信 Syl18268346784 确认');else if(typeof toast==='function')toast('客服微信 Syl18268346784');};
+</script>
 </body>
 </html>
