@@ -1,1 +1,8 @@
-{ "navigationStyle": "custom", "usingComponents": {} }
+{
+  "navigationStyle": "default",
+  "navigationBarBackgroundColor": "#F1EADC",
+  "navigationBarTextStyle": "black",
+  "navigationBarTitleText": "盘愈 PANYU",
+  "backgroundColor": "#F1EADC",
+  "usingComponents": {}
+}

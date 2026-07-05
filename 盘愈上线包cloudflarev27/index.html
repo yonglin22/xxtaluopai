@@ -13,6 +13,8 @@
   if(window.__MP__){var css='';
     if(window.__MP_TAB__)css+='#tabbar{display:none!important}.screen{padding-bottom:26px!important}';
     if(safetop>0)css+='.phone{padding-top:'+safetop+'px;box-sizing:border-box}.orb{top:'+(safetop+40)+'px!important}';
+    /* 子页返回栏固定在顶部 + 毛玻璃（tab 主页返回栏在下方全局隐藏） */
+    css+='.topbar{position:-webkit-sticky!important;position:sticky!important;top:0!important;z-index:60;margin:0 -30px 8px!important;padding:10px 30px 8px!important;height:auto!important;min-height:50px;background:rgba(241,234,220,.86);-webkit-backdrop-filter:saturate(1.5) blur(16px);backdrop-filter:saturate(1.5) blur(16px);border-bottom:1px solid rgba(225,215,195,.5);}';
     if(css){var st=document.createElement('style');st.textContent=css;(document.head||document.documentElement).appendChild(st);}}
 }catch(e){}})();
 </script>
@@ -66,6 +68,8 @@
   .topbar{display:flex;align-items:center;height:50px;margin:0 -30px 6px;padding:0 24px;}
   .back{font-size:22px;color:var(--ink);line-height:1;padding:8px 8px 8px 0;cursor:pointer;}
   .topbar .tt{font-family:var(--serif);font-size:16px;letter-spacing:.1em;margin-left:4px;}
+  /* 底部 tab 一级页（星盘/问/商城）由悬浮 tabbar 导航，去掉多余的返回按钮+标题栏 */
+  #natal>.topbar,#ask>.topbar,#skinshop>.topbar{display:none!important;}
 
   .btn{display:inline-flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:15px;letter-spacing:.08em;
     padding:14px 30px;border-radius:30px;background:var(--ink);color:var(--face);border:none;cursor:pointer;transition:opacity .3s;}
@@ -6598,7 +6602,9 @@ window.diyOrderContact=function(code){if(code&&typeof copyText==='function')copy
   window.mpNav=function(u){try{if(window.wx&&wx.miniProgram&&wx.miniProgram.navigateTo){wx.miniProgram.navigateTo({url:u});return true;}}catch(e){}return false;};
   window.mpLogin=function(){return window.mpNav('/pages/wxlogin/wxlogin');};
   window.mpPay=function(no,amount,desc){return window.mpNav('/pages/pay/pay?orderNo='+encodeURIComponent(no||'')+'&amount='+encodeURIComponent(amount||'')+'&desc='+encodeURIComponent(desc||''));};
+  try{document.title='盘愈 PANYU';}catch(e){}
   window.addEventListener('load',function(){setTimeout(function(){try{
+    document.title='盘愈 PANYU'; /* 只让原生标题栏显示「盘愈 PANYU」 */
     if(window.__MP_SCREEN__&&typeof go==='function')go(window.__MP_SCREEN__);
     else if(typeof state!=='undefined'&&state.phone&&typeof go==='function')go('home');
     var b=document.querySelector('#login .wxbtn'); if(b)b.innerHTML='<span class="wxdot"></span>微信一键登录';
