@@ -32,6 +32,6 @@ Page({
   back() {
     const pages = getCurrentPages();
     if (pages.length > 1) wx.navigateBack();
-    else wx.switchTab({ url: '/pages/home/home' });
+    else wx.reLaunch({ url: '/pages/webview/webview' });
   }
 });
