@@ -43,7 +43,7 @@
       <view class="poster-seal">串</view>
     </view>
     <view class="diy-body">
-      <view class="diy-cv">📿</view>
+      <view class="diy-cv diy-bead"></view>
       <view class="diy-tx">
         <view class="poster-title serif" style="font-size:36rpx">DIY 命理选品 · 心元石验室</view>
         <view class="poster-sub">按你的八字五行 + 此刻议题，为你预排一串专属珠串 · 可自由增减、调色、成串</view>
@@ -56,6 +56,7 @@
   <!-- 情绪陪伴 -->
   <view class="section-h">情 绪 陪 伴 · 有 我 在</view>
   <view wx:for="{{moods}}" wx:key="key" class="exrow" data-k="{{item.key}}" bindtap="onMood">
+    <view class="ex-ic ic-{{item.key}}"></view>
     <view class="ex-main">
       <view class="ex-t">{{item.t}}</view>
       <view class="ex-d">{{item.d}}</view>
