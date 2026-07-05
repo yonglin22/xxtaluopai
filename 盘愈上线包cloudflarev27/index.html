@@ -2638,7 +2638,7 @@ function studioGather(silent){const S=studioState();S.yaw=0;S.pitch=1.12;const n
   const sz=S.beads.map(b=>Math.max(4,b.mm||8));const units=sz.reduce((a,b)=>a+b,0)||1;let acc=0;
   S.beads.forEach((b,i)=>{const mid=acc+sz[i]/2;acc+=sz[i];const a=mid/units*6.283-1.5708;b.x=Math.cos(a)*0.72;b.y=Math.sin(a)*0.57;});
   S.gathered=true;if(!silent)studioPaint();}
-function studioScatter(){const S=studioState();S.beads.forEach((b,i)=>{const a=i*2.399;const rr=0.30+((i*0.13)%0.34);b.x=Math.cos(a)*rr;b.y=Math.sin(a)*rr*0.9;});S.gathered=false;studioPaint();}
+function studioScatter(){const S=studioState();studioAudioArm();S.beads.forEach((b,i)=>{const a=i*2.399;b.x=Math.cos(a)*0.1;b.y=Math.sin(a)*0.1;const sp=0.03+Math.random()*0.026;b.vx=Math.cos(a)*sp;b.vy=Math.sin(a)*sp;});S.gathered=false;studioPhysKick();studioPaint();}
 /* ---- 瓷盘 + 摆珠 渲染（逐颗按 x,y,mm 画）---- */
 function studioPaint(){
   const cv=document.getElementById('studioPlate');if(!cv)return;const S=studioState();
@@ -2676,6 +2676,47 @@ function studioPaint(){
   });
 }
 let STUDIO_SEL=null;
+/* ===== 散开态·弹珠物理（拖动带惯性 + 珠间/边缘碰撞 + 碰撞音 + 添加时向上发射滚入）===== */
+let STUDIO_DRAG=null,_stRAF=0,_stIdle=0,_stAudio=null,_stLastClack=0;
+function studioAudioArm(){try{var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;if(!_stAudio)_stAudio=new AC();if(_stAudio.state==='suspended')_stAudio.resume();}catch(e){}}
+function studioRNorm(b){return Math.max(0.033,(b.mm||8)*0.026);}
+function studioMass(b){return (b===STUDIO_DRAG)?1e6:Math.max(4,(b.mm||8));}
+function studioClack(b,impact){try{
+  var now=(window.performance&&performance.now)?performance.now():Date.now();if(now-_stLastClack<26)return;_stLastClack=now;
+  studioAudioArm();if(!_stAudio)return;
+  var t=_stAudio.currentTime,o=_stAudio.createOscillator(),g=_stAudio.createGain();
+  var mm=(b&&b.mm)||8,base=560-(mm-4)*16;o.type='triangle';
+  o.frequency.setValueAtTime(base+Math.random()*50,t);o.frequency.exponentialRampToValueAtTime(Math.max(120,base*0.55),t+0.05);
+  var vol=Math.min(0.26,Math.max(0.02,impact*5.5));g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.0006,t+0.075);
+  o.connect(g);g.connect(_stAudio.destination);o.start(t);o.stop(t+0.09);
+}catch(e){}}
+function studioPhysStep(){
+  var S=studioState();if(S.gathered)return false;var bs=S.beads,n=bs.length;if(!n)return false;
+  var BR=0.86,moving=false,i,j;
+  for(i=0;i<n;i++){var b=bs[i];if(b===STUDIO_DRAG)continue;
+    b.vx=(b.vx||0)*0.955;b.vy=(b.vy||0)*0.955;b.x+=b.vx;b.y+=b.vy;
+    if(Math.abs(b.vx)>0.0009||Math.abs(b.vy)>0.0009)moving=true;}
+  for(i=0;i<n;i++){var w=bs[i];if(w===STUDIO_DRAG)continue;var r=studioRNorm(w),lim=BR-r,d=Math.hypot(w.x,w.y);
+    if(d>lim&&d>0.0001){var nx=w.x/d,ny=w.y/d;w.x=nx*lim;w.y=ny*lim;var vn=(w.vx||0)*nx+(w.vy||0)*ny;
+      if(vn>0){w.vx-=1.55*vn*nx;w.vy-=1.55*vn*ny;if(vn>0.014)studioClack(w,vn);}}}
+  for(i=0;i<n;i++)for(j=i+1;j<n;j++){var a=bs[i],c=bs[j];var dx=c.x-a.x,dy=c.y-a.y,dist=Math.hypot(dx,dy),md=studioRNorm(a)+studioRNorm(c);
+    if(dist<md){if(dist<1e-4){dx=(Math.random()-0.5)*0.01;dy=(Math.random()-0.5)*0.01;dist=Math.hypot(dx,dy)||1e-4;}
+      var ux=dx/dist,uy=dy/dist,ov=md-dist,ma=studioMass(a),mc=studioMass(c),tot=ma+mc;
+      a.x-=ux*ov*(mc/tot);a.y-=uy*ov*(mc/tot);c.x+=ux*ov*(ma/tot);c.y+=uy*ov*(ma/tot);
+      var rvx=(c.vx||0)-(a.vx||0),rvy=(c.vy||0)-(a.vy||0),vn=rvx*ux+rvy*uy;
+      if(vn<0){var e=0.42,jimp=-(1+e)*vn/(1/ma+1/mc);
+        if(a!==STUDIO_DRAG){a.vx=(a.vx||0)-jimp*ux/ma;a.vy=(a.vy||0)-jimp*uy/ma;}
+        if(c!==STUDIO_DRAG){c.vx=(c.vx||0)+jimp*ux/mc;c.vy=(c.vy||0)+jimp*uy/mc;}
+        if(-vn>0.012)studioClack(c,-vn);moving=true;}}}
+  return moving||!!STUDIO_DRAG;
+}
+function studioPhysLoop(){
+  if(!document.getElementById('studioPlate')){_stRAF=0;return;}
+  var moving=studioPhysStep();studioPaint();
+  if(moving){_stIdle=0;_stRAF=requestAnimationFrame(studioPhysLoop);}
+  else{_stIdle++;if(_stIdle<5)_stRAF=requestAnimationFrame(studioPhysLoop);else _stRAF=0;}
+}
+function studioPhysKick(){var S=studioState();if(S.gathered){_stRAF=0;return;}if(!_stRAF)_stRAF=requestAnimationFrame(studioPhysLoop);}
 /* ---- 画布拖动：命中最近珠 → 拖动它（解除态自由拖；收拢态拖动=不动，提示解除）---- */
 function studioBindCanvas(cv){
   if(cv._sbound)return;cv._sbound=1;cv.style.touchAction='none';
@@ -2684,18 +2725,22 @@ function studioBindCanvas(cv){
     const mx=e.clientX-r.left,my=e.clientY-r.top;let best=null,bd=1e9;
     S.beads.forEach(b=>{const px=cx+b.x*R,py=cy+b.y*R*0.9,d=Math.max(9,(b.mm||8)*mmPx);const dist=Math.hypot(mx-px,my-py);if(dist<d*0.62&&dist<bd){bd=dist;best=b;}});
     return {best,R,cx,cy,W,H,mx,my};};
-  cv.addEventListener('pointerdown',e=>{const S=studioState();
+  cv.addEventListener('pointerdown',e=>{const S=studioState();studioAudioArm();
     if(S.gathered){rot={x:e.clientX,y:e.clientY,yaw:S.yaw||0,pitch:(S.pitch==null?1.12:S.pitch)};try{cv.setPointerCapture(e.pointerId);}catch(_){}return;}
-    const h=hit(e);if(h.best){drag={b:h.best,R:h.R,cx:h.cx,cy:h.cy};STUDIO_SEL=h.best;try{cv.setPointerCapture(e.pointerId);}catch(_){}studioPaint();}});
+    const h=hit(e);if(h.best){drag={b:h.best,R:h.R,cx:h.cx,cy:h.cy};STUDIO_SEL=h.best;STUDIO_DRAG=h.best;h.best.vx=0;h.best.vy=0;try{cv.setPointerCapture(e.pointerId);}catch(_){}studioPhysKick();}});
   cv.addEventListener('pointermove',e=>{const S=studioState();
     if(rot){const dx=e.clientX-rot.x,dy=e.clientY-rot.y;S.yaw=rot.yaw+dx*0.011;S.pitch=Math.max(0.14,Math.min(1.5,rot.pitch-dy*0.010));studioPaint();return;}
     if(!drag)return;const r=cv.getBoundingClientRect();const mx=e.clientX-r.left,my=e.clientY-r.top;
-    let nx=(mx-drag.cx)/drag.R,ny=(my-drag.cy)/(drag.R*0.9);const rr=Math.hypot(nx,ny);if(rr>0.94){nx=nx/rr*0.94;ny=ny/rr*0.94;}
-    drag.b.x=nx;drag.b.y=ny;studioPaint();});
-  cv.addEventListener('pointerup',()=>{drag=null;rot=null;});cv.addEventListener('pointercancel',()=>{drag=null;rot=null;});
+    let nx=(mx-drag.cx)/drag.R,ny=(my-drag.cy)/(drag.R*0.9);const lim=0.86-studioRNorm(drag.b);const rr=Math.hypot(nx,ny);if(rr>lim){nx=nx/rr*lim;ny=ny/rr*lim;}
+    drag.b.vx=(nx-drag.b.x);drag.b.vy=(ny-drag.b.y);drag.b.x=nx;drag.b.y=ny;studioPhysKick();});
+  cv.addEventListener('pointerup',()=>{drag=null;rot=null;STUDIO_DRAG=null;studioPhysKick();});
+  cv.addEventListener('pointercancel',()=>{drag=null;rot=null;STUDIO_DRAG=null;studioPhysKick();});
 }
 /* ---- 目录点选：调珠大小弹窗 → 加进盘 ---- */
-function studioAdd(id){const b=STUDIO_BEADS[id];if(!b)return;studioSizeModal(id,b.mm,mm=>{const S=studioState();const a=S.beads.length*2.399,rr=0.55;S.beads.push({id,mm,x:S.gathered?0:Math.cos(a)*rr,y:S.gathered?0:Math.sin(a)*rr});if(S.gathered)studioGather(true);toast('加了一颗「'+b.n+'」'+mm+'mm');renderBeadshop();});}
+function studioAdd(id){const b=STUDIO_BEADS[id];if(!b)return;studioSizeModal(id,b.mm,mm=>{const S=studioState();studioAudioArm();
+  if(S.gathered){S.beads.push({id,mm,x:0,y:0});studioGather(true);}
+  else{S.beads.push({id,mm,x:(Math.random()*0.34-0.17),y:0.8,vx:(Math.random()*0.03-0.015),vy:-(0.058+Math.random()*0.036)});}
+  toast('加了一颗「'+b.n+'」'+mm+'mm');renderBeadshop();if(!S.gathered)studioPhysKick();});}
 function studioSizeModal(id,mm0,cb){
   const b=STUDIO_BEADS[id];let mm=mm0;
   const host=document.getElementById('toast');
