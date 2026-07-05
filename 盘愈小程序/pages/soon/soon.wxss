@@ -1,5 +1,0 @@
-.soon { text-align: center; padding-top: 220rpx; }
-.soon-orb { font-size: 120rpx; opacity: .85; }
-.soon-t { font-size: 44rpx; color: var(--ink); margin-top: 30rpx; }
-.soon-d { font-size: 26rpx; color: var(--ink-faint); line-height: 1.9; margin-top: 18rpx; }
-.soon-btn { width: 240rpx; margin: 50rpx auto 0; }

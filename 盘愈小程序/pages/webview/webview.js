@@ -1,29 +1,19 @@
-// ============================================================
-// 内容页：full-screen web-view 内嵌 H5（与 H5 观感 100% 一致）
-// 上线前把 H5_BASE 换成你自己的「已备案业务域名」，并在小程序后台配置。
-// ============================================================
-const H5_BASE = 'https://taluo-b76.pages.dev/';
-
+const mp = require('../../utils/mp.js');
 Page({
   data: { url: '' },
-
-  onLoad(query) {
-    // mp=1 告诉 H5 当前运行在小程序 web-view 中（H5 据此走原生登录/支付桥，阶段二）
-    // screen=xxx 可深链到 H5 具体页面（需 H5 读取该参数，阶段二）
-    let url = H5_BASE + '?mp=1';
-    if (query && query.screen) url += '&screen=' + encodeURIComponent(query.screen);
-    this.setData({ url });
+  onLoad() {
+    let st = 66;
+    try { const m = wx.getMenuButtonBoundingClientRect(); if (m && m.bottom) st = Math.round(m.bottom + 6); }
+    catch (e) { try { st = (wx.getSystemInfoSync().statusBarHeight || 20) + 46; } catch (_) {} }
+    this._st = st;
+    this.setData({ url: mp.urlFull(st) });
   },
-
-  // H5 通过 wx.miniProgram.postMessage 传来的数据（仅在返回/分享/跳转等时机触发）
-  onMessage(e) {
-    const data = (e.detail && e.detail.data) || [];
-    console.log('[webview→mp] message:', data);
+  onShow() {
+    try { wx.showShareMenu({ withShareTicket: true, menus: ['shareAppMessage', 'shareTimeline'] }); } catch (e) {}
+    const u = mp.urlFull(this._st || 66);
+    if (u !== this.data.url) this.setData({ url: u }); // 登录态变化时刷新
   },
-  onErr() {
-    wx.showModal({
-      title: '页面加载失败', showCancel: false, confirmText: '知道了',
-      content: '请检查网络；若在真机/预览，需把 H5 域名加入小程序后台「业务域名」（开发者工具里勾选「不校验合法域名/web-view」即可预览）。'
-    });
-  }
+  onErr() { wx.showToast({ title: '加载失败：检查网络/业务域名白名单', icon: 'none' }); },
+  onShareAppMessage() { return { title: '盘愈 · 自我探索与情绪疏导', path: '/pages/webview/webview' }; },
+  onShareTimeline() { return { title: '盘愈 · 自我探索与情绪疏导' }; }
 });

@@ -1,6 +1,0 @@
-<view class="page soon">
-  <view class="soon-orb">📿</view>
-  <view class="soon-t serif">{{title}}</view>
-  <view class="soon-d">这个模块正在原生开发中<br/>将按阶段陆续上线，敬请期待</view>
-  <view class="btn btn-ghost soon-btn" bindtap="back">‹ 返回</view>
-</view>

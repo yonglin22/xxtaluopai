@@ -9,7 +9,11 @@
   var q=new URLSearchParams(location.search||'');
   window.__MP__=q.get('mp')==='1'; window.__MP_SCREEN__=q.get('screen')||''; window.__MP_TAB__=q.get('tab')==='1';
   var ph=q.get('phone'); if(ph&&/^1[3-9]\d{9}$/.test(ph)){try{localStorage.setItem('ft_phone',ph);}catch(e){}}
-  if(window.__MP__&&window.__MP_TAB__){var st=document.createElement('style');st.textContent='#tabbar{display:none!important}.screen{padding-bottom:26px!important}';(document.head||document.documentElement).appendChild(st);}
+  var safetop=parseInt(q.get('safetop')||'0',10);
+  if(window.__MP__){var css='';
+    if(window.__MP_TAB__)css+='#tabbar{display:none!important}.screen{padding-bottom:26px!important}';
+    if(safetop>0)css+='.phone{padding-top:'+safetop+'px;box-sizing:border-box}.orb{top:'+(safetop+40)+'px!important}';
+    if(css){var st=document.createElement('style');st.textContent=css;(document.head||document.documentElement).appendChild(st);}}
 }catch(e){}})();
 </script>
 <title>盘愈 PANYU · 自我探索 · 情绪疏导</title>
@@ -6596,6 +6600,7 @@ window.diyOrderContact=function(code){if(code&&typeof copyText==='function')copy
   window.mpPay=function(no,amount,desc){return window.mpNav('/pages/pay/pay?orderNo='+encodeURIComponent(no||'')+'&amount='+encodeURIComponent(amount||'')+'&desc='+encodeURIComponent(desc||''));};
   window.addEventListener('load',function(){setTimeout(function(){try{
     if(window.__MP_SCREEN__&&typeof go==='function')go(window.__MP_SCREEN__);
+    else if(typeof state!=='undefined'&&state.phone&&typeof go==='function')go('home');
     var b=document.querySelector('#login .wxbtn'); if(b)b.innerHTML='<span class="wxdot"></span>微信一键登录';
     var ph=document.getElementById('lgPhone'); if(ph)ph.style.display='none';
   }catch(e){}},350);});
