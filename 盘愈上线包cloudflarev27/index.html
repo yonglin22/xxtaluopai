@@ -1115,6 +1115,7 @@
       <div class="domain sel" data-domain="姻缘"><div class="d-char">姻缘</div><div class="d-en">Love</div></div>
       <div class="domain" data-domain="事业"><div class="d-char">事业</div><div class="d-en">Career</div></div>
       <div class="domain" data-domain="财运"><div class="d-char">财运</div><div class="d-en">Fortune</div></div>
+      <div class="domain" data-domain="运势"><div class="d-char">运势</div><div class="d-en">Luck</div></div>
     </div>
     <div class="label" style="margin-top:26px">选个牌阵</div>
     <div class="domains" id="spreadSel"></div>
@@ -1186,7 +1187,7 @@
         <button class="btn" onclick="go('recharge')">充值</button>
       </div>
       <div class="w-streak" id="mineStreak"></div>
-      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--line-soft)"><span class="pv-wx" style="color:var(--amber);cursor:pointer;font-size:13px" onclick="go('profile')">⚙ 出生档案 / 编辑 →</span></div>
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--line-soft)"><span class="pv-wx" style="color:var(--amber);cursor:pointer;font-size:13px" onclick="archEdit('self')">⚙ 出生档案 / 编辑 →</span></div>
     </div>
     <div style="font-size:12px;color:var(--ink-faint);letter-spacing:.18em;margin:18px 2px 10px">探 索 · 自 我 与 关 系</div>
     <div class="exlist">
@@ -1214,6 +1215,7 @@
       <div class="pv-wx" onclick="copyText('Syl18268346784','客服微信已复制')">微信：Syl18268346784（点此复制）</div>
     </div>
     <div id="adminWrap" style="text-align:center;margin-top:22px;display:none"><button class="btn" style="background:transparent;color:var(--ink-faint);border:1px solid var(--line);font-size:13px;padding:12px 26px" onclick="go('admin')">🛠 管理后台</button></div>
+    <div style="text-align:center;margin-top:14px"><button class="btn" style="background:transparent;color:var(--ink-faint);border:1px solid var(--line);font-size:13px;padding:12px 30px;border-radius:24px" onclick="logout()">退出登录</button></div>
   </section>
 
   <!-- ===== RECHARGE 充值 ===== -->
@@ -3041,11 +3043,12 @@ function buildSign(){
 const QTPL={
   姻缘:['我和现在的人还能走下去吗？','暗恋的他/她对我有意思吗？','分手后还有复合的可能吗？','最近会遇到正缘吗？','异地恋还要不要坚持？','他到底在犹豫什么？','要不要接受这段新关系？','为什么我总遇到同一类人？'],
   事业:['这份工作还要不要继续做？','要不要跳槽去那家公司？','手上这个项目能顺利吗？','和领导的关系该怎么处理？','现在适合创业吗？','要不要转行试试？','这次晋升/调岗有戏吗？','我适合走管理还是专业路线？'],
-  财运:['最近我的财运怎么样？','这笔钱能顺利要回来吗？','要不要做这笔投资？','今年能攒下钱吗？','副业值不值得投入？','这次合作能赚到钱吗？','大额消费现在合适吗？','钱总是存不住，问题在哪？']
+  财运:['最近我的财运怎么样？','这笔钱能顺利要回来吗？','要不要做这笔投资？','今年能攒下钱吗？','副业值不值得投入？','这次合作能赚到钱吗？','大额消费现在合适吗？','钱总是存不住，问题在哪？'],
+  运势:['我最近整体运势怎么样？','这段时间适合大动作还是稳一稳？','近期要注意避开什么坑？','什么时候会有转机？','这件事整体走向是吉是凶？','眼下该进还是该退？','最近为什么总不顺？','这个阶段我最该抓住什么？']
 };
 let tplDomain='姻缘'; const tplOff={home:0,ask:0};
 function renderTpl(where){
-  if(where==='home'){const tabs=$("#homeTplTabs"); if(tabs)tabs.innerHTML=['姻缘','事业','财运'].map(d=>`<div class="tpl-tab ${d===tplDomain?'on':''}" onclick="pickTplDomain('${d}')">${d}</div>`).join('');}
+  if(where==='home'){const tabs=$("#homeTplTabs"); if(tabs)tabs.innerHTML=['姻缘','事业','财运','运势'].map(d=>`<div class="tpl-tab ${d===tplDomain?'on':''}" onclick="pickTplDomain('${d}')">${d}</div>`).join('');}
   const dm=where==='ask'?domain:tplDomain, list=QTPL[dm]||[], off=tplOff[where]||0, show=[];
   for(let i=0;i<4;i++)show.push(list[(off+i)%list.length]);
   const box=$(where==='ask'?'#askTpl':'#homeTpl'); if(!box)return;
@@ -3076,7 +3079,7 @@ function renderHome(){
   if(!todaySign)todaySign=buildSign();
   try{const _os=orbCompute(orbLocalLog());state.streak=(state._walletStreak!=null)?state._walletStreak:_os.streak;state.signedToday=(state.phone&&state._walletSignedToday!=null)?state._walletSignedToday:_os.fedToday;}catch(e){}
   const s=todaySign,p=state.profile,pl=$("#profLine");
-  if(pl)pl.innerHTML=p?`<span>属${p.zodiac||zodiacOf(p.sy||p.by)} · ${p.cons||constOf(p.sm||p.bm,p.sd||p.bd)}座${p.region?(' · '+p.region):''} · <a onclick="go('archive')">编辑档案</a></span>`:`<span><a onclick="go('profile')">＋ 完善出生信息，运势更贴合你 →</a></span>`;
+  if(pl)pl.innerHTML=p?`<span>属${p.zodiac||zodiacOf(p.sy||p.by)} · ${p.cons||constOf(p.sm||p.bm,p.sd||p.bd)}座${p.region?(' · '+p.region):''} · <a onclick="archEdit('self')">编辑档案</a></span>`:`<span><a onclick="go('profile')">＋ 完善出生信息，运势更贴合你 →</a></span>`;
   const eb=$("#homeEyebrow");if(eb)eb.textContent='TODAY · 今日牌'+(state.streak>0?(' · 连签'+state.streak+'天'):'');
   const en=s.energy, lvl=en>=75?'充盈':en>=55?'平稳':'偏低', theme=en>=75?'顺势而为':en>=55?'稳中有进':'宜静不宜动';
   const enNum=$("#homeEnergyNum");if(enNum)enNum.textContent=en;
@@ -3176,9 +3179,9 @@ field.addEventListener("input",()=>{cc.textContent=field.value.length;goBtn.disa
 /* ---- 首页内联问事 + 进阶牌阵 + 深度专题 ---- */
 const homeField=$("#homeField"),homeGo=$("#homeGo"),homeCc=$("#homeCc");
 if(homeField)homeField.addEventListener("input",()=>{homeCc.textContent=homeField.value.length;homeGo.disabled=homeField.value.trim().length<4;});
-const D_EN={姻缘:'Love',事业:'Career',财运:'Fortune'};
+const D_EN={姻缘:'Love',事业:'Career',财运:'Fortune',运势:'Luck'};
 function renderHomeAsk(){
-  const dd=$("#homeDomains");if(dd)dd.innerHTML=['姻缘','事业','财运'].map(d=>`<div class="domain ${d===domain?'sel':''}" onclick="pickDomainHome('${d}')"><div class="d-char">${d}</div><div class="d-en">${D_EN[d]}</div></div>`).join('');
+  const dd=$("#homeDomains");if(dd)dd.innerHTML=['姻缘','事业','财运','运势'].map(d=>`<div class="domain ${d===domain?'sel':''}" onclick="pickDomainHome('${d}')"><div class="d-char">${d}</div><div class="d-en">${D_EN[d]}</div></div>`).join('');
   const ss=$("#homeSpreadSel");if(ss)ss.innerHTML=SPREADS.map(s=>spreadChipHTML(s,s.id===spread.id,'pickSpreadHome')).join('');
   const gh=$("#homeGoHint");if(gh)gh.innerHTML='抽 '+spread.positions.length+' 张：'+spread.positions.slice(0,3).join(' · ')+(spread.positions.length>3?' …':'');
   const ag=$("#homeAgentSel");if(ag)ag.innerHTML=agentSelHTML();
@@ -3634,7 +3637,7 @@ function applyConfig(cfg){
   if(cfg.featReward)Object.keys(FEAT_REWARD).forEach(k=>{if(cfg.featReward[k]!=null&&!isNaN(cfg.featReward[k]))FEAT_REWARD[k]=Math.max(0,parseInt(cfg.featReward[k],10));});
   if(Array.isArray(cfg.packs))cfg.packs.forEach((p,i)=>{if(PACKS[i]){if(p.cny!=null&&!isNaN(p.cny))PACKS[i].cny=Math.max(0,+p.cny);if(p.credits!=null&&!isNaN(p.credits))PACKS[i].credits=Math.max(0,parseInt(p.credits,10));if(p.label!=null)PACKS[i].label=String(p.label);PACKS[i].tag=p.tag?String(p.tag):'';}});
   if(Array.isArray(cfg.goods))cfg.goods.forEach((g,i)=>{if(GOODS[i]){if(g.name!=null)GOODS[i].name=String(g.name);if(g.desc!=null)GOODS[i].desc=String(g.desc);if(g.price!=null&&!isNaN(g.price))GOODS[i].price=Math.max(0,+g.price);if(g.ptOff!=null&&!isNaN(g.ptOff))GOODS[i].ptOff=Math.max(0,parseInt(g.ptOff,10));if(g.yuanOff!=null&&!isNaN(g.yuanOff))GOODS[i].yuanOff=Math.max(0,+g.yuanOff);}});
-  if(cfg.qtpl)['姻缘','事业','财运'].forEach(d=>{if(Array.isArray(cfg.qtpl[d])&&cfg.qtpl[d].length)QTPL[d]=cfg.qtpl[d].slice();});
+  if(cfg.qtpl)['姻缘','事业','财运','运势'].forEach(d=>{if(Array.isArray(cfg.qtpl[d])&&cfg.qtpl[d].length)QTPL[d]=cfg.qtpl[d].slice();});
   if(Array.isArray(cfg.topics))cfg.topics.forEach((t,i)=>{if(TOPICS[i]){if(t.name)TOPICS[i].name=t.name;if(t.desc)TOPICS[i].desc=t.desc;if(t.q)TOPICS[i].q=t.q;if(t.spread)TOPICS[i].spread=t.spread;}});
   TOPICS.forEach(t=>{const s=SPREADS.find(x=>x.id===t.spread);if(s)t.price=s.price;}); // 专题价随牌阵价
 }
@@ -3665,7 +3668,7 @@ function renderAdminOps(){
   const packPanel=`<div style="${secS}">运营后台 · 充值档位（¥ / 心元 / 档名 / 角标）</div><div class="panel">${packRows}</div>`;
   const goodsRows=GOODS.map((g,i)=>`<div class="panel" style="margin-bottom:10px"><input id="op_gd_${i}_nm" value="${esc(g.name)}" placeholder="商品名" style="${fullS};margin-bottom:6px"><input id="op_gd_${i}_ds" value="${esc(g.desc)}" placeholder="描述" style="${fullS};font-size:13px;margin-bottom:6px"><div style="display:flex;gap:6px"><input id="op_gd_${i}_pr" type="number" value="${g.price}" placeholder="售价¥" style="${inS};flex:1;min-width:0"><input id="op_gd_${i}_pt" type="number" value="${g.ptOff}" placeholder="抵扣心元" style="${inS};flex:1;min-width:0"><input id="op_gd_${i}_yo" type="number" value="${g.yuanOff}" placeholder="抵¥" style="${inS};flex:1;min-width:0"></div></div>`).join('');
   const goodsPanel=`<div style="${secS}">运营后台 · 心元抵扣好物（用心元抵扣现金差价）</div>${goodsRows}`;
-  const qtplRows=['姻缘','事业','财运'].map(d=>`<div style="margin-bottom:12px"><div style="font-size:13px;color:var(--gold-deep);margin-bottom:6px">${d}</div><textarea id="op_qtpl_${d}" rows="5" style="${fullS};font-size:13px;line-height:1.7;resize:vertical">${esc((QTPL[d]||[]).join('\n'))}</textarea></div>`).join('');
+  const qtplRows=['姻缘','事业','财运','运势'].map(d=>`<div style="margin-bottom:12px"><div style="font-size:13px;color:var(--gold-deep);margin-bottom:6px">${d}</div><textarea id="op_qtpl_${d}" rows="5" style="${fullS};font-size:13px;line-height:1.7;resize:vertical">${esc((QTPL[d]||[]).join('\n'))}</textarea></div>`).join('');
   const topicRows=TOPICS.map((t,i)=>`<div class="panel" style="margin-bottom:12px"><div style="font-size:13px;color:var(--gold-deep);margin-bottom:8px">${t.dm}专题</div><input id="op_topic_${i}_name" value="${esc(t.name)}" placeholder="标题（如 姻缘 · 正缘录）" style="${fullS};margin-bottom:8px"><input id="op_topic_${i}_desc" value="${esc(t.desc)}" placeholder="副标题" style="${fullS};font-size:13px;margin-bottom:8px"><textarea id="op_topic_${i}_q" rows="2" placeholder="预设问题" style="${fullS};font-size:13px;line-height:1.6;margin-bottom:8px;resize:vertical">${esc(t.q)}</textarea><select id="op_topic_${i}_spread" style="${fullS}">${SPREADS.map(s=>`<option value="${s.id}" ${t.spread===s.id?'selected':''}>${s.name}（${s.price?s.price+'分':'免费'}）</option>`).join('')}</select></div>`).join('');
   box.innerHTML=`<div style="${secS}">运营后台 · 牌阵价格（心元）</div><div class="panel">${priceRows}${reportRow}</div>${featPanel}${packPanel}${goodsPanel}<div style="${secS}">运营后台 · 常见问题模板（每行一条）</div><div class="panel">${qtplRows}</div><div style="${secS}">运营后台 · 深度专题</div>${topicRows}<button class="btn block" style="margin-top:6px" onclick="saveOps()">保存运营配置</button><div class="disclaimer">填对令牌保存后<b>全网生效</b>（存到 Cloudflare KV）；令牌为空或未联网时仅存本机。</div>`;
 }
@@ -6079,6 +6082,8 @@ function studioIntroClose(){var ov=document.getElementById('diyIntro');if(window
 #archedit .af-in{width:100%;min-width:0;box-sizing:border-box;text-align:right;border:none;background:transparent;font-size:14px;color:var(--ink);outline:none;-webkit-appearance:none;appearance:none}
 #archedit .af-in::placeholder{color:var(--ink-faint)}
 #archedit select.af-in{text-align-last:right;direction:rtl}
+#archedit .af-lunar{display:flex;gap:6px;justify-content:flex-end;flex-wrap:nowrap}
+#archedit .af-lsel{width:auto!important;text-align:center;text-align-last:center;direction:ltr;padding:2px 2px;font-size:13.5px;color:var(--ink);background:transparent}
 #archedit select.af-in option{direction:ltr}
 #archedit .af-seg{display:flex;gap:8px}
 #archedit .af-seg b{font-weight:400;font-size:13px;padding:7px 15px;border:1px solid var(--line);border-radius:16px;color:var(--ink-soft);background:var(--bg);cursor:pointer}
@@ -6110,6 +6115,19 @@ function archPersist(){try{localStorage.setItem('ft_archives',JSON.stringify(sta
 function archZodSvg(z){var e=(typeof ZODIAC_SVG!=='undefined')&&z&&ZODIAC_SVG[z];return e?('<span class="arch-zod"><svg viewBox="0 0 64 64" width="52" height="52">'+e+'</svg></span>'):'';}
 function archBirthStr(p){if(!p||!p.sy)return '未填写出生信息';var t=(p.bh>0&&typeof SHICHEN_HOUR!=='undefined'&&SHICHEN_HOUR[p.bh]!=null)?(' '+archPad(SHICHEN_HOUR[p.bh])+':00'):'';return p.sy+'-'+archPad(p.sm)+'-'+archPad(p.sd)+t+(p.region?('  ·  '+p.region):'');}
 function archBaziStr(p){try{if(!p||!p.sy||typeof fateWXFromBirth!=='function')return '';var wx=fateWXFromBirth({sy:p.sy,sm:p.sm,sd:p.sd,bh:p.bh});return wx?wx.pillars:'';}catch(e){return '';}}
+function archLunarYears(){var a=[];for(var y=2026;y>=1930;y--)a.push(y);return a;}
+function archLMonthOpts(y,sel){var S=(typeof SL==='function')&&SL(),lm=S?S.leapMonth(y):0,o=[];for(var m=1;m<=12;m++){var nm=S?S.toChinaMonth(m):(m+'月');o.push('<option value="'+m+'"'+((''+sel)===(''+m)?' selected':'')+'>'+nm+'</option>');if(lm===m)o.push('<option value="L'+m+'"'+(sel==='L'+m?' selected':'')+'>闰'+nm+'</option>');}return o.join('');}
+function archLDayOpts(sel){var S=(typeof SL==='function')&&SL(),o=[];for(var d=1;d<=30;d++){var nm=S?S.toChinaDay(d):(''+d);o.push('<option value="'+d+'"'+((''+sel)===(''+d)?' selected':'')+'>'+nm+'</option>');}return o.join('');}
+function archDateCtrl(cal,p){
+  if(cal!=='lunar'){
+    var dv=(p&&p.by&&p.cal!=='lunar')?(p.by+'-'+archPad(p.bm)+'-'+archPad(p.bd)):((p&&p.sy&&p.cal!=='lunar')?(p.sy+'-'+archPad(p.sm)+'-'+archPad(p.sd)):'');
+    return '<input id="afDate" class="af-in" type="date" value="'+dv+'">';
+  }
+  var isL=p&&p.cal==='lunar';var yv=isL?p.by:1995,mv=isL?((p.leap?'L':'')+p.bm):'',dv=isL?p.bd:'';
+  var ys=archLunarYears().map(function(y){return '<option'+(y===yv?' selected':'')+'>'+y+'</option>';}).join('');
+  return '<span class="af-lunar"><select id="afLY" class="af-in af-lsel" onchange="archLYearChange()">'+ys+'</select><select id="afLM" class="af-in af-lsel">'+archLMonthOpts(yv,mv)+'</select><select id="afLD" class="af-in af-lsel">'+archLDayOpts(dv)+'</select></span>';
+}
+window.archLYearChange=function(){var yEl=document.getElementById('afLY'),mEl=document.getElementById('afLM');if(yEl&&mEl)mEl.innerHTML=archLMonthOpts(+yEl.value,mEl.value);};
 function archCardHTML(id,p,isSelf){
   var nm=(p&&p.name)?p.name:(isSelf?'我的档案':'未命名');
   var zod=(p&&(p.zodiac||(p.sy&&zodiacOf(p.sy))))||'';var bazi=archBaziStr(p);
@@ -6126,7 +6144,8 @@ window.renderArchive=function(){
    +'<div class="arch-add" onclick="archEdit(\'new\')">＋ 创建新档案</div>'
    +'<div class="arch-note">出生信息仅本机保存，用于排盘与合盘，不外传。</div>';
 };
-window.archEdit=function(target){state._archEditing=target;go('archedit');};
+window.archEdit=function(target){state._archEditing=target;state._archReturn=(document.querySelector('.screen.active')||{}).id||'home';go('archedit');};
+window.logout=function(){var run=function(ok){if(!ok)return;try{state.phone='';state.isAdmin=false;state.boundReader=null;state.reader=null;}catch(e){}try{localStorage.removeItem('ft_phone');}catch(e){}if(typeof toast==='function')toast('已退出登录');go('login');var lp=document.getElementById('lgPhone');if(lp)lp.value='';};if(typeof confirmBox==='function')confirmBox('退出登录？下次需重新输入手机号登录','退出登录','取消').then(run);else run(confirm('退出登录？'));};
 window.archToSynastry=function(id){var a=(state.archives||[]).find(function(x){return x.id===id;});if(!a)return;state._synPrefillTa=a;go('synastry');};
 window.archDel=function(id){var run=function(ok){if(!ok)return;state.archives=(state.archives||[]).filter(function(a){return a.id!==id;});archPersist();if(typeof toast==='function')toast('已删除该档案');if(document.getElementById('archive')&&document.getElementById('archive').classList.contains('active'))renderArchive();else go('archive');};
   if(typeof confirmBox==='function')confirmBox('删除这个档案？','删除','取消').then(run);else run(confirm('删除这个档案？'));};
@@ -6140,12 +6159,12 @@ window.renderArchEdit=function(){
   var dateVal=p.by?(p.by+'-'+archPad(p.bm)+'-'+archPad(p.bd)):'';
   var shOpts=ARCH_SH.map(function(l,i){return '<option value="'+i+'"'+((p.bh||0)===i?' selected':'')+'>'+l+'</option>';}).join('');
   var regionDetail=(p.region&&p.prov)?p.region.replace(p.prov,'').trim():(p.region||'');
-  box.innerHTML='<div class="topbar"><div class="back" onclick="go(\'archive\')">‹</div><div class="tt">'+(t==='new'?'创建档案':(isSelf?'编辑我的档案':'编辑档案'))+'</div><div style="width:24px"></div></div>'
+  box.innerHTML='<div class="topbar"><div class="back" onclick="go(state._archReturn||\'archive\')">‹</div><div class="tt">'+(t==='new'?'创建档案':(isSelf?'编辑我的档案':'编辑档案'))+'</div><div style="width:24px"></div></div>'
    +'<div class="arch-form">'
      +archRow('名称','<input id="afName" class="af-in" placeholder="填写姓名 / 称呼" value="'+(p.name?esc(p.name):'')+'">')
      +archRow('性别','<div class="af-seg" id="afSex"><b data-v="female"'+(p.sex==='female'?' class="on"':'')+'>女</b><b data-v="male"'+(p.sex==='male'?' class="on"':'')+'>男</b></div>')
      +archRow('历法','<div class="af-seg" id="afCal"><b data-v="solar"'+(p.cal!=='lunar'?' class="on"':'')+'>公历</b><b data-v="lunar"'+(p.cal==='lunar'?' class="on"':'')+'>农历</b></div>')
-     +archRow('出生日期','<input id="afDate" class="af-in" type="date" value="'+dateVal+'">')
+     +archRow('出生日期','<span id="afDateWrap">'+archDateCtrl(p.cal==='lunar'?'lunar':'solar',p)+'</span>')
      +archRow('出生时辰','<select id="afSh" class="af-in">'+shOpts+'</select>')
      +archRow('出生地','<select id="afProv" class="af-in">'+provOpts+'</select>')
      +archRow('市 / 区（可选）','<input id="afRegion" class="af-in" placeholder="如 温州市 苍南县" value="'+esc(regionDetail)+'">')
@@ -6154,27 +6173,34 @@ window.renderArchEdit=function(){
    +'<button class="btn block af-save" onclick="archSave()">保存</button>'
    +((isSelf||t==='new')?'':'<button class="btn block ghost" style="margin-top:10px" onclick="archDel(\''+t+'\')">删除此档案</button>')
    +'<div class="arch-note">* 依据出生时间与地点排盘；时辰不确定可选「不确定 / 未知」，仅本机保存。</div>';
-  ['afSex','afCal'].forEach(function(sid){var el=document.getElementById(sid);if(el)el.addEventListener('click',function(e){var b=e.target.closest('b');if(!b)return;el.querySelectorAll('b').forEach(function(x){x.classList.remove('on');});b.classList.add('on');});});
+  var _sx=document.getElementById('afSex');if(_sx)_sx.addEventListener('click',function(e){var b=e.target.closest('b');if(!b)return;_sx.querySelectorAll('b').forEach(function(x){x.classList.remove('on');});b.classList.add('on');});
+  var _cl=document.getElementById('afCal');if(_cl)_cl.addEventListener('click',function(e){var b=e.target.closest('b');if(!b)return;_cl.querySelectorAll('b').forEach(function(x){x.classList.remove('on');});b.classList.add('on');var w=document.getElementById('afDateWrap');if(w)w.innerHTML=archDateCtrl(b.getAttribute('data-v'),null);});
 };
 window.archSave=function(){
   var g=function(id){return document.getElementById(id);};
   var name=(g('afName').value||'').trim();
   var sexEl=document.querySelector('#afSex b.on'),sex=sexEl?sexEl.getAttribute('data-v'):'';
   var calEl=document.querySelector('#afCal b.on'),cal=calEl?calEl.getAttribute('data-v'):'solar';
-  var dv=g('afDate').value,bh=+g('afSh').value||0,prov=g('afProv').value,region=(g('afRegion').value||'').trim(),trueSolar=g('afTrue').checked;
-  if(!dv){if(typeof toast==='function')toast('请选择出生日期');return;}
-  var parts=dv.split('-'),by=+parts[0],bm=+parts[1],bd=+parts[2];
-  if(!by||!bm||!bd){toast('出生日期格式有误');return;}
-  var sy=by,sm=bm,sd=bd,leap=false;
-  if(cal==='lunar'){try{var r=(typeof SL==='function')&&SL()&&SL().lunar2solar(by,bm,bd,false);if(r&&r.cYear){sy=r.cYear;sm=r.cMonth;sd=r.cDay;}}catch(e){}}
-  var obj={name:name,cal:cal,sex:sex,by:by,bm:bm,bd:bd,leap:leap,sy:sy,sm:sm,sd:sd,bh:bh,prov:prov,region:(prov?((prov+(region?(' '+region):'')).trim()):region),trueSolar:trueSolar,zodiac:zodiacOf(sy),cons:constOf(sm,sd)};
+  var bh=+g('afSh').value||0,prov=g('afProv').value,region=(g('afRegion').value||'').trim(),trueSolar=g('afTrue').checked;
+  var by,bm,bd,leap=false,sy,sm,sd;
+  if(cal==='lunar'){
+    var mRaw=g('afLM')?g('afLM').value:'';leap=((''+mRaw)[0]==='L');by=+(g('afLY')?g('afLY').value:0);bm=leap?+(''+mRaw).slice(1):+mRaw;bd=+(g('afLD')?g('afLD').value:0);
+    if(!by||!bm||!bd){if(typeof toast==='function')toast('请选择农历出生日期');return;}
+    var r=(typeof SL==='function')&&SL()&&SL().lunar2solar(by,bm,bd,leap);
+    if(r&&r.cYear){sy=r.cYear;sm=r.cMonth;sd=r.cDay;}else{if(typeof toast==='function')toast('农历日期无效（该月可能没有这一天）');return;}
+  }else{
+    var dv=g('afDate')?g('afDate').value:'';if(!dv){if(typeof toast==='function')toast('请选择出生日期');return;}
+    var parts=dv.split('-');by=+parts[0];bm=+parts[1];bd=+parts[2];if(!by||!bm||!bd){toast('出生日期格式有误');return;}
+    sy=by;sm=bm;sd=bd;
+  }
+  var obj={name:name,nick:name,cal:cal,sex:sex,by:by,bm:bm,bd:bd,leap:leap,sy:sy,sm:sm,sd:sd,bh:bh,prov:prov,region:(prov?((prov+(region?(' '+region):'')).trim()):region),trueSolar:trueSolar,zodiac:zodiacOf(cal==='lunar'?by:sy),cons:constOf(sm,sd)};
   var t=state._archEditing;
   if(t==='self'){
     state.profile=Object.assign({},state.profile||{},obj);
     try{todaySign=null;}catch(e){}
     try{if(typeof setHomeZodiac==='function')setHomeZodiac();}catch(e){}
     if(typeof toast==='function')toast('已保存我的档案');
-    go('archive');
+    go(state._archReturn||'home');
     try{if(typeof renderHome==='function')renderHome();}catch(e){}
   }else{
     if(t==='new'){obj.id='a'+Date.now()+Math.floor(Math.random()*1000);state.archives.push(obj);}
