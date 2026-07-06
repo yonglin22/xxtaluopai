@@ -217,7 +217,8 @@ async function handleWxPhone(request, env) {
 //   WX_PAY_NOTIFY_URL  支付结果回调地址（如 https://你的备案域名/api/wxpay/notify）
 //   WX_PAY_APIV3_KEY   APIv3 密钥（32 位，回调解密用；不配则回调只应答不解密）
 function pemToDer(pem) {
-  const b64 = String(pem).replace(/-----BEGIN [^-]+-----/g, '').replace(/-----END [^-]+-----/g, '').replace(/\s+/g, '');
+  // 兼容粘贴事故：先去掉字面量转义 \n \r \t（Cloudflare 里换行常被转义），再去头尾，最后只保留 base64 字符
+  const b64 = String(pem).replace(/\\[nrtf]/g, '').replace(/-----BEGIN [^-]+-----/g, '').replace(/-----END [^-]+-----/g, '').replace(/[^A-Za-z0-9+/=]/g, '');
   const bin = atob(b64); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u.buffer;
 }
 async function rsaSign(privatePem, message) {
@@ -236,11 +237,12 @@ async function handleWxPay(request, env) {
   const APPID = env.WX_APPID, SECRET = env.WX_APPSECRET, MCHID = env.WX_MCHID, SERIAL = env.WX_PAY_SERIAL, PKEY = env.WX_PAY_PRIVATE_KEY;
   if (!APPID || !MCHID || !SERIAL || !PKEY) return json(200, { ok: false, error: 'not_configured', hint: '需配置 WX_APPID / WX_MCHID / WX_PAY_SERIAL / WX_PAY_PRIVATE_KEY（+ WX_APPSECRET 换 openid）' });
   // JSAPI 支付必须要付款人 openid：优先用前端传的 openid，否则用 wx.login 的 code 换
-  let openid = String(body.openid || '');
-  if (!openid && body.code && SECRET) {
-    try { const s = await (await fetch('https://api.weixin.qq.com/sns/jscode2session?appid=' + APPID + '&secret=' + SECRET + '&js_code=' + body.code + '&grant_type=authorization_code')).json(); openid = s.openid || ''; } catch (e) {}
+  let openid = String(body.openid || ''), _sess = null;
+  if (!openid && !SECRET) return json(200, { ok: false, error: 'no_openid', hint: '未配置 WX_APPSECRET，无法用 code 换 openid' });
+  if (!openid && body.code) {
+    try { const s = await (await fetch('https://api.weixin.qq.com/sns/jscode2session?appid=' + APPID + '&secret=' + SECRET + '&js_code=' + encodeURIComponent(body.code) + '&grant_type=authorization_code')).json(); openid = s.openid || ''; if (!openid) _sess = s; } catch (e) { _sess = String(e); }
   }
-  if (!openid) return json(200, { ok: false, error: 'no_openid', hint: '缺 openid：前端需 wx.login 传 code，且后端配 WX_APPSECRET' });
+  if (!openid) return json(200, { ok: false, error: 'no_openid', hint: '换 openid 失败：多为 WX_APPSECRET 错、或 AppID 与商户未关联', detail: _sess });
   const total = Math.round(Number(body.amountFen || 0)) || Math.round(Number(body.amountYuan || body.amount || 0) * 100);
   if (!(total > 0)) return json(200, { ok: false, error: 'bad_amount' });
   const outTradeNo = String(body.orderNo || ('py' + Date.now() + Math.random().toString(36).slice(2, 6)));
