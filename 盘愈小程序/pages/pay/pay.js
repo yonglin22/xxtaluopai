@@ -35,8 +35,20 @@ Page({
         wx.showModal({ title: '网络异常', showCancel: false, confirmText: '知道了', content: '支付下单失败，请检查网络后重试。' });
       } else {
         this.setData({ paying: false });
-        wx.showModal({ title: '支付未接入', showCancel: false, confirmText: '知道了',
-          content: '后端统一下单 /api/wxpay 尚未接入（需商户号 + API 密钥/证书）。接好后这里用 wx.requestPayment 拉起微信支付。\n订单 ' + (this.data.orderNo || '—') + ' · ¥' + (this.data.amount || '—') });
+        // 直接把后端返回的真实错误显示出来，便于排查
+        const j = r.j || {};
+        const map = {
+          not_configured: '后端未读到密钥：确认 7 个环境变量已配 + 加完后「重新部署」过一次',
+          no_openid: '拿不到 openid：检查 WX_APPSECRET 是否正确',
+          bad_amount: '金额异常',
+          sign_failed: '签名失败：检查 WX_PAY_PRIVATE_KEY 是否为完整 pem 私钥',
+          unifiedorder_failed: '微信下单失败（多为「商户未关联小程序」或序列号/私钥不符）',
+          network: '后端访问微信超时，请重试'
+        };
+        let msg = map[j.error] || j.hint || j.error || '未知错误';
+        if (j.detail) { try { const d = j.detail; msg += '\n微信：' + (d.code ? (d.code + ' ' + (d.message || '')) : JSON.stringify(d)).slice(0, 160); } catch (e) {} }
+        wx.showModal({ title: '下单失败', showCancel: false, confirmText: '知道了',
+          content: msg + '\n订单 ' + (this.data.orderNo || '—') + ' · ¥' + (this.data.amount || '—') });
       }
     } catch (e) {
       wx.hideLoading();
