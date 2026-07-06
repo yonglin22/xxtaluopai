@@ -6628,11 +6628,18 @@ window.diyOrderContact=function(code){if(code&&typeof copyText==='function')copy
       var _done={};try{_done=JSON.parse(localStorage.getItem('py_paid_done')||'{}')||{};}catch(_e){}
       if(_no&&!_done[_no]){var _pk=PACKS.find(function(x){return +x.cny===_cny;}),_cr=_pk?_pk.credits:0;
         if(_cr>0){_done[_no]=1;try{localStorage.setItem('py_paid_done',JSON.stringify(_done));}catch(_e){}
-          state.balance=(state.balance||0)+_cr;if(typeof walletPush==='function')walletPush(_cr);
           if(state.orders)state.orders.unshift({no:_no,credits:_cr,label:_pk?_pk.label:'充值',cny:_cny,status:'paid'});
           if(state.ledger)state.ledger.unshift({type:'充值到账',amount:'+'+_cr,when:'刚刚'});
-          if(typeof refreshBalanceUI==='function')refreshBalanceUI();
-          setTimeout(function(){if(typeof toast==='function')toast('到账成功 +'+_cr+' 心元');},600);}}
+          /* 以服务端权威余额为准，并延迟到开机余额拉取(loadWallet)之后，避免竞态把刚到账心元盖回旧值 */
+          (function(cr){setTimeout(function(){
+            if(state.phone&&typeof apiPost==='function'){
+              apiPost('/api/wallet',{action:'adjust',phone:state.phone,delta:cr}).then(function(r){
+                state.balance=(r&&r.j&&typeof r.j.balance==='number')?r.j.balance:((state.balance||0)+cr);
+                if(typeof refreshBalanceUI==='function')refreshBalanceUI();
+                if(typeof toast==='function')toast('到账成功 +'+cr+' 心元');
+              });
+            }else{state.balance=(state.balance||0)+cr;if(typeof refreshBalanceUI==='function')refreshBalanceUI();if(typeof toast==='function')toast('到账成功 +'+cr+' 心元');}
+          },1000);})(_cr);}}
       window.__MP_PAID__=null; }}catch(e){}
     if(window.__MP_SCREEN__&&typeof go==='function')go(window.__MP_SCREEN__);
     else if(typeof state!=='undefined'&&state.phone&&typeof go==='function')go('home');
