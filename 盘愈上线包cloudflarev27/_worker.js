@@ -164,6 +164,7 @@ export default {
     if (url.pathname === '/api/config') { return handleConfig(request, env); }
     if (url.pathname === '/api/wall') { return handleWall(request, env, url); }
     if (url.pathname === '/api/shelf') { return handleShelf(request, env, url); }
+    if (url.pathname === '/api/fate') { return handleFate(request, env, url); }
     if (url.pathname === '/api/capsule') { return handleCapsule(request, env, url); }
     if (url.pathname === '/api/mood') { return handleMood(request, env, url); }
     if (url.pathname === '/api/wallet') { return handleWallet(request, env, url); }
@@ -349,7 +350,13 @@ const YUCHI_SEED = [
   { mood:'焦虑', pol:'neg', text:'明天还没来，我却已经担心了一整夜。谁来替我，把灯关上。', lamps:4, lv:'暖心常客', ageMin:15, reply:'你已经很勇敢了，先睡吧。' },
   { mood:'期待', pol:'pos', text:'我把愿望折成一只纸船，放进这片池水，愿它替我漂到有光的地方。', lamps:7, lv:'夜行者', ageMin:120 },
   { mood:'委屈', pol:'neg', text:'今天又忍住没哭。其实我只是想，被人轻轻抱一下。', lamps:5, lv:'暖心常客', ageMin:52 },
-  { mood:'平静', pol:'pos', text:'月亮不争，也不辩，只是安静地亮着。今晚，我也想这样。', lamps:3, lv:'守灯人', ageMin:95 }
+  { mood:'平静', pol:'pos', text:'月亮不争，也不辩，只是安静地亮着。今晚，我也想这样。', lamps:3, lv:'守灯人', ageMin:95 },
+  { mood:'想努力', pol:'pos', text:'再撑一下下。天亮以后，我请自己喝一杯热的。', lamps:8, lv:'深夜活跃', ageMin:8 },
+  { mood:'失落', pol:'neg', text:'有些人只是路过，却教会我怎么好好告别。谢谢你来过。', lamps:11, lv:'守灯人', ageMin:64, reply:'会遇到更好的。' },
+  { mood:'还好', pol:'pos', text:'今天没什么特别的，平平安安地过完了。这样也很好。', lamps:2, lv:'夜行者', ageMin:22 },
+  { mood:'emo', pol:'neg', text:'不知道为什么，就是有点想哭。也许只是累了，允许自己脆弱一下。', lamps:6, lv:'暖心常客', ageMin:41 },
+  { mood:'期待', pol:'pos', text:'把日子过成诗，把心事熬成茶。慢慢来，都会好的。', lamps:5, lv:'深夜活跃', ageMin:105 },
+  { mood:'孤独', pol:'neg', text:'一个人住久了，连影子都成了室友。但我把它照顾得很好。', lamps:7, lv:'守灯人', ageMin:130 }
 ];
 function seedPosts(now){
   return YUCHI_SEED.map((s,i)=>({
@@ -367,14 +374,21 @@ async function ballsGet(KV, phone){
   if(d.posT==null)d.posT=0; if(d.negT==null)d.negT=0;  // 累计正/负计数
   return d;
 }
+// 长期养成里程碑（累计投递数触发）
+const YUCHI_MILES=[{n:1,t:'第一颗情绪'},{n:7,t:'一周之约'},{n:30,t:'满月心事'},{n:100,t:'百颗星光'},{n:365,t:'一年同行'}];
+function milestoneFor(total){ let hit=null; for(const m of YUCHI_MILES){ if(total===m.n)hit=m; } return hit; }
 // drop=投一颗情绪球入罐（满30颗自动封存成一瓶上情绪架）；act=累计互动数（涨等级）
 async function ballsBump(KV, phone, opt){
   const d=await ballsGet(KV, phone); opt=opt||{};
+  if(!d.streak)d.streak=0; if(!d.maxStreak)d.maxStreak=0; if(!d.lastDay)d.lastDay='';
   if(opt.drop){
     const pol=opt.pol==='pos'?'pos':'neg';
     d.balls.push({ pol, mood:String(opt.mood||'').slice(0,6), when:Date.now() });
     d.year.push({ pol, when:Date.now() }); if(d.year.length>500)d.year=d.year.slice(-500);
     if(pol==='pos')d.posT++; else d.negT++;
+    // 连续投递养成：跨天则按是否昨天连续来累计/重置
+    const today=cnDayKey(Date.now());
+    if(d.lastDay!==today){ const yest=cnDayKey(Date.now()-86400000); d.streak=(d.lastDay===yest)?(d.streak+1):1; d.lastDay=today; if(d.streak>d.maxStreak)d.maxStreak=d.streak; }
     if(d.balls.length>=30){
       const pos=d.balls.filter(x=>x.pol==='pos').length;
       d.jars=(d.jars||0)+1;
@@ -382,6 +396,7 @@ async function ballsBump(KV, phone, opt){
       d.balls=[]; d._filled=true;
     } else d._filled=false;
     d.total=(d.total||0)+1;
+    d._mile=milestoneFor(d.total);   // 命中里程碑（供前端弹祝贺）
   }
   d.acts=(d.acts||0)+(opt.act||0);
   try{ await KV.put('balls:'+phone, JSON.stringify(d)); }catch(e){}
@@ -398,7 +413,7 @@ async function handleShelf(request, env, url){
     let caps=[]; try{ const raw=await KV.get('ecap:'+phone); if(raw)caps=JSON.parse(raw); }catch(e){}
     return json(200, { ok:true, kv:true, level:yuchiLevel(d.acts),
       jars:d.jars||0, fill:(d.balls||[]).length, curBalls:d.balls||[], shelf:d.shelf||[], year:d.year||[],
-      total:d.total||0, pos:d.posT||0, neg:d.negT||0, capsules:caps });
+      total:d.total||0, pos:d.posT||0, neg:d.negT||0, streak:d.streak||0, maxStreak:d.maxStreak||0, capsules:caps });
   }
   if(request.method!=='POST') return json(405, { error:'Method Not Allowed' });
   let body; try{ body=await request.json(); }catch(e){ body={}; }
@@ -418,6 +433,51 @@ async function handleShelf(request, env, url){
     return json(200, { ok:true, capsule:cap, count:caps.length });
   }
   return json(400, { error:'未知操作' });
+}
+// ---- 今日缘分 · 站内匿名加好友 + 24h 阅后即焚（KV：fate:<手机号>=好友；fmsg:<配对>=消息；fidmap:<fid>=手机号）----
+function fidOf(p){ let h=0; for(let i=0;i<p.length;i++){ h=(h*31+p.charCodeAt(i))>>>0; } return 'f'+h.toString(36); }
+function fateHandle(phone){ let s=0; const f=fidOf(phone); for(let i=0;i<f.length;i++)s+=f.charCodeAt(i); const nm=['临风','踏雪','听雨','望舒','拾光','煮酒','观星','守夜','采薇','南栀','清欢','怀瑾']; return nm[s%nm.length]+'·'+f.slice(-3); }
+async function handleFate(request, env, url){
+  const KV=env.CONFIG_KV||null;
+  if(!KV) return json(200,{ ok:true, kv:false, friends:[], candidates:[] });
+  if(request.method==='GET'){
+    const phone=String(url.searchParams.get('phone')||'');
+    if(!/^1[3-9]\d{9}$/.test(phone)) return json(400,{ error:'需要登录' });
+    const withFid=String(url.searchParams.get('with')||'');
+    let me=null; try{ const raw=await KV.get('fate:'+phone); if(raw)me=JSON.parse(raw); }catch(e){}
+    if(!me)me={ friends:[] };
+    const now=Date.now();
+    if(withFid){
+      let tp=''; try{ tp=(await KV.get('fidmap:'+withFid))||''; }catch(e){}
+      if(!tp) return json(404,{ error:'这段缘分已经散了' });
+      const pk=[phone,tp].sort().join('|'); let msgs=[]; try{ const raw=await KV.get('fmsg:'+pk); if(raw)msgs=JSON.parse(raw); }catch(e){}
+      msgs=msgs.filter(m=>now-m.when<24*3600000);
+      return json(200,{ ok:true, with:withFid, handle:fateHandle(tp), messages:msgs.map(m=>({ mine:m.from===phone, text:m.text, when:m.when })) });
+    }
+    const friends=[]; for(const fp of (me.friends||[])){ const fid=fidOf(fp); try{ await KV.put('fidmap:'+fid,fp); }catch(e){} const b=await ballsGet(KV,fp); friends.push({ fid, handle:fateHandle(fp), lv:yuchiLevel(b.acts) }); }
+    let posts=[]; try{ const raw=await KV.get('wall'); if(raw)posts=JSON.parse(raw); }catch(e){}
+    const seen={}, cands=[];
+    for(const p of posts){ const ap=p.ap; if(!ap||ap===phone||seen[ap]||(me.friends||[]).indexOf(ap)>=0)continue; seen[ap]=1; const fid=fidOf(ap); try{ await KV.put('fidmap:'+fid,ap); }catch(e){} cands.push({ fid, handle:fateHandle(ap), mood:p.mood, lv:p.lv||'', text:p.text }); if(cands.length>=6)break; }
+    return json(200,{ ok:true, friends, candidates:cands });
+  }
+  if(request.method!=='POST') return json(405,{ error:'Method Not Allowed' });
+  let body; try{ body=await request.json(); }catch(e){ body={}; }
+  const phone=String(body.phone||''); if(!/^1[3-9]\d{9}$/.test(phone)) return json(400,{ error:'需要登录' });
+  const action=String(body.action||''), fid=String(body.fid||'');
+  let tp=''; try{ tp=(await KV.get('fidmap:'+fid))||''; }catch(e){}
+  if(!tp||tp===phone) return json(400,{ error:'缘分不存在' });
+  if(action==='add'){
+    for(const pair of [[phone,tp],[tp,phone]]){ let d=null; try{ const raw=await KV.get('fate:'+pair[0]); if(raw)d=JSON.parse(raw); }catch(e){} if(!d)d={ friends:[] }; if((d.friends||[]).indexOf(pair[1])<0)d.friends.push(pair[1]); try{ await KV.put('fate:'+pair[0],JSON.stringify(d)); }catch(e){} }
+    return json(200,{ ok:true, fid, handle:fateHandle(tp) });
+  }
+  if(action==='msg'){
+    let text=String(body.text||'').trim(); if(text.length<1||text.length>200) return json(400,{ error:'消息 1-200 字' }); if(wallBad(text)) return json(400,{ error:'仅限站内聊天，请不要留站外联系方式～' });
+    const now=Date.now(),pk=[phone,tp].sort().join('|'); let msgs=[]; try{ const raw=await KV.get('fmsg:'+pk); if(raw)msgs=JSON.parse(raw); }catch(e){}
+    msgs=msgs.filter(m=>now-m.when<24*3600000); msgs.push({ from:phone, text, when:now }); if(msgs.length>200)msgs=msgs.slice(-200);
+    try{ await KV.put('fmsg:'+pk,JSON.stringify(msgs)); }catch(e){ return json(502,{ error:'发送失败' }); }
+    return json(200,{ ok:true });
+  }
+  return json(400,{ error:'未知操作' });
 }
 async function handleWall(request, env, url) {
   const KV = env.CONFIG_KV || null;
@@ -439,7 +499,7 @@ async function handleWall(request, env, url) {
         lampers: mine ? (p.lampers||[]).slice(-5) : undefined };
     });
     let extra = {};
-    if (phone && /^1[3-9]\d{9}$/.test(phone)) { const b=await ballsGet(KV, phone); extra = { jar:{ fill:b.balls.length, balls:b.balls.slice(-30), jars:b.jars||0, total:b.total||0 }, level:yuchiLevel(b.acts) }; }
+    if (phone && /^1[3-9]\d{9}$/.test(phone)) { const b=await ballsGet(KV, phone); extra = { jar:{ fill:b.balls.length, balls:b.balls.slice(-30), jars:b.jars||0, total:b.total||0, streak:b.streak||0, maxStreak:b.maxStreak||0 }, level:yuchiLevel(b.acts) }; }
     return json(200, Object.assign({ ok:true, kv:true, posts:out }, extra));
   }
   if (request.method !== 'POST') return json(405, { error: 'Method Not Allowed' });
@@ -452,13 +512,12 @@ async function handleWall(request, env, url) {
     let text = String(body.text || '').trim();
     if (text.length < 2 || text.length > 300) return json(400, { error: '内容太短或太长' });
     if (wallBad(text)) return json(400, { error: '为了这片池水，请不要留联系方式或广告～' });
-    let lv=''; if (phone && /^1[3-9]\d{9}$/.test(phone)) { const b=await ballsBump(KV, phone, { drop:true, pol:body.pol, mood:body.mood, act:1 }); lv=yuchiLevel(b.acts); }
+    let lv='',jar=null,mile=null; if (phone && /^1[3-9]\d{9}$/.test(phone)) { const b=await ballsBump(KV, phone, { drop:true, pol:body.pol, mood:body.mood, act:1 }); lv=yuchiLevel(b.acts); jar={ fill:b.balls.length, jars:b.jars||0, total:b.total||0, filled:!!b._filled, streak:b.streak||0, maxStreak:b.maxStreak||0 }; mile=b._mile||null; }
     const pol = moodPolarity(String(body.mood||''), body.pol);
     const p = { id:'w'+now.toString(36)+Math.random().toString(36).slice(2,5), mood:String(body.mood||'').slice(0,6), pol, text, card:String(body.card||'').slice(0,20), when:now, lamps:0, views:0, replies:[], lv, lampers:[], ap:phone||'' };
     posts.unshift(p); if (posts.length > 200) posts = posts.slice(0, 200);
     try { await KV.put('wall', JSON.stringify(posts)); } catch (e) { return json(502, { error: '投进池子失败，再试一次' }); }
-    let jar=null; if(phone && /^1[3-9]\d{9}$/.test(phone)){ const b=await ballsGet(KV, phone); jar={ fill:b.balls.length, jars:b.jars||0, total:b.total||0, filled:!!b._filled }; }
-    return json(200, { ok:true, post:{ id:p.id, mood:p.mood, pol, text:p.text, when:p.when, lamps:0, views:0, lv, comments:0, replies:[], mine:true }, jar, level:lv });
+    return json(200, { ok:true, post:{ id:p.id, mood:p.mood, pol, text:p.text, when:p.when, lamps:0, views:0, lv, comments:0, replies:[], mine:true }, jar, level:lv, milestone:mile });
   }
   if (action === 'lamp') {
     const p = posts.find(x => x.id === String(body.id || '')); if (!p) return json(404, { error: '这条心事已经不在了' });

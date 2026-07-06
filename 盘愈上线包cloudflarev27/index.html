@@ -1227,8 +1227,10 @@
   .yc-fly.pol-pos{background:radial-gradient(circle at 35% 30%,#F6E4B6,#D9A84E 70%,#9A7226)}
   .yc-fly.pol-neg{background:radial-gradient(circle at 35% 30%,#c9c3b8,#8f8880 70%,#5f5a52)}
   /* ============ 愈池 v3 · 池水 + 玻璃罐 + 宝石 ============ */
-  #yuchi .yc-pool{position:relative;height:196px;border-radius:22px;overflow:hidden;margin:2px 0 16px;box-shadow:0 14px 40px rgba(60,42,20,.22);border:1px solid rgba(201,162,78,.28);cursor:pointer}
-  #yuchi .yc-pool canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
+  #yuchi .yc-pool{position:relative;height:188px;border-radius:26px;overflow:hidden;margin:2px 0 16px;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.72);box-shadow:0 20px 54px rgba(70,62,48,.12);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);cursor:pointer}
+  #yuchi .yc-pool-glow{position:absolute;left:50%;top:44%;width:300px;height:300px;border-radius:50%;filter:blur(34px);background:radial-gradient(circle at 60% 40%,rgba(226,168,88,.28),rgba(224,146,92,.12) 46%,rgba(228,196,150,0) 72%);transform:translate(-50%,-50%);animation:ehBreathe 6.5s ease-in-out infinite;pointer-events:none;z-index:0}
+  #yuchi .yc-pool canvas{position:absolute;inset:0;display:block;width:100%;height:100%;z-index:1}
+  #yuchi .yc-pool-ov,#yuchi .yc-pool-foot{z-index:2}
   #yuchi .yc-pool-ov{position:absolute;left:0;right:0;top:0;padding:22px 22px 0;text-align:center;pointer-events:none}
   #yuchi .yc-pool-py{font-size:10.5px;letter-spacing:.32em;color:var(--gold-deep);opacity:.85;text-transform:uppercase}
   #yuchi .yc-pool-tt{font-size:34px;color:#2a2016;letter-spacing:.14em;margin:5px 0 10px;text-shadow:0 1px 2px rgba(255,255,255,.6)}
@@ -4750,6 +4752,17 @@ var _yuchiPoemIdx=0;
 function YUCHI_SOUND_LABEL(on){return on?'🎧 沉浸中':'🎧 沉浸背景音';}
 /* 愈池 v2 情绪：极性/表情 */
 var YC_MOODS=[['🌙','孤独','neg'],['😔','焦虑','neg'],['🥺','委屈','neg'],['🌫️','emo','neg'],['😞','失落','neg'],['🌱','期待','pos'],['🙂','还好','pos'],['🌿','平静','pos'],['✨','释然','pos'],['💪','想努力','pos']];
+/* PUGC · 引导文案模板（借句诗开头，帮没文采的用户起笔）*/
+var YC_TPLS=[
+  '今晚的月亮，替我…',
+  '把心事写下来，它就…',
+  '愿明天有光，也愿我…',
+  '一个人的夜晚，也…',
+  '谢谢今天的自己，因为…',
+  '这一刻我想说，其实…',
+  '如果情绪是潮水，那此刻它…'
+];
+function ycUseTpl(i){var s=YC_TPLS[i]||'';var t=$("#ycText");if(t){t.value=s.replace(/…$/,'');t.focus();try{t.setSelectionRange(t.value.length,t.value.length);}catch(e){}ycCount();}}
 var _ycMood='',_ycPol='',_ycPosting=false;
 function ycMoodEmoji(m){for(var i=0;i<YC_MOODS.length;i++){if(YC_MOODS[i][1]===m)return YC_MOODS[i][0];}return '🌙';}
 function renderYuchi(){
@@ -4759,6 +4772,7 @@ function renderYuchi(){
   var chips=YC_MOODS.map(function(m){return '<span class="yc-mchip pol-'+m[2]+'" data-mood="'+m[1]+'" data-pol="'+m[2]+'" onclick="ycPickMood(this)"><i class="yc-mgem pol-'+m[2]+'"></i>'+m[0]+' '+m[1]+'</span>';}).join('');
   box.innerHTML=
     '<div class="yc-pool" id="ycPool">'+
+      '<div class="yc-pool-glow"></div>'+
       '<canvas id="ycPoolC"></canvas>'+
       '<div class="yc-pool-ov">'+
         '<div class="yc-pool-py">yù chí · a pool of feelings</div>'+
@@ -4776,13 +4790,15 @@ function renderYuchi(){
       '<div class="yc-comp-h">此刻，点亮一种情绪 · 写成一句诗，投进池子</div>'+
       '<div class="yc-mchips" id="ycMoods">'+chips+'</div>'+
       '<textarea id="ycText" maxlength="120" rows="3" placeholder="写下几十字诗意的话，让此刻被接住…" oninput="ycCount()"></textarea>'+
+      '<div class="yc-tpls" id="ycTpls">'+YC_TPLS.map(function(s,i){return '<span onclick="ycUseTpl('+i+')">'+esc(s.split('…')[0])+'…</span>';}).join('')+'</div>'+
       '<div class="yc-comp-foot"><span class="yc-cc" id="ycCc">0/120</span>'+
         '<button class="yc-postbtn" id="ycPostBtn" onclick="submitYuchiPost()">🫧 投进愈池</button></div>'+
     '</div>'+
     '<div class="yc-entries">'+
+      '<span onclick="go(\'fate\')"><b>🔮</b>今日缘分<em>遇见·24h</em></span>'+
       '<span onclick="go(\'treehole\')"><b>🌙</b>情绪树洞<em>抽牌陪伴</em></span>'+
       '<span onclick="go(\'shelf\')"><b>🫙</b>情绪架<em>瓶子·胶囊</em></span>'+
-      '<span onclick="go(\'trajectory\')"><b>📈</b>情绪轨迹<em>成长曲线</em></span>'+
+      '<span onclick="go(\'anthology\')"><b>📖</b>精选诗集<em>翻阅收藏</em></span>'+
     '</div>'+
     '<div class="yc-feed-h"><span>池 水 · 此 刻 在 线 的 心 事</span><span class="yc-traj" id="ycFeedTip">霸榜置顶 · 温柔沉底</span></div>'+
     '<div id="yuchiFeed"><div class="panel" style="text-align:center"><div class="pv-d">池水正在漾开…</div></div></div>'+
@@ -4803,8 +4819,8 @@ function yuchiPool(seedPols){
   resize();
   var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches;
   var bubbles=[],ripples=[],t=0;
-  function mk(pol,x){return {x:(x!=null?x:Math.random()*W),y:H+8+Math.random()*40,r:6+Math.random()*8,pol:(pol==='pos'||pol==='neg')?pol:(Math.random()<0.5?'pos':'neg'),spd:0.16+Math.random()*0.34,ph:Math.random()*6.28,wob:5+Math.random()*10,a:0};}
-  for(var i=0;i<11;i++){var b=mk(seedPols&&seedPols[i%seedPols.length]);b.y=Math.random()*H;b.a=1;bubbles.push(b);}
+  function mk(pol,x){return {x:(x!=null?x:Math.random()*W),y:H+8+Math.random()*40,r:6+Math.random()*7,pol:(pol==='pos'||pol==='neg')?pol:(Math.random()<0.5?'pos':'neg'),spd:0.12+Math.random()*0.22,ph:Math.random()*6.28,wob:6+Math.random()*10,a:0};}
+  for(var i=0;i<6;i++){var b=mk(seedPols&&seedPols[i%seedPols.length]);b.y=Math.random()*H;b.a=1;bubbles.push(b);}
   window._ycPoolState={emit:function(pol){var nb=mk(pol,W*0.5);nb.y=H-8;nb.a=1;bubbles.push(nb);if(bubbles.length>26)bubbles.shift();ripples.push({x:W*0.5,y:H*0.66,r:8,a:.5});},ripple:function(x,y){ripples.push({x:x,y:y,r:6,a:.55});}};
   // 一颗晶莹的水晶珠：柔和外晕 + 玻璃体 + 高光 + 暗边（贴合水晶珠串主题）
   function crystal(bx,by,r,pol,a){
@@ -4826,17 +4842,13 @@ function yuchiPool(seedPols){
     ctx.restore();
   }
   function draw(){
-    t+=0.02;ctx.clearRect(0,0,W,H);
-    var g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#FBF6EC');g.addColorStop(.52,'#F4ECDB');g.addColorStop(1,'#EBE0C8');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-    var rg=ctx.createRadialGradient(W*0.5,H*0.30,8,W*0.5,H*0.34,W*0.8);rg.addColorStop(0,'rgba(201,162,78,.16)');rg.addColorStop(1,'rgba(201,162,78,0)');ctx.fillStyle=rg;ctx.fillRect(0,0,W,H);
-    // 水面微光波纹
-    ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=1;
-    for(var w=0;w<2;w++){ctx.beginPath();var yy=H*(0.5+w*0.22);for(var xx=0;xx<=W;xx+=8){var y2=yy+Math.sin(xx*0.03+t+w)*3;if(xx===0)ctx.moveTo(xx,y2);else ctx.lineTo(xx,y2);}ctx.globalAlpha=0.22;ctx.stroke();ctx.globalAlpha=1;}
+    // 透明画布：只画少量柔和水晶珠 + 涟漪，让下层毛玻璃卡与呼吸光晕透出来（精简 · 玻璃白）
+    ctx.clearRect(0,0,W,H);
     for(var i=0;i<bubbles.length;i++){var b=bubbles[i];
-      if(!reduce){b.y-=b.spd;b.ph+=0.02;}
-      if(b.a<1)b.a+=0.02;
-      crystal(b.x+Math.sin(b.ph)*b.wob,b.y,b.r,b.pol,b.a);
-      if(b.y<-b.r*2){ripples.push({x:b.x,y:6,r:4,a:.3});bubbles[i]=mk(b.pol);}
+      if(!reduce){b.y-=b.spd;b.ph+=0.016;}
+      if(b.a<0.9)b.a+=0.015;
+      crystal(b.x+Math.sin(b.ph)*b.wob,b.y,b.r,b.pol,Math.min(0.9,b.a));
+      if(b.y<-b.r*2){ripples.push({x:b.x,y:6,r:4,a:.28});bubbles[i]=mk(b.pol);}
     }
     for(var j=ripples.length-1;j>=0;j--){var rp=ripples[j];if(!reduce){rp.r+=1.5;rp.a-=0.015;}ctx.strokeStyle='rgba(176,132,58,'+Math.max(0,rp.a)+')';ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(rp.x,rp.y,rp.r,0,6.29);ctx.stroke();if(rp.a<=0)ripples.splice(j,1);}
     if(!reduce)window._ycPoolRAF=requestAnimationFrame(draw);
