@@ -328,35 +328,107 @@ async function handleConfig(request, env) {
   try { await KV.put('appcfg', JSON.stringify(cfg)); } catch (e) { return json(502, { error: '写入失败：' + ((e && e.message) || '') }); }
   return json(200, { ok: true });
 }
-// ---- 匿名情绪墙（KV：键 wall = 帖子数组）----
+// ---- 愈池 · 公域情绪治愈池（KV：wall=帖子数组；balls:<手机号>=情绪球储蓄罐）----
 function wallBad(s){ return /(微信|加我|vx|VX|qq|QQ|http|www\.|代购|出售|加群|联系方式|\d{6,})/.test(s); }
+// 会员等级：按累计互动（投递/点灯/留言）成长
+function yuchiLevel(n){ n=n|0; if(n>=80)return '守灯人'; if(n>=30)return '深夜活跃'; if(n>=10)return '暖心常客'; if(n>=3)return '夜行者'; return '初来乍到'; }
+const POS_MOODS = { '期待':1,'开心':1,'想努力':1,'平静':1,'还好':1,'感恩':1,'释然':1,'温暖':1 };
+function moodPolarity(mood, pol){ if(pol==='pos'||pol==='neg')return pol; return POS_MOODS[mood] ? 'pos' : 'neg'; }
+// 霸榜/沉底：综合分＝点亮×3＋评论×2＋观看×0.15；新贴有递减冒泡加成（约 3h 内衰减），
+// 让刚投的心事能先被看见，随后靠真实互动霸榜或自然沉底
+function postScore(p, now){
+  const lamps=p.lamps||0, comm=(p.replies||[]).length, views=p.views||0;
+  const ageH=(now-(p.when||now))/3600000;
+  return lamps*3 + comm*2 + views*0.15 + Math.max(0, 18 - ageH*5);
+}
+// 冷启动预置内容：空池时以诗句打样（早期真实体量：个位数点亮），避免新用户进来空场
+const YUCHI_SEED = [
+  { mood:'孤独', pol:'neg', text:'深夜的城市像一片海，我在这头，你在那头，可我们都还醒着。', lamps:6, lv:'守灯人', ageMin:36 },
+  { mood:'释然', pol:'pos', text:'把心事写下来的那一刻，它就轻了一半。晚安，明天见。', lamps:9, lv:'深夜活跃', ageMin:78 },
+  { mood:'焦虑', pol:'neg', text:'明天还没来，我却已经担心了一整夜。谁来替我，把灯关上。', lamps:4, lv:'暖心常客', ageMin:15, reply:'你已经很勇敢了，先睡吧。' },
+  { mood:'期待', pol:'pos', text:'我把愿望折成一只纸船，放进这片池水，愿它替我漂到有光的地方。', lamps:7, lv:'夜行者', ageMin:120 },
+  { mood:'委屈', pol:'neg', text:'今天又忍住没哭。其实我只是想，被人轻轻抱一下。', lamps:5, lv:'暖心常客', ageMin:52 },
+  { mood:'平静', pol:'pos', text:'月亮不争，也不辩，只是安静地亮着。今晚，我也想这样。', lamps:3, lv:'守灯人', ageMin:95 }
+];
+function seedPosts(now){
+  return YUCHI_SEED.map((s,i)=>({
+    id:'seed'+i, mood:s.mood, pol:s.pol, text:s.text, card:'', when:now-(s.ageMin||30)*60000,
+    lamps:s.lamps||0, views:(s.lamps||0)*4+10, lv:s.lv||'夜行者', seed:true,
+    replies: s.reply ? [{ text:s.reply, when:now-((s.ageMin||30)*60000)+120000, role:'user', nick:'', code:'' }] : [],
+    lampers:[]
+  }));
+}
+async function ballsGet(KV, phone){
+  let d=null; try{ const raw=await KV.get('balls:'+phone); if(raw)d=JSON.parse(raw); }catch(e){}
+  if(!d)d={ balls:[], total:0, jars:0, acts:0 };
+  return d;
+}
+// drop=投一颗情绪球入罐（满30颗自动封存进情绪架）；act=累计互动数（涨等级）
+async function ballsBump(KV, phone, opt){
+  const d=await ballsGet(KV, phone); opt=opt||{};
+  if(opt.drop){
+    d.balls.push({ pol:opt.pol==='pos'?'pos':'neg', mood:String(opt.mood||'').slice(0,6), when:Date.now() });
+    if(d.balls.length>=30){ d.jars=(d.jars||0)+1; d.balls=[]; d._filled=true; } else { d._filled=false; }
+    d.total=(d.total||0)+1;
+  }
+  d.acts=(d.acts||0)+(opt.act||0);
+  try{ await KV.put('balls:'+phone, JSON.stringify(d)); }catch(e){}
+  return d;
+}
 async function handleWall(request, env, url) {
   const KV = env.CONFIG_KV || null;
+  const now = Date.now();
   if (request.method === 'GET') {
     if (!KV) return json(200, { ok: true, kv: false, posts: [] });
     let posts = []; try { const raw = await KV.get('wall'); if (raw) posts = JSON.parse(raw); } catch (e) {}
+    if (!posts.length) { posts = seedPosts(now); try { await KV.put('wall', JSON.stringify(posts)); } catch (e) {} }
+    const phone = String(url.searchParams.get('phone') || '');
     const lim = Math.min(60, parseInt(url.searchParams.get('limit') || '40', 10) || 40);
-    return json(200, { ok: true, kv: true, posts: posts.slice(0, lim).map(p => ({ id: p.id, mood: p.mood, text: p.text, card: p.card, when: p.when, lamps: p.lamps || 0, replies: (p.replies || []).slice(-6) })) });
+    // 沉底消失：零互动且超过 2 小时的内容移出公共池
+    const alive = posts.filter(p => (p.lamps||0)>0 || (p.replies||[]).length>0 || (now-(p.when||now))<2*3600000);
+    alive.sort((a,b)=>postScore(b,now)-postScore(a,now));
+    const out = alive.slice(0, lim).map(p => {
+      const mine = !!(phone && p.ap && p.ap===phone);
+      return { id:p.id, mood:p.mood, pol:p.pol||moodPolarity(p.mood), text:p.text, card:p.card, when:p.when,
+        lamps:p.lamps||0, views:p.views||0, lv:p.lv||'', comments:(p.replies||[]).length,
+        replies:(p.replies||[]).slice(-6), mine,
+        lampers: mine ? (p.lampers||[]).slice(-5) : undefined };
+    });
+    let extra = {};
+    if (phone && /^1[3-9]\d{9}$/.test(phone)) { const b=await ballsGet(KV, phone); extra = { jar:{ fill:b.balls.length, balls:b.balls.slice(-30), jars:b.jars||0, total:b.total||0 }, level:yuchiLevel(b.acts) }; }
+    return json(200, Object.assign({ ok:true, kv:true, posts:out }, extra));
   }
   if (request.method !== 'POST') return json(405, { error: 'Method Not Allowed' });
-  if (!KV) return json(501, { error: '情绪墙还没开启（需要在 Pages 绑定 KV）' });
+  if (!KV) return json(501, { error: '愈池还没开启（需要在 Pages 绑定 KV）' });
   let body; try { body = await request.json(); } catch (e) { body = {}; }
   const action = String(body.action || '').trim();
+  const phone = String(body.phone || '');
   let posts = []; try { const raw = await KV.get('wall'); if (raw) posts = JSON.parse(raw); } catch (e) {}
   if (action === 'post') {
     let text = String(body.text || '').trim();
     if (text.length < 2 || text.length > 300) return json(400, { error: '内容太短或太长' });
-    if (wallBad(text)) return json(400, { error: '为了大家的树洞，请不要留联系方式或广告～' });
-    const p = { id: 'w' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), mood: String(body.mood || '').slice(0, 6), text, card: String(body.card || '').slice(0, 20), when: Date.now(), lamps: 0, replies: [] };
+    if (wallBad(text)) return json(400, { error: '为了这片池水，请不要留联系方式或广告～' });
+    let lv=''; if (phone && /^1[3-9]\d{9}$/.test(phone)) { const b=await ballsBump(KV, phone, { drop:true, pol:body.pol, mood:body.mood, act:1 }); lv=yuchiLevel(b.acts); }
+    const pol = moodPolarity(String(body.mood||''), body.pol);
+    const p = { id:'w'+now.toString(36)+Math.random().toString(36).slice(2,5), mood:String(body.mood||'').slice(0,6), pol, text, card:String(body.card||'').slice(0,20), when:now, lamps:0, views:0, replies:[], lv, lampers:[], ap:phone||'' };
     posts.unshift(p); if (posts.length > 200) posts = posts.slice(0, 200);
-    try { await KV.put('wall', JSON.stringify(posts)); } catch (e) { return json(502, { error: '放上墙失败，再试一次' }); }
-    return json(200, { ok: true, post: { id: p.id, mood: p.mood, text: p.text, card: p.card, when: p.when, lamps: 0, replies: [] } });
+    try { await KV.put('wall', JSON.stringify(posts)); } catch (e) { return json(502, { error: '投进池子失败，再试一次' }); }
+    let jar=null; if(phone && /^1[3-9]\d{9}$/.test(phone)){ const b=await ballsGet(KV, phone); jar={ fill:b.balls.length, jars:b.jars||0, total:b.total||0, filled:!!b._filled }; }
+    return json(200, { ok:true, post:{ id:p.id, mood:p.mood, pol, text:p.text, when:p.when, lamps:0, views:0, lv, comments:0, replies:[], mine:true }, jar, level:lv });
   }
   if (action === 'lamp') {
     const p = posts.find(x => x.id === String(body.id || '')); if (!p) return json(404, { error: '这条心事已经不在了' });
     p.lamps = (p.lamps || 0) + 1;
+    let lv=''; if (phone && /^1[3-9]\d{9}$/.test(phone)) { const b=await ballsBump(KV, phone, { act:1 }); lv=yuchiLevel(b.acts); }
+    p.lampers = p.lampers || []; p.lampers.push({ lv:lv||'夜行者', when:now }); if (p.lampers.length > 20) p.lampers = p.lampers.slice(-20);
     try { await KV.put('wall', JSON.stringify(posts)); } catch (e) {}
-    return json(200, { ok: true, lamps: p.lamps });
+    return json(200, { ok: true, lamps: p.lamps, by: lv || '有人' });
+  }
+  if (action === 'view') {
+    const ids = Array.isArray(body.ids) ? body.ids.slice(0, 60) : [];
+    let changed=false; for(const id of ids){ const p=posts.find(x=>x.id===String(id)); if(p){ p.views=(p.views||0)+1; changed=true; } }
+    if(changed){ try { await KV.put('wall', JSON.stringify(posts)); } catch(e){} }
+    return json(200, { ok:true });
   }
   if (action === 'reply') {
     let text = String(body.text || '').trim();
@@ -366,7 +438,8 @@ async function handleWall(request, env, url) {
     let role = 'user', nick = '', code = '';
     const rid2 = String(body.readerId || ''), rkey = String(body.rkey || '');
     if (rid2 && rkey) { try { const all = await rdAll(env); const r = all.find(x => x.id === rid2 && x.key === rkey && x.status === 'approved'); if (r) { role = 'reader'; nick = (r.persona && r.persona.nick) || r.name || '起牌师'; code = r.code || ''; } } catch (e) {} }
-    p.replies = p.replies || []; p.replies.push({ text, when: Date.now(), role, nick, code }); if (p.replies.length > 30) p.replies = p.replies.slice(-30);
+    if (phone && /^1[3-9]\d{9}$/.test(phone)) { await ballsBump(KV, phone, { act:1 }); }
+    p.replies = p.replies || []; p.replies.push({ text, when: now, role, nick, code }); if (p.replies.length > 30) p.replies = p.replies.slice(-30);
     try { await KV.put('wall', JSON.stringify(posts)); } catch (e) { return json(502, { error: '留言失败' }); }
     return json(200, { ok: true });
   }

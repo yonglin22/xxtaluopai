@@ -1162,9 +1162,71 @@
   #yuchi .yc-act-ic{font-size:30px;line-height:1;margin-bottom:8px}
   #yuchi .yc-act-t{font-size:16px;color:#2a2016;letter-spacing:.04em}
   #yuchi .yc-act-d{font-size:11.5px;color:var(--ink-soft);margin-top:5px;line-height:1.5}
-  #yuchi .yc-feed-h{display:flex;align-items:baseline;justify-content:space-between;margin:6px 2px 12px}
-  #yuchi .yc-feed-h>span:first-child{font-size:12px;color:var(--ink-faint);letter-spacing:.18em}
+  #yuchi .yc-feed-h{display:flex;align-items:baseline;justify-content:space-between;margin:16px 2px 12px}
+  #yuchi .yc-feed-h>span:first-child{font-size:12px;color:var(--ink-faint);letter-spacing:.14em}
   #yuchi .yc-traj{font-size:12px;color:var(--gold-deep);cursor:pointer}
+  /* ---- 情绪储蓄罐 ---- */
+  #yuchi .yc-jar{background:linear-gradient(180deg,#fbf7ef,#f4ecdc);border:1px solid rgba(201,162,78,.24);border-radius:16px;padding:14px 16px;margin-bottom:14px;box-shadow:0 6px 20px rgba(120,96,40,.06)}
+  #yuchi .yc-jar-guest{font-size:12.5px;color:var(--gold-deep);cursor:pointer;line-height:1.6;text-align:center;padding:4px 2px}
+  #yuchi .yc-jar-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+  #yuchi .yc-jar-title{font-size:14.5px;color:#2a2016;letter-spacing:.03em}
+  #yuchi .yc-lvl{font-size:11px;color:var(--gold-deep);background:rgba(201,162,78,.13);border:1px solid rgba(201,162,78,.4);border-radius:999px;padding:3px 10px;white-space:nowrap}
+  #yuchi .yc-jar-dots{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+  #yuchi .yc-ball{width:12px;height:12px;border-radius:50%;flex:none;box-sizing:border-box;padding:0}
+  #yuchi .yc-ball.off{background:transparent;border:1px dashed rgba(120,100,60,.28)}
+  #yuchi .yc-ball.pol-pos{background:radial-gradient(circle at 35% 30%,#F6E4B6,#D9A84E 70%,#9A7226);box-shadow:0 1px 3px rgba(154,114,38,.4)}
+  #yuchi .yc-ball.pol-neg{background:radial-gradient(circle at 35% 30%,#c9c3b8,#8f8880 70%,#5f5a52);box-shadow:0 1px 3px rgba(60,56,50,.3)}
+  #yuchi .yc-jar-foot{font-size:11.5px;color:var(--ink-soft)}
+  #yuchi .yc-jar-foot b{color:var(--gold-deep);font-family:var(--serif);font-size:14px}
+  /* ---- 诗句发布器 ---- */
+  #yuchi .yc-composer{background:var(--bg-raise);border:1px solid var(--line);border-radius:16px;padding:14px 15px;margin-bottom:12px}
+  #yuchi .yc-comp-h{font-size:13px;color:var(--ink-soft);margin-bottom:10px;letter-spacing:.02em}
+  #yuchi .yc-mchips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:11px}
+  #yuchi .yc-mchip{font-size:12.5px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);color:var(--ink-soft);background:var(--bg);cursor:pointer;transition:.15s}
+  #yuchi .yc-mchip.pol-pos.on{background:linear-gradient(135deg,#F0D79B,#D9A84E);color:#2a1f10;border-color:transparent;font-weight:600}
+  #yuchi .yc-mchip.pol-neg.on{background:linear-gradient(135deg,#8a7bbf,#6a5c98);color:#fff;border-color:transparent;font-weight:600}
+  #yuchi .yc-composer textarea{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font-size:14.5px;line-height:1.8;padding:11px;resize:vertical;outline:none;font-family:inherit}
+  #yuchi .yc-composer textarea:focus{border-color:var(--gold)}
+  #yuchi .yc-comp-foot{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+  #yuchi .yc-cc{font-size:11px;color:var(--ink-faint)}
+  #yuchi .yc-postbtn{border:none;border-radius:999px;padding:9px 20px;font-size:13.5px;font-family:var(--serif);letter-spacing:.04em;background:linear-gradient(135deg,#8a7bbf,#5f4f96);color:#fff;cursor:pointer;box-shadow:0 6px 16px rgba(95,79,150,.3)}
+  #yuchi .yc-postbtn:disabled{opacity:.6}
+  /* ---- 入口 ---- */
+  #yuchi .yc-entries{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+  #yuchi .yc-entries>span{flex:1;text-align:center;white-space:nowrap;font-size:12px;color:var(--ink-soft);background:var(--bg-raise);border:1px solid var(--line);border-radius:10px;padding:9px 6px;cursor:pointer}
+  #yuchi .yc-entries>span:active{background:var(--gold-soft,rgba(201,162,78,.1))}
+  /* ---- 池水 帖子 ---- */
+  #yuchi .yc-post{position:relative;background:var(--bg-raise);border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:10px;transition:transform .5s cubic-bezier(.2,.8,.2,1),box-shadow .3s;overflow:hidden}
+  #yuchi .yc-post::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px}
+  #yuchi .yc-post.pol-pos::before{background:linear-gradient(180deg,#F0D79B,#D9A84E)}
+  #yuchi .yc-post.pol-neg::before{background:linear-gradient(180deg,#9a8fc4,#6a5c98)}
+  #yuchi .yc-post.mine{border-color:rgba(201,162,78,.5);background:linear-gradient(180deg,#fcf8f0,#f6efe1)}
+  #yuchi .yc-post.yc-lift{transform:translateY(-6px);box-shadow:0 12px 28px rgba(120,96,40,.16)}
+  #yuchi .yc-post-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  #yuchi .yc-mtag{font-size:12px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+  #yuchi .yc-lvbadge{font-size:10.5px;color:var(--gold-deep);background:rgba(201,162,78,.12);border:1px solid rgba(201,162,78,.36);border-radius:999px;padding:2px 8px}
+  #yuchi .yc-mine-tag{font-size:10.5px;color:#fff;background:linear-gradient(135deg,#E7C892,var(--amber));border-radius:999px;padding:2px 8px}
+  #yuchi .yc-time{font-size:11px;color:var(--ink-faint);margin-left:auto}
+  #yuchi .yc-received{font-size:12px;color:var(--gold-deep);background:rgba(201,162,78,.1);border-radius:8px;padding:6px 10px;margin-bottom:8px}
+  #yuchi .yc-post-t{font-size:14.5px;line-height:1.85;color:var(--ink);letter-spacing:.01em}
+  #yuchi .yc-reps{margin-top:10px;padding-top:8px;border-top:1px solid var(--line-soft);display:grid;gap:6px}
+  #yuchi .yc-rep{font-size:12.5px;color:var(--ink-soft);line-height:1.65}
+  #yuchi .yc-rep.reader{color:var(--gold-deep);background:rgba(201,162,78,.1);border:1px solid rgba(201,162,78,.4);border-radius:9px;padding:7px 10px;cursor:pointer}
+  #yuchi .yc-post-meta{display:flex;align-items:center;gap:12px;margin-top:12px}
+  #yuchi .yc-lampb{display:inline-flex;align-items:center;gap:5px;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-size:12.5px;color:var(--ink-soft);cursor:pointer}
+  #yuchi .yc-lampb.on{background:rgba(201,162,78,.16);border-color:rgba(201,162,78,.5);color:var(--gold-deep);cursor:default}
+  #yuchi .yc-meta-b{background:transparent;border:none;color:var(--ink-faint);font-size:12.5px;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+  #yuchi .yc-views{font-size:11.5px;color:var(--ink-faint);margin-left:auto}
+  #yuchi .yc-repbox{display:none;align-items:center;gap:8px;margin-top:10px}
+  #yuchi .yc-repbox.show{display:flex}
+  #yuchi .yc-repbox input{flex:1;min-width:0;padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-size:13px}
+  #yuchi .yc-repbox button{flex:none;border:none;border-radius:8px;padding:9px 14px;background:var(--ink);color:var(--face);font-size:13px;cursor:pointer}
+  #yuchi .yc-rise{position:absolute;font-size:16px;pointer-events:none;animation:ycRise 1s ease-out forwards;z-index:3}
+  @keyframes ycRise{0%{opacity:0;transform:translateY(0) scale(.7)}20%{opacity:1}100%{opacity:0;transform:translateY(-46px) scale(1.25)}}
+  .yc-fly{position:fixed;width:16px;height:16px;border-radius:50%;z-index:70;pointer-events:none;transition:transform .7s cubic-bezier(.4,1.3,.5,1),opacity .7s ease-in;box-shadow:0 2px 8px rgba(120,90,30,.4)}
+  .yc-fly.pol-pos{background:radial-gradient(circle at 35% 30%,#F6E4B6,#D9A84E 70%,#9A7226)}
+  .yc-fly.pol-neg{background:radial-gradient(circle at 35% 30%,#c9c3b8,#8f8880 70%,#5f5a52)}
+  @media (prefers-reduced-motion:reduce){#yuchi .yc-post,.yc-fly,#yuchi .yc-rise{transition:none;animation:none}}
   </style>
   <section class="screen" id="yuchi">
     <div id="yuchiBody"></div>
@@ -4567,12 +4629,17 @@ var YUCHI_POEMS=[
 ];
 var _yuchiPoemIdx=0;
 function YUCHI_SOUND_LABEL(on){return on?'🎧 沉浸中':'🎧 沉浸背景音';}
+/* 愈池 v2 情绪：极性/表情 */
+var YC_MOODS=[['🌙','孤独','neg'],['😔','焦虑','neg'],['🥺','委屈','neg'],['🌫️','emo','neg'],['😞','失落','neg'],['🌱','期待','pos'],['🙂','还好','pos'],['🌿','平静','pos'],['✨','释然','pos'],['💪','想努力','pos']];
+var _ycMood='',_ycPol='',_ycPosting=false;
+function ycMoodEmoji(m){for(var i=0;i<YC_MOODS.length;i++){if(YC_MOODS[i][1]===m)return YC_MOODS[i][0];}return '🌙';}
 function renderYuchi(){
   var box=$("#yuchiBody");if(!box)return;
-  _yuchiPoemIdx=Math.floor(Math.random()*YUCHI_POEMS.length);
+  _yuchiPoemIdx=Math.floor(Math.random()*YUCHI_POEMS.length);_ycMood='';_ycPol='';
   var p=YUCHI_POEMS[_yuchiPoemIdx],on=!!window._yuchiAudio;
+  var chips=YC_MOODS.map(function(m){return '<span class="yc-mchip pol-'+m[2]+'" data-mood="'+m[1]+'" data-pol="'+m[2]+'" onclick="ycPickMood(this)">'+m[0]+' '+m[1]+'</span>';}).join('');
   box.innerHTML=
-    pHero('yù chí · a pool of feelings','愈池','把此刻的情绪，轻轻放进池子 · 也替别人，点亮一盏灯')+
+    pHero('yù chí · a pool of feelings','愈池','把此刻的情绪，写成一句诗投进池子 · 也替别人，点亮一盏灯')+
     '<div class="yc-poem" id="yuchiPoem" onclick="yuchiNextPoem()">'+
       '<div class="yc-quote">“</div>'+
       '<div class="yc-poem-t serif" id="yuchiPoemT">'+esc(p.t)+'</div>'+
@@ -4581,21 +4648,76 @@ function renderYuchi(){
         '<span class="yc-sound'+(on?' on':'')+'" id="yuchiSoundBtn" onclick="event.stopPropagation();toggleYuchiSound()">'+YUCHI_SOUND_LABEL(on)+'</span>'+
       '</div>'+
     '</div>'+
-    '<div class="yc-acts">'+
-      '<div class="yc-act yc-act-drop" onclick="go(\'treehole\')">'+
-        '<div class="yc-act-ic">🫧</div><div class="yc-act-t serif">投一颗情绪</div>'+
-        '<div class="yc-act-d">写下此刻 · 抽一张陪伴牌</div>'+
-      '</div>'+
-      '<div class="yc-act yc-act-cap" onclick="go(\'capsule\')">'+
-        '<div class="yc-act-ic">🫙</div><div class="yc-act-t serif">情绪胶囊</div>'+
-        '<div class="yc-act-d">封存此刻 · 寄给未来的你</div>'+
-      '</div>'+
+    '<div id="yuchiJar" class="yc-jar"></div>'+
+    '<div class="yc-composer" id="yuchiComposer">'+
+      '<div class="yc-comp-h">此刻，点亮一种情绪 · 写成一句诗</div>'+
+      '<div class="yc-mchips" id="ycMoods">'+chips+'</div>'+
+      '<textarea id="ycText" maxlength="120" rows="3" placeholder="写下几十字诗意的话，让此刻被接住…" oninput="ycCount()"></textarea>'+
+      '<div class="yc-comp-foot"><span class="yc-cc" id="ycCc">0/120</span>'+
+        '<button class="yc-postbtn" id="ycPostBtn" onclick="submitYuchiPost()">🫧 投进愈池</button></div>'+
     '</div>'+
-    '<div class="yc-feed-h"><span>池 水 · 大 家 的 心 事</span><span class="yc-traj" onclick="go(\'trajectory\')">我的情绪轨迹 →</span></div>'+
+    '<div class="yc-entries">'+
+      '<span onclick="go(\'treehole\')">🌙 情绪树洞 · 抽牌陪伴</span>'+
+      '<span onclick="go(\'capsule\')">🫙 情绪胶囊</span>'+
+      '<span onclick="go(\'trajectory\')">📈 情绪轨迹</span>'+
+    '</div>'+
+    '<div class="yc-feed-h"><span>池 水 · 此 刻 在 线 的 心 事</span><span class="yc-traj" id="ycFeedTip">霸榜置顶 · 温柔沉底</span></div>'+
     '<div id="yuchiFeed"><div class="panel" style="text-align:center"><div class="pv-d">池水正在漾开…</div></div></div>'+
-    '<div class="disclaimer">愈池是情绪陪伴，不评判、不诊断；点亮与暖话都会被对方看见，请温柔以待。</div>';
+    '<div class="disclaimer">愈池是情绪陪伴，不评判、不诊断；点亮与暖话都会被对方看见，请温柔以待。零互动的心事约 2 小时会安静沉底。</div>';
   yuchiStartPoemRotate();
   yuchiLoadFeed();
+}
+function ycPickMood(el){
+  var on=el.classList.contains('on');
+  document.querySelectorAll('#ycMoods .yc-mchip').forEach(function(c){c.classList.remove('on');});
+  if(on){_ycMood='';_ycPol='';}else{el.classList.add('on');_ycMood=el.dataset.mood;_ycPol=el.dataset.pol;}
+}
+function ycCount(){var t=$("#ycText"),c=$("#ycCc");if(t&&c)c.textContent=t.value.length+'/120';}
+function yuchiRenderJar(jar,level){
+  var box=$("#yuchiJar");if(!box)return;
+  if(!state.phone){box.innerHTML='<div class="yc-jar-guest" onclick="doLogin()"><span>🫙 登录后，你投的每一颗情绪都会存进专属的情绪储蓄罐 →</span></div>';return;}
+  jar=jar||{fill:0,jars:0,total:0,balls:[]};
+  var balls=jar.balls||[];var dots='';
+  for(var i=0;i<30;i++){var b=balls[i];dots+='<i class="'+(b?('yc-ball pol-'+(b.pol==='pos'?'pos':'neg')):'yc-ball off')+'"></i>';}
+  box.innerHTML=
+    '<div class="yc-jar-top"><span class="yc-jar-title serif">情绪储蓄罐 · 第 '+((jar.jars||0)+1)+' 罐</span>'+
+      '<span class="yc-lvl">Lv · '+esc(level||'初来乍到')+'</span></div>'+
+    '<div class="yc-jar-dots">'+dots+'</div>'+
+    '<div class="yc-jar-foot">已收集 <b>'+(jar.fill||0)+'</b>/30 · 累计封存 '+(jar.total||0)+' 颗'+((jar.jars||0)>0?(' · 情绪架 '+jar.jars+' 罐'):'')+'</div>';
+}
+async function submitYuchiPost(){
+  if(_ycPosting)return;
+  var t=$("#ycText"),text=((t&&t.value)||'').trim();
+  if(!_ycMood){toast('先点亮一种情绪');return;}
+  if(text.length<2){toast('写一句诗意的话吧（至少 2 字）');return;}
+  if(!state.phone){confirmBox('登录后才能把情绪投进池子、收集情绪球，去登录？','去登录','再看看').then(function(ok){if(ok)doLogin();});return;}
+  _ycPosting=true;var btn=$("#ycPostBtn");if(btn){btn.disabled=true;btn.textContent='投递中…';}
+  var r=await apiPost('/api/wall',{action:'post',phone:state.phone,mood:_ycMood,pol:_ycPol,text:text});
+  _ycPosting=false;if(btn){btn.disabled=false;btn.innerHTML='🫧 投进愈池';}
+  if(!r.ok||!r.j||!r.j.ok){toast((r.j&&r.j.error)||'投递失败，再试一次');return;}
+  if(t)t.value='';ycCount();
+  document.querySelectorAll('#ycMoods .yc-mchip').forEach(function(c){c.classList.remove('on');});_ycMood='';_ycPol='';
+  ycDropBallAnim(r.j.post&&r.j.post.pol);
+  try{rewardFeat('wall','愈池投递');}catch(e){}
+  if(r.j.jar&&r.j.jar.filled)setTimeout(function(){toast('一整罐情绪已封存进情绪架 🫙 第 '+r.j.jar.jars+' 罐');},900);
+  else toast('已投进池子 · 情绪球 +1 🫧');
+  var newId=r.j.post&&r.j.post.id;
+  setTimeout(function(){yuchiLoadFeed().then(function(){
+    try{var el=newId&&document.getElementById('yp-'+newId);if(el)el.scrollIntoView({block:'center',behavior:'smooth'});}catch(e){}
+  });},650);
+}
+/* 投递动效：一颗情绪球从发布器"跳"进上方的情绪罐 */
+function ycDropBallAnim(pol){
+  try{
+    var jar=$("#yuchiJar"),comp=$("#yuchiComposer");if(!jar||!comp)return;
+    var jr=jar.getBoundingClientRect(),cr=comp.getBoundingClientRect();
+    var ball=document.createElement('div');ball.className='yc-fly pol-'+(pol==='pos'?'pos':'neg');
+    ball.style.left=(cr.left+cr.width/2)+'px';ball.style.top=(cr.top+10)+'px';
+    document.body.appendChild(ball);
+    var dx=(jr.left+jr.width/2)-(cr.left+cr.width/2),dy=(jr.top+jr.height/2)-(cr.top+10);
+    requestAnimationFrame(function(){ball.style.transform='translate('+dx+'px,'+dy+'px) scale(.5)';ball.style.opacity='0';});
+    setTimeout(function(){if(ball.parentNode)ball.parentNode.removeChild(ball);},760);
+  }catch(e){}
 }
 function yuchiSetPoem(){
   var el=$("#yuchiPoemT");if(!el)return;
@@ -4614,14 +4736,85 @@ function yuchiStartPoemRotate(){
 }
 async function yuchiLoadFeed(){
   var list=$("#yuchiFeed");if(!list)return;
-  var r=await apiGet('/api/wall?limit=30'),ok=r.ok,j=r.j;
+  var q='/api/wall?limit=30'+(state.phone?('&phone='+encodeURIComponent(state.phone)):'');
+  var r=await apiGet(q),ok=r.ok,j=r.j;
+  if(document.getElementById('yuchiJar'))yuchiRenderJar(j&&j.jar,j&&j.level);
   list=$("#yuchiFeed");if(!list)return;
   if(!ok){list.innerHTML='<div class="panel" style="text-align:center"><div class="pv-d">池水没漾开，返回重进试试</div></div>';return;}
   if(j&&j.kv===false){list.innerHTML='<div class="panel" style="text-align:center"><div class="pv-d">愈池即将开启（部署后绑定 KV 即可上线）。</div></div>';return;}
   var posts=(j&&j.posts)||[];
-  if(!posts.length){list.innerHTML='<div class="panel" style="text-align:center"><div class="pv-d">池水还很静。做第一个，把心事放进来吧 🌙</div><button class="btn block" style="margin-top:12px;background:linear-gradient(135deg,#8a7bbf,#5f4f96);color:#fff;border:none" onclick="go(\'treehole\')">🫧 投一颗情绪进池</button></div>';return;}
+  if(!posts.length){list.innerHTML='<div class="panel" style="text-align:center"><div class="pv-d">池水还很静。做第一个，把心事投进来吧 🌙</div></div>';return;}
   var lamped=lampedSet();
-  list.innerHTML=posts.map(function(p){return wallItem(p,lamped.has(p.id));}).join('');
+  list.innerHTML=posts.map(function(p){return yuchiPostItem(p,lamped.has(p.id));}).join('');
+  yuchiTrackViews(posts);
+}
+function yuchiPostItem(p,lit){
+  var pol=(p.pol==='pos')?'pos':'neg';
+  var reps=(p.replies||[]).map(function(r){
+    return r.role==='reader'
+      ?'<div class="yc-rep reader" onclick="wallReaderTap(\''+esc(r.code||'')+'\')">🔮 <b>'+esc(r.nick||'起牌师')+'</b>：'+esc(r.text)+'</div>'
+      :'<div class="yc-rep">🫶 '+esc(r.text)+'</div>';
+  }).join('');
+  var mineNote='';
+  if(p.mine&&(p.lamps||0)>0){
+    var lp=(p.lampers||[]);var last=lp.length?lp[lp.length-1].lv:'';
+    mineNote='<div class="yc-received">🕯 收到 '+p.lamps+' 盏灯'+(last?(' · 刚有「'+esc(last)+'」为你点亮'):'')+'</div>';
+  }
+  return '<div class="yc-post pol-'+pol+(p.mine?' mine':'')+'" id="yp-'+p.id+'">'+
+    '<div class="yc-post-top">'+
+      '<span class="yc-mtag">'+ycMoodEmoji(p.mood)+' '+esc(p.mood||'心事')+'</span>'+
+      (p.lv?'<span class="yc-lvbadge">'+esc(p.lv)+'</span>':'')+
+      (p.mine?'<span class="yc-mine-tag">我的</span>':'')+
+      '<span class="yc-time">'+timeAgo(p.when)+'</span>'+
+    '</div>'+
+    mineNote+
+    '<div class="yc-post-t">'+esc(p.text)+'</div>'+
+    (reps?'<div class="yc-reps">'+reps+'</div>':'')+
+    '<div class="yc-post-meta">'+
+      '<button class="yc-lampb'+(lit?' on':'')+'" '+(lit?'disabled':'')+' onclick="yuchiLamp(\''+p.id+'\',this)">🕯 <span id="ylc-'+p.id+'">'+(p.lamps||0)+'</span> '+(lit?'已点亮':'点亮')+'</button>'+
+      '<button class="yc-meta-b" onclick="yuchiReplyToggle(\''+p.id+'\')">💬 <span>'+(p.comments||(p.replies||[]).length||0)+'</span></button>'+
+      '<span class="yc-views">👁 '+(p.views||0)+'</span>'+
+    '</div>'+
+    '<div class="yc-repbox" id="wr-'+p.id+'"><input id="wri-'+p.id+'" maxlength="40" placeholder="送一句暖话（1-40字）"/><button onclick="yuchiReplySend(\''+p.id+'\')">送出</button></div>'+
+  '</div>';
+}
+async function yuchiLamp(id,el){
+  if(el&&el.disabled)return;if(el)el.disabled=true;
+  var card=document.getElementById('yp-'+id);
+  ycRiseGlyph(el);if(card)card.classList.add('yc-lift');
+  var r=await apiPost('/api/wall',{action:'lamp',id:id,phone:state.phone||''});
+  if(r.ok&&r.j&&typeof r.j.lamps==='number'){
+    markLamped(id);var c=document.getElementById('ylc-'+id);if(c)c.textContent=r.j.lamps;
+    if(el){el.classList.add('on');el.innerHTML='🕯 <span id="ylc-'+id+'">'+r.j.lamps+'</span> 已点亮';}
+    try{rewardFeat('wall','愈池点灯');}catch(e){}
+    toast('为 TA 点亮了一盏灯 🕯 灯球升起');
+    setTimeout(yuchiLoadFeed,720); // 顶球上浮：重排让被点亮的心事往上升
+  }else{if(el)el.disabled=false;if(card)card.classList.remove('yc-lift');toast((r.j&&r.j.error)||'点灯失败');}
+}
+/* 顶球：一枚灯焰从按钮升起 */
+function ycRiseGlyph(el){
+  try{var host=el&&el.closest?el.closest('.yc-post'):null;if(!host)return;
+    var g=document.createElement('span');g.className='yc-rise';g.textContent='🕯';
+    var r=el.getBoundingClientRect(),hr=host.getBoundingClientRect();
+    g.style.left=(r.left-hr.left+8)+'px';g.style.top=(r.top-hr.top)+'px';host.appendChild(g);
+    setTimeout(function(){if(g.parentNode)g.parentNode.removeChild(g);},1000);
+  }catch(e){}
+}
+function yuchiReplyToggle(id){var w=$("#wr-"+id);if(w){var open=!w.classList.contains('show');w.classList.toggle('show',open);if(open){var i=$("#wri-"+id);if(i)setTimeout(function(){i.focus();},50);}}}
+async function yuchiReplySend(id){
+  var i=$("#wri-"+id),text=((i&&i.value)||'').trim();if(text.length<1){toast('写一句吧');return;}
+  var body={action:'reply',id:id,text:text,phone:state.phone||''};
+  if(state.reader&&state.reader.status==='approved'&&state.reader.id){body.readerId=state.reader.id;body.rkey=readerKey();}
+  var r=await apiPost('/api/wall',body);
+  if(r.ok){toast(body.readerId?'已以起牌师身份回应 🔮':'暖话已送到 🫶');yuchiLoadFeed();}else toast((r.j&&r.j.error)||'留言失败');
+}
+/* 观看人数：每台设备对每条心事只计一次 */
+function yuchiTrackViews(posts){
+  try{
+    var seen={};try{seen=JSON.parse(localStorage.getItem('py_viewed')||'{}')||{};}catch(e){seen={};}
+    var neu=[];posts.forEach(function(p){if(p.id&&!seen[p.id]&&String(p.id).indexOf('seed')!==0){seen[p.id]=1;neu.push(p.id);}else if(p.id&&!seen[p.id]){seen[p.id]=1;neu.push(p.id);}});
+    if(neu.length){localStorage.setItem('py_viewed',JSON.stringify(seen));apiPost('/api/wall',{action:'view',ids:neu.slice(0,60)});}
+  }catch(e){}
 }
 /* 沉浸背景音：无音频文件，用 WebAudio 生成一段柔和环境音垫（用户轻触才启动，符合自动播放限制）*/
 function startYuchiAmbient(){
