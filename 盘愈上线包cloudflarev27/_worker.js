@@ -174,6 +174,7 @@ export default {
     if (url.pathname === '/api/wxphone') { if (request.method !== 'POST') return json(405, { error: 'Method Not Allowed' }); return handleWxPhone(request, env); }
     if (url.pathname === '/api/wxpay') { if (request.method !== 'POST') return json(405, { error: 'Method Not Allowed' }); return handleWxPay(request, env); }
     if (url.pathname === '/api/wxpay/notify') { if (request.method !== 'POST') return json(405, { error: 'Method Not Allowed' }); return handleWxPayNotify(request, env); }
+    if (url.pathname === '/api/wxpay/diag') { return handleWxPayDiag(request, env); }
     { const _r = await env.ASSETS.fetch(request); const _ct = _r.headers.get('content-type') || ''; if (_ct.includes('text/html')) { const _h = new Headers(_r.headers); _h.set('cache-control', 'no-cache, must-revalidate'); return new Response(_r.body, { status: _r.status, statusText: _r.statusText, headers: _h }); } return _r; }
   }
 };
@@ -235,7 +236,7 @@ async function aesGcmDecrypt(apiv3key, nonce, aad, ciphertextB64) {
 async function handleWxPay(request, env) {
   let body = {}; try { body = await request.json(); } catch (e) {}
   const APPID = env.WX_APPID, SECRET = env.WX_APPSECRET, MCHID = env.WX_MCHID, SERIAL = env.WX_PAY_SERIAL, PKEY = env.WX_PAY_PRIVATE_KEY;
-  if (!APPID || !MCHID || !SERIAL || !PKEY) return json(200, { ok: false, error: 'not_configured', hint: '需配置 WX_APPID / WX_MCHID / WX_PAY_SERIAL / WX_PAY_PRIVATE_KEY（+ WX_APPSECRET 换 openid）' });
+  if (!APPID || !MCHID || !SERIAL || !PKEY) return json(200, { ok: false, error: 'not_configured', present: { WX_APPID: !!APPID, WX_MCHID: !!MCHID, WX_PAY_SERIAL: !!SERIAL, WX_PAY_PRIVATE_KEY: !!PKEY }, hint: '需配置 WX_APPID / WX_MCHID / WX_PAY_SERIAL / WX_PAY_PRIVATE_KEY（+ WX_APPSECRET 换 openid）' });
   // JSAPI 支付必须要付款人 openid：优先用前端传的 openid，否则用 wx.login 的 code 换
   let openid = String(body.openid || ''), _sess = null;
   if (!openid && !SECRET) return json(200, { ok: false, error: 'no_openid', hint: '未配置 WX_APPSECRET，无法用 code 换 openid' });
@@ -272,6 +273,24 @@ async function handleWxPayNotify(request, env) {
     }
   } catch (e) {}
   return json(200, { code: 'SUCCESS', message: '成功' });
+}
+// 排查用：显示 Worker 到底读到了哪些环境变量（只显示有/无，不显示值）。排查完可删本函数+路由。
+function handleWxPayDiag(request, env) {
+  const has = (k) => !!(env && env[k]);
+  const len = (k) => (env && env[k]) ? String(env[k]).length : 0;
+  return json(200, {
+    ok: true,
+    note: '仅排查用，显示变量是否被读到（不含值），排查完请删除本接口',
+    present: {
+      WX_APPID: has('WX_APPID'), WX_APPSECRET: has('WX_APPSECRET'), WX_MCHID: has('WX_MCHID'),
+      WX_PAY_SERIAL: has('WX_PAY_SERIAL'), WX_PAY_PRIVATE_KEY: has('WX_PAY_PRIVATE_KEY'),
+      WX_PAY_NOTIFY_URL: has('WX_PAY_NOTIFY_URL'), WX_PAY_APIV3_KEY: has('WX_PAY_APIV3_KEY'),
+      AI_KEY: has('AI_KEY'), CONFIG_ADMIN_TOKEN: has('CONFIG_ADMIN_TOKEN')
+    },
+    kv_bound: !!env.CONFIG_KV,
+    lengths: { WX_APPID: len('WX_APPID'), WX_MCHID: len('WX_MCHID'), WX_PAY_SERIAL: len('WX_PAY_SERIAL'), WX_PAY_PRIVATE_KEY: len('WX_PAY_PRIVATE_KEY') },
+    all_env_keys: env ? Object.keys(env).sort() : []
+  });
 }
 async function handleConfig(request, env) {
   const KV = env.CONFIG_KV || null;

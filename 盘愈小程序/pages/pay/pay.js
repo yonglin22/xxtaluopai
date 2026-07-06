@@ -46,6 +46,7 @@ Page({
           network: '后端访问微信超时，请重试'
         };
         let msg = map[j.error] || j.hint || j.error || '未知错误';
+        if (j.present) { const miss = Object.keys(j.present).filter((k) => !j.present[k]); if (miss.length) msg += '\n缺失变量：' + miss.join('、'); }
         if (j.detail) { try { const d = j.detail; msg += '\n微信：' + (d.code ? (d.code + ' ' + (d.message || '')) : JSON.stringify(d)).slice(0, 160); } catch (e) {} }
         wx.showModal({ title: '下单失败', showCancel: false, confirmText: '知道了',
           content: msg + '\n订单 ' + (this.data.orderNo || '—') + ' · ¥' + (this.data.amount || '—') });
