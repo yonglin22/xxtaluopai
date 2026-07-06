@@ -1352,37 +1352,89 @@
   </section>
 
   <!-- ===== ASK 问事 ===== -->
+  <style>
+  #ask .topbar{position:relative}
+  #ask .ask-steps{position:absolute;right:6px;top:50%;transform:translateY(-50%);display:flex;gap:6px}
+  #ask .ask-steps i{width:16px;height:4px;border-radius:2px;background:var(--line);transition:.3s}
+  #ask .ask-steps i.on{background:var(--ink);width:22px}
+  #ask .ask-step{will-change:transform,opacity}
+  #ask .ask-step.ask-slide{animation:askSlide .34s cubic-bezier(.3,.7,.3,1)}
+  #ask .ask-step.ask-slideback{animation:askSlideBack .34s cubic-bezier(.3,.7,.3,1)}
+  @keyframes askSlide{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+  @keyframes askSlideBack{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:none}}
+  @media(prefers-reduced-motion:reduce){#ask .ask-step.ask-slide,#ask .ask-step.ask-slideback{animation:none}}
+  #ask .ask-hero2{position:relative;overflow:hidden;display:flex;align-items:center;gap:8px;background:linear-gradient(180deg,#FFFFFF,#F6F4EF);border:1px solid rgba(120,116,108,.14);border-radius:24px;padding:20px 20px 20px 22px;margin-bottom:22px;box-shadow:0 16px 38px rgba(70,55,30,.09)}
+  #ask .ah-tx{flex:1;min-width:0}
+  #ask .ah-py{font-family:"Courier New",monospace;letter-spacing:.3em;color:#B4B1A9;font-size:10px;text-transform:uppercase}
+  #ask .ah-tt{font-size:28px;font-weight:600;color:#1E1C18;letter-spacing:.06em;margin-top:8px}
+  #ask .ah-sub{font-size:11.5px;color:#7A766E;line-height:1.7;margin-top:9px}
+  #ask .ah-fanwrap{flex:none;width:126px;height:110px;position:relative;overflow:hidden;margin-right:-4px}
+  #ask .ah-fanwrap .apr-fan{position:absolute;top:-2px;left:50%;width:280px;margin-left:-140px;height:198px;transform:scale(.5);transform-origin:top center}
+  #ask .ah-fanwrap .apr-card{box-shadow:0 10px 18px rgba(40,34,26,.22)}
+  #ask .ask-summary{margin-top:4px}
+  #ask .asu-grid{display:flex;gap:9px}
+  #ask .asu-cell{flex:1;background:#FFFFFF;border:1px solid #EEEDE9;border-radius:16px;padding:12px 11px 11px;box-shadow:0 6px 16px rgba(70,55,30,.04);min-width:0}
+  #ask .asu-k{font-family:"Courier New",monospace;font-size:9.5px;letter-spacing:.12em;color:#B4B1A9;text-transform:uppercase}
+  #ask .asu-v{font-size:16px;color:#1E1C18;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #ask .asu-x{font-size:10.5px;color:var(--ink-faint);margin-top:3px}
+  #ask .asu-tap{cursor:pointer;border-color:rgba(201,162,78,.5);background:linear-gradient(180deg,#fffdf8,#f9f2e4)}
+  #ask .asu-tap .asu-k{color:var(--gold-deep)}
+  #ask .asu-readers{max-height:0;overflow:hidden;opacity:0;transition:max-height .32s ease,opacity .25s ease,margin-top .25s ease}
+  #ask .asu-readers.show{max-height:280px;opacity:1;margin-top:10px}
+  #ask .ask-reader-def{font-size:12.5px;color:var(--gold-deep);background:linear-gradient(180deg,#fffdf8,#f9f2e4);border:1px solid rgba(201,162,78,.32);border-radius:14px;padding:12px 14px;line-height:1.6}
+  #ask .ask-reader-def span{color:var(--ink-faint);font-size:11.5px}
+  #ask .ask-foot{display:flex;gap:12px;margin-top:6px}
+  #ask .ask-prev{flex:none;padding-left:20px;padding-right:20px;background:transparent;color:var(--ink);border:1px solid var(--line)}
+  #ask .ask-go{flex:1}
+  </style>
   <section class="screen" id="ask">
-    <div class="topbar"><div class="back" onclick="go('home')">‹</div><div class="tt"></div></div>
-    <div class="ask-premium">
-      <div class="apr-py-top">WÈN YĪ SHÌ</div>
-      <div class="apr-title serif">问一事</div>
-      <div class="apr-sub">把心里的事说出来，越具体，越照得清此刻的自己。</div>
-      <div class="apr-fan" id="askFan"></div>
+    <div class="topbar"><div class="back" onclick="askBack()">‹</div><div class="tt">问一事</div><div class="ask-steps" id="askSteps"><i class="on"></i><i></i></div></div>
+
+    <!-- ===== STEP 1 · 设定 ===== -->
+    <div class="ask-step" id="askStep1">
+      <div class="ask-hero2">
+        <div class="ah-tx">
+          <div class="ah-py">WÈN YĪ SHÌ</div>
+          <div class="ah-tt serif">问一事</div>
+          <div class="ah-sub">把心里的事说出来，<br>越具体，越照得清此刻的自己。</div>
+        </div>
+        <div class="ah-fanwrap"><div class="apr-fan" id="askFan"></div></div>
+      </div>
+      <div class="label">想问哪一面</div>
+      <div class="domains" id="domains">
+        <div class="domain sel" data-domain="姻缘"><div class="d-char">姻缘</div><div class="d-en">Love</div></div>
+        <div class="domain" data-domain="事业"><div class="d-char">事业</div><div class="d-en">Career</div></div>
+        <div class="domain" data-domain="财运"><div class="d-char">财运</div><div class="d-en">Fortune</div></div>
+        <div class="domain" data-domain="运势"><div class="d-char">运势</div><div class="d-en">Luck</div></div>
+      </div>
+      <div class="tpl-head" style="margin-top:22px"><div class="tpl-title">解读记录 <span id="askHistCount" style="color:var(--ink-faint);font-size:12px;font-weight:400"></span></div><div class="tpl-refresh" id="askHistToggle" style="display:none" onclick="toggleAskHist()">展开 ▾</div></div>
+      <div id="askHistory" style="display:none"></div>
+      <div class="label" style="margin-top:22px">选个牌阵</div>
+      <div class="domains" id="spreadSel"></div>
+      <div class="label" style="margin-top:22px">选起牌师</div>
+      <div id="askAgentSel"></div>
+      <button class="btn block ask-next" onclick="askStep(2)" style="margin-top:24px">下一步 · 说说你的事 →</button>
+      <div class="disclaimer">仅供自我觉察与决策参考，不构成任何确定性预测或投资建议。</div>
     </div>
-    <div class="label">想问哪一面</div>
-    <div class="domains" id="domains">
-      <div class="domain sel" data-domain="姻缘"><div class="d-char">姻缘</div><div class="d-en">Love</div></div>
-      <div class="domain" data-domain="事业"><div class="d-char">事业</div><div class="d-en">Career</div></div>
-      <div class="domain" data-domain="财运"><div class="d-char">财运</div><div class="d-en">Fortune</div></div>
-      <div class="domain" data-domain="运势"><div class="d-char">运势</div><div class="d-en">Luck</div></div>
+
+    <!-- ===== STEP 2 · 提问 ===== -->
+    <div class="ask-step" id="askStep2" style="display:none">
+      <div class="ask-summary" id="askSummary"></div>
+      <div class="label" style="margin-top:20px">说说你的事</div>
+      <div class="field-wrap">
+        <textarea class="field" id="situation" rows="4" maxlength="200" placeholder="比如：和对象在一起三年，最近总吵架，不知道该不该继续…"></textarea>
+        <div class="count"><span id="cc">0</span>/200</div>
+      </div>
+      <div id="astroFuseChip" style="margin:10px 0 2px"></div>
+      <div class="tpl-head" style="margin-top:18px"><div class="tpl-title">常见问题 · 点一下填入</div><div class="tpl-refresh" onclick="cycleTpl('ask')">换一换 ↻</div></div>
+      <div id="askTpl"></div>
+      <div class="bal-line" id="askBal" style="margin:16px 0 14px"></div>
+      <div class="ask-foot">
+        <button class="btn ghost ask-prev" onclick="askStep(1,1)">‹ 上一步</button>
+        <button class="btn ask-go" id="goBtn" disabled onclick="goReading()">开始洗牌 →</button>
+      </div>
+      <div class="disclaimer">牌为镜，照见此刻的你；答案始终在你心里。</div>
     </div>
-    <div class="label" style="margin-top:26px">选个牌阵</div>
-    <div class="domains" id="spreadSel"></div>
-    <div class="label" style="margin-top:26px">说说你的处境</div>
-    <div class="field-wrap">
-      <textarea class="field" id="situation" rows="3" maxlength="200" placeholder="比如：和对象在一起三年，最近总吵架，不知道该不该继续…"></textarea>
-      <div class="count"><span id="cc">0</span>/200</div>
-    </div>
-    <div id="askAgentSel"></div>
-    <div id="astroFuseChip" style="margin:12px 0 2px"></div>
-    <div class="bal-line" id="askBal" style="margin:14px 0 12px"></div>
-    <button class="btn block" id="goBtn" disabled onclick="goReading()">开始解读 →</button>
-    <div class="tpl-head" style="margin-top:28px"><div class="tpl-title">常见问题 · 点一下填入</div><div class="tpl-refresh" onclick="cycleTpl('ask')">换一换 ↻</div></div>
-    <div id="askTpl"></div>
-    <div class="tpl-head" style="margin-top:30px"><div class="tpl-title">解读记录 <span id="askHistCount" style="color:var(--ink-faint);font-size:12px;font-weight:400"></span></div><div class="tpl-refresh" id="askHistToggle" style="display:none" onclick="toggleAskHist()">展开 ▾</div></div>
-    <div id="askHistory" style="display:none"></div>
-    <div class="disclaimer">仅供自我觉察与决策参考，不构成任何确定性预测或投资建议。</div>
   </section>
 
   <!-- ===== REPORT 年运报告 ===== -->
@@ -3580,15 +3632,45 @@ function pHero(py,title,sub,extra){return `<div class="ask-premium" style="text-
 function pHeroBare(inner,extra){return `<div class="ask-premium" style="text-align:center;padding:20px 22px 18px;margin-bottom:14px">${inner||''}${extra||''}</div>`;}
 function spreadIco(n){let s='';for(let i=0;i<n;i++){const rot=n>1?(i-(n-1)/2)*11:0;s+=`<span class="sc-card" style="margin-left:${i?-6:0}px;transform:rotate(${rot.toFixed(1)}deg);transform-origin:50% 92%"></span>`;}return s;}
 function spreadChipHTML(s,sel,fn){return `<div class="spread-chip ${sel?'sel':''}" onclick="${fn}('${s.id}')">${s.adv?'<div class="sc-adv">进阶</div>':''}<div class="sc-ico">${spreadIco(s.positions.length)}</div><div class="sc-n">${s.name}</div><div class="sc-d">${s.positions.length}张 · ${s.price?s.price+'分':'免费'}</div></div>`;}
+function updateAskBal(){var b=$("#askBal");if(!b)return;b.innerHTML=spread.id==='one'?(freeSingleUsedToday()?`今日免费单张已用 · 明天再来 · 当前心元 ${state.balance}`:`<span style="color:var(--amber)">✨ 免费单张 · 每日 1 次</span> · 当前心元 ${state.balance}`):(state.firstFree?`<span style="color:var(--amber)">✨ 新人首单免费</span> · 当前心元 ${state.balance}`:`当前心元 ${state.balance} · ${spread.name} ${spread.price}/次`);}
+function renderAskSummary(){
+  var box=$("#askSummary");if(!box)return;
+  var list=agentList(),rd=null;for(var i=0;i<list.length;i++){if(list[i].code===state.agentCode){rd=list[i];break;}}if(!rd)rd=list[0]||null;
+  var rdName=rd?((rd.persona&&rd.persona.nick)||rd.name):'平台起牌师';
+  box.innerHTML=
+    '<div class="asu-grid">'+
+      '<div class="asu-cell"><div class="asu-k">想问</div><div class="asu-v serif">'+esc(domain)+'</div></div>'+
+      '<div class="asu-cell"><div class="asu-k">牌阵</div><div class="asu-v serif">'+esc(spread.name)+'</div><div class="asu-x">'+spread.positions.length+'张 · '+(spread.price?spread.price+'心元':'免费')+'</div></div>'+
+      '<div class="asu-cell asu-tap" onclick="toggleAskReader()"><div class="asu-k">起牌师 ⇅</div><div class="asu-v serif">🔮 '+esc(rdName)+'</div></div>'+
+    '</div>'+
+    '<div class="asu-readers" id="askAgentSel2"></div>';
+  var r2=$("#askAgentSel2");if(r2)r2.innerHTML=agentSelHTML()||'<div class="ask-reader-def">🔮 目前由平台起牌师为你解读<span>（登录并关注专属老师后，可在这里切换）</span></div>';
+}
+function toggleAskReader(){var r=$("#askAgentSel2");if(r)r.classList.toggle('show');}
+function askShowStep(n){var s1=$("#askStep1"),s2=$("#askStep2"),st=$("#askSteps");if(!s1||!s2)return;if(n===2){s1.style.display='none';s2.style.display='';}else{s2.style.display='none';s1.style.display='';}if(st)st.innerHTML=(n===2)?'<i></i><i class="on"></i>':'<i class="on"></i><i></i>';}
+function askStep(n,back){
+  state._askStep=n;
+  var el=(n===2)?$("#askStep2"):$("#askStep1");
+  if(back){var of=$("#situation");if(of){try{of.blur();}catch(e){}}}   // 返回前先收键盘，避免顶部跳动
+  askShowStep(n);
+  if(el){el.classList.remove('ask-slide','ask-slideback');void el.offsetWidth;el.classList.add(back?'ask-slideback':'ask-slide');}
+  if(n===2){renderAskSummary();renderTpl('ask');renderAstroFuseChip();updateAskBal();
+    var f=$("#situation");if(f){try{f.focus({preventScroll:true});}catch(e){try{f.focus();}catch(_){}}}  // 同步聚焦(留在点击手势栈内)，iOS 才会弹出键盘
+  }
+  try{window.scrollTo(0,0);}catch(e){}
+}
+function askBack(){if(state._askStep===2){askStep(1,1);}else{go('home');}}
 function renderAsk(){
+  state._askStep=1;
   document.querySelectorAll("#domains .domain").forEach(x=>x.classList.toggle('sel',x.dataset.domain===domain));
   const f=$("#askFan");if(f)f.innerHTML=premiumCardFan();
   renderTpl('ask');
-  const ss=$("#spreadSel"); ss.className="spread-scroll"; ss.innerHTML=SPREADS.map(s=>spreadChipHTML(s,s.id===spread.id,'pickSpread')).join("");
-  const gh=$("#goHint"); if(gh)gh.innerHTML='抽 '+spread.positions.length+' 张牌：<br>'+spread.positions.slice(0,3).join(' · ')+(spread.positions.length>3?' …':'');
-  const ag=$("#askAgentSel");if(ag)ag.innerHTML=agentSelHTML();
+  const ss=$("#spreadSel"); if(ss){ss.className="spread-scroll"; ss.innerHTML=SPREADS.map(s=>spreadChipHTML(s,s.id===spread.id,'pickSpread')).join("");}
+  const ag=$("#askAgentSel");if(ag)ag.innerHTML=agentSelHTML()||'<div class="ask-reader-def">🔮 平台起牌师 · 默认为你温柔解读<span>（有专属老师时，登录后可在这里切换）</span></div>';
   renderAstroFuseChip();
-  $("#askBal").innerHTML=spread.id==='one'?(freeSingleUsedToday()?`今日免费单张已用 · 明天再来 · 当前心元 ${state.balance}`:`<span style="color:var(--amber)">✨ 免费单张 · 每日 1 次</span> · 当前心元 ${state.balance}`):(state.firstFree?`<span style="color:var(--amber)">✨ 新人首单免费</span> · 当前心元 ${state.balance}`:`当前心元 ${state.balance} · ${spread.name} ${spread.price}/次`);
+  updateAskBal();
+  renderAskSummary();
+  askShowStep(1);
 }
 
 function goReading(){
@@ -4368,7 +4450,7 @@ async function loadBinding(){
 }
 function agentList(){const seen=new Set();const arr=[];if(state.boundReader&&state.boundReader.code){arr.push(state.boundReader);seen.add(state.boundReader.code);}(state.officialReaders||[]).forEach(r=>{if(r&&r.code&&!seen.has(r.code)){arr.push(r);seen.add(r.code);}});return arr;}
 function agentSelHTML(){const arr=agentList();if(!arr.length)return '';const chips=arr.map(r=>{const mine=state.boundReader&&state.boundReader.code===r.code;return `<div class="spread-chip ${state.agentCode===r.code?'sel':''}" style="min-width:auto;padding:8px 14px" onclick="pickAgent('${r.code}')"><div class="sc-n">🔮 ${esc((r.persona&&r.persona.nick)||r.name)}${mine?'':' <span style="color:var(--gold-deep);font-size:10px">官方</span>'}</div><div class="sc-d">${mine?'专属解读师':'平台起牌师'}</div></div>`;}).join('');return `<div class="spread-scroll" style="margin:10px 0 4px">${chips}</div>`;}
-function pickAgent(code){state.agentCode=code;const h=$("#homeAgentSel");if(h)h.innerHTML=agentSelHTML();const k=$("#askAgentSel");if(k)k.innerHTML=agentSelHTML();}
+function pickAgent(code){state.agentCode=code;const h=$("#homeAgentSel");if(h)h.innerHTML=agentSelHTML();const k=$("#askAgentSel");if(k)k.innerHTML=agentSelHTML();if(typeof renderAskSummary==='function')renderAskSummary();}
 function agentPayload(){return state.agentCode?{agent:'reader',code:state.agentCode,phone:state.phone}:{};}
 /* 当前"接住你"的起牌师：专属优先，否则官方 */
 function activeReader(){if(state.boundReader&&state.boundReader.code)return state.boundReader;const list=state.officialReaders||[];if(state.agentCode){const r=list.find(x=>x.code===state.agentCode);if(r)return r;}return list[0]||null;}
@@ -4387,7 +4469,7 @@ function readingReaderHTML(){
   const mine=state.boundReader&&state.boundReader.code===r.code;
   return `<div class="sec reveal" id="r0" style="display:flex;align-items:center;gap:12px;background:linear-gradient(160deg,#fbf5e9,#f4ebd9);border:1px solid rgba(201,162,78,.26);border-radius:14px;padding:14px 16px;margin-bottom:10px"><div onclick="viewReader('${esc(r.code)}')" style="display:flex;align-items:center;gap:12px;flex:1;cursor:pointer"><div style="font-size:22px">🔮</div><div style="flex:1"><div style="font-size:15px;color:#282016">本次由 ${esc(nick)} 解读${mine?'':' <span style="color:var(--gold-deep);font-size:11px">官方</span>'} <span style="color:var(--gold-deep);font-size:12px">· 主页</span></div>${exp?`<div style="font-size:12px;color:#9a8f7e;margin-top:2px">${esc(exp)}</div>`:''}</div></div><button class="btn" style="background:var(--amber);color:#1c1610;padding:8px 14px;font-size:13px" onclick="goAskKeepReader()">再问她</button></div>`;
 }
-function openAskFocused(){if(state._lastDomain){domain=state._lastDomain;tplDomain=state._lastDomain;}go('ask');setTimeout(()=>{const f=$("#situation");if(f){f.value='';f.dispatchEvent(new Event('input'));f.focus();try{f.scrollIntoView({block:'center',behavior:'smooth'});}catch(e){}}},160);}
+function openAskFocused(){if(state._lastDomain){domain=state._lastDomain;tplDomain=state._lastDomain;}go('ask');setTimeout(()=>{try{askStep(2);}catch(e){}const f=$("#situation");if(f){f.value='';f.dispatchEvent(new Event('input'));}},180);}
 function goAskKeepReader(){openAskFocused();}
 
 async function renderAdminReaders(){
