@@ -163,6 +163,7 @@ export default {
     if (url.pathname === '/api/treehole') { if (request.method !== 'POST') return json(405, { error: 'Method Not Allowed' }); return handle(request, env, 'treehole'); }
     if (url.pathname === '/api/config') { return handleConfig(request, env); }
     if (url.pathname === '/api/wall') { return handleWall(request, env, url); }
+    if (url.pathname === '/api/shelf') { return handleShelf(request, env, url); }
     if (url.pathname === '/api/capsule') { return handleCapsule(request, env, url); }
     if (url.pathname === '/api/mood') { return handleMood(request, env, url); }
     if (url.pathname === '/api/wallet') { return handleWallet(request, env, url); }
@@ -361,19 +362,62 @@ function seedPosts(now){
 async function ballsGet(KV, phone){
   let d=null; try{ const raw=await KV.get('balls:'+phone); if(raw)d=JSON.parse(raw); }catch(e){}
   if(!d)d={ balls:[], total:0, jars:0, acts:0 };
+  if(!d.shelf)d.shelf=[];   // 已封存的瓶子（情绪架陈列）
+  if(!d.year)d.year=[];     // 全年情绪日志（{pol,when}），供年度色彩可视化
+  if(d.posT==null)d.posT=0; if(d.negT==null)d.negT=0;  // 累计正/负计数
   return d;
 }
-// drop=投一颗情绪球入罐（满30颗自动封存进情绪架）；act=累计互动数（涨等级）
+// drop=投一颗情绪球入罐（满30颗自动封存成一瓶上情绪架）；act=累计互动数（涨等级）
 async function ballsBump(KV, phone, opt){
   const d=await ballsGet(KV, phone); opt=opt||{};
   if(opt.drop){
-    d.balls.push({ pol:opt.pol==='pos'?'pos':'neg', mood:String(opt.mood||'').slice(0,6), when:Date.now() });
-    if(d.balls.length>=30){ d.jars=(d.jars||0)+1; d.balls=[]; d._filled=true; } else { d._filled=false; }
+    const pol=opt.pol==='pos'?'pos':'neg';
+    d.balls.push({ pol, mood:String(opt.mood||'').slice(0,6), when:Date.now() });
+    d.year.push({ pol, when:Date.now() }); if(d.year.length>500)d.year=d.year.slice(-500);
+    if(pol==='pos')d.posT++; else d.negT++;
+    if(d.balls.length>=30){
+      const pos=d.balls.filter(x=>x.pol==='pos').length;
+      d.jars=(d.jars||0)+1;
+      d.shelf.push({ n:d.jars, pos, neg:d.balls.length-pos, sealedAt:Date.now() }); if(d.shelf.length>80)d.shelf=d.shelf.slice(-80);
+      d.balls=[]; d._filled=true;
+    } else d._filled=false;
     d.total=(d.total||0)+1;
   }
   d.acts=(d.acts||0)+(opt.act||0);
   try{ await KV.put('balls:'+phone, JSON.stringify(d)); }catch(e){}
   return d;
+}
+// ---- 情绪架 + 永久情绪胶囊（KV：balls:<手机号> 存架/年；ecap:<手机号> 存永久胶囊）----
+async function handleShelf(request, env, url){
+  const KV = env.CONFIG_KV || null;
+  if(!KV) return json(200, { ok:true, kv:false, shelf:[], year:[], capsules:[] });
+  if(request.method==='GET'){
+    const phone=String(url.searchParams.get('phone')||'');
+    if(!/^1[3-9]\d{9}$/.test(phone)) return json(400, { error:'需要登录' });
+    const d=await ballsGet(KV, phone);
+    let caps=[]; try{ const raw=await KV.get('ecap:'+phone); if(raw)caps=JSON.parse(raw); }catch(e){}
+    return json(200, { ok:true, kv:true, level:yuchiLevel(d.acts),
+      jars:d.jars||0, fill:(d.balls||[]).length, curBalls:d.balls||[], shelf:d.shelf||[], year:d.year||[],
+      total:d.total||0, pos:d.posT||0, neg:d.negT||0, capsules:caps });
+  }
+  if(request.method!=='POST') return json(405, { error:'Method Not Allowed' });
+  let body; try{ body=await request.json(); }catch(e){ body={}; }
+  const phone=String(body.phone||'');
+  if(!/^1[3-9]\d{9}$/.test(phone)) return json(400, { error:'需要登录' });
+  const action=String(body.action||'').trim();
+  if(action==='seal'){
+    let text=String(body.text||'').trim();
+    if(text.length<2||text.length>300) return json(400, { error:'内容太短或太长' });
+    if(wallBad(text)) return json(400, { error:'请不要留联系方式或广告～' });
+    let caps=[]; try{ const raw=await KV.get('ecap:'+phone); if(raw)caps=JSON.parse(raw); }catch(e){}
+    const pol=moodPolarity(String(body.mood||''), body.pol);
+    const cap={ id:'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,5), mood:String(body.mood||'').slice(0,6), pol, text, card:String(body.card||'').slice(0,20), when:Date.now() };
+    caps.unshift(cap); if(caps.length>200)caps=caps.slice(0,200);
+    try{ await KV.put('ecap:'+phone, JSON.stringify(caps)); }catch(e){ return json(502,{ error:'封存失败，再试一次' }); }
+    await ballsBump(KV, phone, { act:1 });   // 封存也算一次互动
+    return json(200, { ok:true, capsule:cap, count:caps.length });
+  }
+  return json(400, { error:'未知操作' });
 }
 async function handleWall(request, env, url) {
   const KV = env.CONFIG_KV || null;
