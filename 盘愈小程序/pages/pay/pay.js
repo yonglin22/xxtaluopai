@@ -9,9 +9,11 @@ Page({
     wx.showLoading({ title: '正在下单…', mask: true });
     // 微信统一下单 total_fee 单位是「分」，这里把元换算成分传给后端
     const amountFen = Math.round((Number(this.data.amount) || 0) * 100);
+    // JSAPI 支付需付款人 openid：拿一个新鲜的 wx.login code，后端用它换 openid
+    const code = await new Promise((res) => { wx.login({ success: (r) => res((r && r.code) || ''), fail: () => res('') }); });
     try {
       const r = await apiPost('/api/wxpay', {
-        orderNo: this.data.orderNo, amountFen, amountYuan: this.data.amount, phone: mp.getPhone()
+        orderNo: this.data.orderNo, amountFen, amountYuan: this.data.amount, phone: mp.getPhone(), code, desc: this.data.desc
       });
       wx.hideLoading();
       if (r.ok && r.j && r.j.timeStamp) {

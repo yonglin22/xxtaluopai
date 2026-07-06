@@ -36,7 +36,26 @@
 - **登录**：`enter()` 加幂等锁（防拒授权/skip/接口返回重复导航把 webview 弹出栈）；换手机号失败时明确提示「暂以体验身份进入」。
 - **清理**：删除死文件 `utils/bazi.js` `utils/tarot.js`（含「tarot/占卜」命名，利于类目审核）；`store.js` 精简为只留 phone（H5 与小程序存储隔离，其余字段是误导性死代码）；`app.js` 去掉废弃 `getSystemInfoSync` 与无人读取的 `globalData`；`README.md` 打包忽略。
 
+## 分享深链 & 字体外链（本轮新增）
+- **分享深链**：从任意子页分享，被分享者进入后**直达该屏**。H5 `go()` 在 `?mp=1` 下用 `wx.miniProgram.postMessage({screen})` 上报当前屏；`webview` 页 `bindmessage` 收屏，`onShareAppMessage/Timeline` 带 `?screen=`，`urlFull(safetop, screen)` 透传。
+- **字体外链提速**：H5 里 4 个内联 base64 字体（PanyuSans/Song 400/700，~817KB）抽成 `fonts/*.woff2` 外链 + `<head>` preload 主字，单文件从 9.3MB 降到 ~8.2MB，首屏更快。**部署时 `fonts/` 目录要一起传。**（更大的 4MB 内联图片是另一档优化，暂未动。）
+
+## 微信支付（后端已实现，填好密钥即通）
+`_worker.js` 已实现 **微信支付 V3 · JSAPI 统一下单 + paySign + 回调解密**（`/api/wxpay`、`/api/wxpay/notify`），加密逻辑已用 Web Crypto 验证通过。开启只需在 **Cloudflare Pages → 设置 → 环境变量** 配置：
+
+| 变量 | 说明 |
+|---|---|
+| `WX_APPID` | 小程序 AppID（与一键登录同一个） |
+| `WX_APPSECRET` | 小程序密钥（用 `wx.login` 的 code 换 openid，JSAPI 必须） |
+| `WX_MCHID` | 微信支付商户号 |
+| `WX_PAY_SERIAL` | 商户 API 证书**序列号** |
+| `WX_PAY_PRIVATE_KEY` | 商户 API 私钥 `apiclient_key.pem` **全文** |
+| `WX_PAY_NOTIFY_URL` | 回调地址，如 `https://你的备案域名/api/wxpay/notify` |
+| `WX_PAY_APIV3_KEY` | APIv3 密钥（32 位，回调解密用） |
+
+> 前端 `pay.js` 已在下单时带上 `wx.login` 的 code 供后端换 openid；到账走前端幂等 `?paid=` 回传（已验证），回调 `notify` 另把订单落库 KV 作对账。
+
 ## 待办（需你提供）
 - **request 合法域名**：`utils/request.js` 的 `API_BASE` 现指向未备案的 `taluo-b76.pages.dev`。真机上 `wx.request` 要求域名**已备案 + 登记到后台 request 合法域名**（与 web-view 域名白名单是两套），否则 `/api/wxphone`、`/api/wxpay` 在真机恒失败。需换成你的**备案域名**（或用微信云托管 `callContainer`）。
-- **微信支付后端**：`/api/wxpay` 统一下单 + 支付回调置单（需商户号 + API 密钥/证书）。接好后「支付→到账」全链路即通（前端幂等已就绪）。
+- **微信支付密钥**：按上表在 Cloudflare 配好 7 个环境变量即可开通支付。
 

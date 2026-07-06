@@ -173,6 +173,7 @@ export default {
     if (url.pathname === '/api/bind') { return handleBind(request, env, url); }
     if (url.pathname === '/api/wxphone') { if (request.method !== 'POST') return json(405, { error: 'Method Not Allowed' }); return handleWxPhone(request, env); }
     if (url.pathname === '/api/wxpay') { if (request.method !== 'POST') return json(405, { error: 'Method Not Allowed' }); return handleWxPay(request, env); }
+    if (url.pathname === '/api/wxpay/notify') { if (request.method !== 'POST') return json(405, { error: 'Method Not Allowed' }); return handleWxPayNotify(request, env); }
     { const _r = await env.ASSETS.fetch(request); const _ct = _r.headers.get('content-type') || ''; if (_ct.includes('text/html')) { const _h = new Headers(_r.headers); _h.set('cache-control', 'no-cache, must-revalidate'); return new Response(_r.body, { status: _r.status, statusText: _r.statusText, headers: _h }); } return _r; }
   }
 };
@@ -206,14 +207,69 @@ async function handleWxPhone(request, env) {
     return json(200, { ok: false, error: 'phone_failed', detail: r });
   } catch (e) { return json(200, { ok: false, error: String(e) }); }
 }
-// ===== 微信支付统一下单（待接入）=====
-// 需配置 商户号 env.WX_MCHID + APIv3 密钥 env.WX_PAY_KEY + 证书序列号/私钥。
-// JSAPI 下单 https://api.mch.weixin.qq.com/v3/pay/transactions/jsapi 拿 prepay_id，
-// 再生成 { timeStamp, nonceStr, package:'prepay_id=...', signType:'RSA', paySign }。
+// ===== 微信支付 V3 · JSAPI 统一下单 =====
+// 需配置环境变量：
+//   WX_APPID           小程序 AppID（与一键登录同一个）
+//   WX_APPSECRET       小程序密钥（用 wx.login 的 code 换 openid）
+//   WX_MCHID           微信支付商户号
+//   WX_PAY_SERIAL      商户 API 证书「序列号」
+//   WX_PAY_PRIVATE_KEY 商户 API 私钥 apiclient_key.pem 全文（含 BEGIN/END）
+//   WX_PAY_NOTIFY_URL  支付结果回调地址（如 https://你的备案域名/api/wxpay/notify）
+//   WX_PAY_APIV3_KEY   APIv3 密钥（32 位，回调解密用；不配则回调只应答不解密）
+function pemToDer(pem) {
+  const b64 = String(pem).replace(/-----BEGIN [^-]+-----/g, '').replace(/-----END [^-]+-----/g, '').replace(/\s+/g, '');
+  const bin = atob(b64); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u.buffer;
+}
+async function rsaSign(privatePem, message) {
+  const key = await crypto.subtle.importKey('pkcs8', pemToDer(privatePem), { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, new TextEncoder().encode(message));
+  let s = ''; const b = new Uint8Array(sig); for (let i = 0; i < b.length; i++) s += String.fromCharCode(b[i]); return btoa(s);
+}
+async function aesGcmDecrypt(apiv3key, nonce, aad, ciphertextB64) {
+  const ck = await crypto.subtle.importKey('raw', new TextEncoder().encode(apiv3key), { name: 'AES-GCM' }, false, ['decrypt']);
+  const bin = atob(ciphertextB64); const data = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) data[i] = bin.charCodeAt(i);
+  const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: new TextEncoder().encode(nonce), additionalData: new TextEncoder().encode(aad || '') }, ck, data);
+  return new TextDecoder().decode(plain);
+}
 async function handleWxPay(request, env) {
   let body = {}; try { body = await request.json(); } catch (e) {}
-  if (!env.WX_MCHID || !env.WX_PAY_KEY) return json(200, { ok: false, error: 'not_configured', hint: '后端未配置微信支付商户号/密钥' });
-  return json(200, { ok: false, error: 'not_implemented', hint: '统一下单待实现（见注释）', order: body.orderNo || '' });
+  const APPID = env.WX_APPID, SECRET = env.WX_APPSECRET, MCHID = env.WX_MCHID, SERIAL = env.WX_PAY_SERIAL, PKEY = env.WX_PAY_PRIVATE_KEY;
+  if (!APPID || !MCHID || !SERIAL || !PKEY) return json(200, { ok: false, error: 'not_configured', hint: '需配置 WX_APPID / WX_MCHID / WX_PAY_SERIAL / WX_PAY_PRIVATE_KEY（+ WX_APPSECRET 换 openid）' });
+  // JSAPI 支付必须要付款人 openid：优先用前端传的 openid，否则用 wx.login 的 code 换
+  let openid = String(body.openid || '');
+  if (!openid && body.code && SECRET) {
+    try { const s = await (await fetch('https://api.weixin.qq.com/sns/jscode2session?appid=' + APPID + '&secret=' + SECRET + '&js_code=' + body.code + '&grant_type=authorization_code')).json(); openid = s.openid || ''; } catch (e) {}
+  }
+  if (!openid) return json(200, { ok: false, error: 'no_openid', hint: '缺 openid：前端需 wx.login 传 code，且后端配 WX_APPSECRET' });
+  const total = Math.round(Number(body.amountFen || 0)) || Math.round(Number(body.amountYuan || body.amount || 0) * 100);
+  if (!(total > 0)) return json(200, { ok: false, error: 'bad_amount' });
+  const outTradeNo = String(body.orderNo || ('py' + Date.now() + Math.random().toString(36).slice(2, 6)));
+  const notify = env.WX_PAY_NOTIFY_URL || (new URL(request.url).origin + '/api/wxpay/notify');
+  const reqBody = JSON.stringify({ appid: APPID, mchid: MCHID, description: String(body.desc || '盘愈 · 心元充值').slice(0, 120), out_trade_no: outTradeNo, notify_url: notify, amount: { total, currency: 'CNY' }, payer: { openid } });
+  const path = '/v3/pay/transactions/jsapi';
+  const nonce = rkey().toUpperCase(), ts = Math.floor(Date.now() / 1000).toString();
+  let signature; try { signature = await rsaSign(PKEY, 'POST\n' + path + '\n' + ts + '\n' + nonce + '\n' + reqBody + '\n'); } catch (e) { return json(200, { ok: false, error: 'sign_failed', detail: String(e) }); }
+  const auth = 'WECHATPAY2-SHA256-RSA2048 mchid="' + MCHID + '",nonce_str="' + nonce + '",signature="' + signature + '",timestamp="' + ts + '",serial_no="' + SERIAL + '"';
+  let up, txt; try { up = await fetch('https://api.mch.weixin.qq.com' + path, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': auth, 'User-Agent': 'panyu-cf-worker' }, body: reqBody }); txt = await up.text(); } catch (e) { return json(200, { ok: false, error: 'network', detail: String(e) }); }
+  let pj = {}; try { pj = JSON.parse(txt); } catch (e) {}
+  if (!up.ok || !pj.prepay_id) return json(200, { ok: false, error: 'unifiedorder_failed', status: up.status, detail: pj });
+  const pkg = 'prepay_id=' + pj.prepay_id, pts = Math.floor(Date.now() / 1000).toString(), pnonce = rkey().toUpperCase();
+  let paySign; try { paySign = await rsaSign(PKEY, APPID + '\n' + pts + '\n' + pnonce + '\n' + pkg + '\n'); } catch (e) { return json(200, { ok: false, error: 'paysign_failed' }); }
+  return json(200, { ok: true, timeStamp: pts, nonceStr: pnonce, package: pkg, signType: 'RSA', paySign, orderNo: outTradeNo });
+}
+// 支付结果回调：解密后把订单标记为已支付（返回 SUCCESS 才停止重推）
+async function handleWxPayNotify(request, env) {
+  let body = {}; try { body = await request.json(); } catch (e) {}
+  try {
+    const res = body.resource, KV = env.CONFIG_KV, KEY = env.WX_PAY_APIV3_KEY;
+    if (KEY && res && res.ciphertext) {
+      const data = JSON.parse(await aesGcmDecrypt(KEY, res.nonce, res.associated_data, res.ciphertext));
+      if (data.trade_state === 'SUCCESS' && KV && data.out_trade_no) {
+        try { await KV.put('order:' + data.out_trade_no, JSON.stringify({ paid: true, amount: data.amount, openid: (data.payer || {}).openid || '', when: Date.now() })); } catch (e) {}
+      }
+    }
+  } catch (e) {}
+  return json(200, { code: 'SUCCESS', message: '成功' });
 }
 async function handleConfig(request, env) {
   const KV = env.CONFIG_KV || null;

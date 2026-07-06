@@ -1,4 +1,4 @@
-<web-view src="{{url}}" binderror="onErr"></web-view>
+<web-view src="{{url}}" binderror="onErr" bindmessage="onMsg"></web-view>
 
 <!-- 品牌加载遮罩（cover-view 才能盖在 web-view 之上）· 纯白玻璃 -->
 <cover-view class="splash {{fading ? 'fade' : ''}}" wx:if="{{loading}}">
