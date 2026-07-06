@@ -1199,7 +1199,12 @@
   #yuchi .yc-post.mine{border-color:rgba(201,162,78,.5);background:linear-gradient(180deg,#fcf8f0,#f6efe1)}
   #yuchi .yc-post.yc-lift{transform:translateY(-6px);box-shadow:0 12px 28px rgba(120,96,40,.16)}
   #yuchi .yc-post-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-  #yuchi .yc-mtag{font-size:12px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+  #yuchi .yc-author{display:inline-flex;align-items:center;gap:6px;min-width:0;max-width:56%}
+  #yuchi .yc-author i.yc-av{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-style:normal;background:rgba(255,255,255,.62);border:1px solid rgba(201,162,78,.28);box-shadow:0 1px 3px rgba(120,96,40,.08);flex:0 0 auto}
+  #yuchi .yc-author b{font-size:12.5px;font-weight:600;color:var(--ink);letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #yuchi .yc-author em{font-style:normal;font-size:10px;color:var(--gold-deep);background:rgba(201,162,78,.12);border:1px solid rgba(201,162,78,.3);border-radius:6px;padding:1px 5px;flex:0 0 auto}
+  #yuchi .yc-author.vu i.yc-av{background:linear-gradient(135deg,#fbf3e0,#f2e4c6);border-color:rgba(201,162,78,.42)}
+  #yuchi .yc-mtag{font-size:12px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px 10px;flex:0 0 auto}
   #yuchi .yc-lvbadge{font-size:10.5px;color:var(--gold-deep);background:rgba(201,162,78,.12);border:1px solid rgba(201,162,78,.36);border-radius:999px;padding:2px 8px}
   #yuchi .yc-mine-tag{font-size:10.5px;color:#fff;background:linear-gradient(135deg,#E7C892,var(--amber));border-radius:999px;padding:2px 8px}
   #yuchi .yc-time{font-size:11px;color:var(--ink-faint);margin-left:auto}
@@ -5130,10 +5135,11 @@ function yuchiPostItem(p,lit){
     var lp=(p.lampers||[]);var last=lp.length?lp[lp.length-1].lv:'';
     mineNote='<div class="yc-received">🕯 收到 '+p.lamps+' 盏灯'+(last?(' · 刚有「'+esc(last)+'」为你点亮'):'')+'</div>';
   }
+  var _av=p.nick?(p.av||'🌙'):(pol==='pos'?'🌿':'🌙'),_nm=p.nick?p.nick:(p.lv||'夜行人');
   return '<div class="yc-post pol-'+pol+(p.mine?' mine':'')+'" id="yp-'+p.id+'">'+
     '<div class="yc-post-top">'+
+      '<span class="yc-author'+(p.vu?' vu':'')+'"><i class="yc-av">'+_av+'</i><b>'+esc(_nm)+'</b>'+((p.nick&&p.lv)?'<em>'+esc(p.lv)+'</em>':'')+'</span>'+
       '<span class="yc-mtag">'+ycMoodEmoji(p.mood)+' '+esc(p.mood||'心事')+'</span>'+
-      (p.lv?'<span class="yc-lvbadge">'+esc(p.lv)+'</span>':'')+
       (p.mine?'<span class="yc-mine-tag">我的</span>':'')+
       '<span class="yc-time">'+timeAgo(p.when)+'</span>'+
     '</div>'+

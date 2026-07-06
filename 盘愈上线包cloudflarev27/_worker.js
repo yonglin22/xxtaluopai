@@ -343,29 +343,82 @@ function postScore(p, now){
   const ageH=(now-(p.when||now))/3600000;
   return lamps*3 + comm*2 + views*0.15 + Math.max(0, 18 - ageH*5);
 }
-// 冷启动预置内容：空池时以诗句打样（早期真实体量：个位数点亮），避免新用户进来空场
-const YUCHI_SEED = [
-  { mood:'孤独', pol:'neg', text:'深夜的城市像一片海，我在这头，你在那头，可我们都还醒着。', lamps:6, lv:'守灯人', ageMin:36 },
-  { mood:'释然', pol:'pos', text:'把心事写下来的那一刻，它就轻了一半。晚安，明天见。', lamps:9, lv:'深夜活跃', ageMin:78 },
-  { mood:'焦虑', pol:'neg', text:'明天还没来，我却已经担心了一整夜。谁来替我，把灯关上。', lamps:4, lv:'暖心常客', ageMin:15, reply:'你已经很勇敢了，先睡吧。' },
-  { mood:'期待', pol:'pos', text:'我把愿望折成一只纸船，放进这片池水，愿它替我漂到有光的地方。', lamps:7, lv:'夜行者', ageMin:120 },
-  { mood:'委屈', pol:'neg', text:'今天又忍住没哭。其实我只是想，被人轻轻抱一下。', lamps:5, lv:'暖心常客', ageMin:52 },
-  { mood:'平静', pol:'pos', text:'月亮不争，也不辩，只是安静地亮着。今晚，我也想这样。', lamps:3, lv:'守灯人', ageMin:95 },
-  { mood:'想努力', pol:'pos', text:'再撑一下下。天亮以后，我请自己喝一杯热的。', lamps:8, lv:'深夜活跃', ageMin:8 },
-  { mood:'失落', pol:'neg', text:'有些人只是路过，却教会我怎么好好告别。谢谢你来过。', lamps:11, lv:'守灯人', ageMin:64, reply:'会遇到更好的。' },
-  { mood:'还好', pol:'pos', text:'今天没什么特别的，平平安安地过完了。这样也很好。', lamps:2, lv:'夜行者', ageMin:22 },
-  { mood:'emo', pol:'neg', text:'不知道为什么，就是有点想哭。也许只是累了，允许自己脆弱一下。', lamps:6, lv:'暖心常客', ageMin:41 },
-  { mood:'期待', pol:'pos', text:'把日子过成诗，把心事熬成茶。慢慢来，都会好的。', lamps:5, lv:'深夜活跃', ageMin:105 },
-  { mood:'孤独', pol:'neg', text:'一个人住久了，连影子都成了室友。但我把它照顾得很好。', lamps:7, lv:'守灯人', ageMin:130 }
+// ===== 虚拟用户铺量 · 每日轮流霸榜（冷启动/低峰期让公共池始终有人、榜单每天在动）=====
+// ~20 个带雅号+头像的虚拟账号；每天按日期确定性地轮换一批顶到榜前（"团队号带节奏"），
+// 跨天变化、同一天对所有人一致。真实用户对虚拟帖的点灯/留言累加进 vmeta 持久化，体感真实。
+const VUSERS = [
+  {nick:'临川听雨', av:'🌧️', lv:'守灯人'},
+  {nick:'南山旧友', av:'🌿', lv:'深夜活跃'},
+  {nick:'半夏微凉', av:'🍃', lv:'暖心常客'},
+  {nick:'江南烟客', av:'🌊', lv:'守灯人'},
+  {nick:'眠云', av:'☁️', lv:'深夜活跃'},
+  {nick:'拾光者', av:'🕯', lv:'守灯人'},
+  {nick:'北岛未眠', av:'🌙', lv:'深夜活跃'},
+  {nick:'温酒', av:'☕', lv:'暖心常客'},
+  {nick:'白露成霜', av:'🍂', lv:'夜行者'},
+  {nick:'星子入海', av:'⭐', lv:'守灯人'},
+  {nick:'竹外一枝', av:'🎋', lv:'深夜活跃'},
+  {nick:'晚风信', av:'🕊️', lv:'暖心常客'},
+  {nick:'青灯客', av:'🪔', lv:'守灯人'},
+  {nick:'折纸鸢', av:'🪁', lv:'夜行者'},
+  {nick:'荼蘼记', av:'🌸', lv:'深夜活跃'},
+  {nick:'潮汐旧梦', av:'🐚', lv:'暖心常客'},
+  {nick:'云中君', av:'🌛', lv:'守灯人'},
+  {nick:'一苇渡', av:'🪷', lv:'深夜活跃'},
+  {nick:'拂晓前', av:'🌅', lv:'夜行者'},
+  {nick:'松间照', av:'🌾', lv:'暖心常客'}
 ];
-function seedPosts(now){
-  return YUCHI_SEED.map((s,i)=>({
-    id:'seed'+i, mood:s.mood, pol:s.pol, text:s.text, card:'', when:now-(s.ageMin||30)*60000,
-    lamps:s.lamps||0, views:(s.lamps||0)*4+10, lv:s.lv||'夜行者', seed:true,
-    replies: s.reply ? [{ text:s.reply, when:now-((s.ageMin||30)*60000)+120000, role:'user', nick:'', code:'' }] : [],
-    lampers:[]
-  }));
+// 每条虚拟诗句：ui=作者索引，mood/pol=情绪，text=内容，rep=可选一条暖回
+const VSEED = [
+  {ui:0, mood:'孤独', pol:'neg', text:'深夜的城市像一片海，我在这头，你在那头，可我们都还醒着。'},
+  {ui:1, mood:'释然', pol:'pos', text:'把心事写下来的那一刻，它就轻了一半。晚安，明天见。'},
+  {ui:2, mood:'焦虑', pol:'neg', text:'明天还没来，我却已经担心了一整夜。谁来替我，把灯关上。', rep:'你已经很勇敢了，先睡吧。'},
+  {ui:3, mood:'期待', pol:'pos', text:'我把愿望折成一只纸船，放进这片池水，愿它替我漂到有光的地方。'},
+  {ui:4, mood:'委屈', pol:'neg', text:'今天又忍住没哭。其实我只是想，被人轻轻抱一下。'},
+  {ui:5, mood:'平静', pol:'pos', text:'月亮不争，也不辩，只是安静地亮着。今晚，我也想这样。'},
+  {ui:6, mood:'想努力', pol:'pos', text:'再撑一下下。天亮以后，我请自己喝一杯热的。'},
+  {ui:7, mood:'失落', pol:'neg', text:'有些人只是路过，却教会我怎么好好告别。谢谢你来过。', rep:'会遇到更好的。'},
+  {ui:8, mood:'还好', pol:'pos', text:'今天没什么特别的，平平安安地过完了。这样也很好。'},
+  {ui:9, mood:'emo', pol:'neg', text:'不知道为什么，就是有点想哭。也许只是累了，允许自己脆弱一下。'},
+  {ui:10, mood:'期待', pol:'pos', text:'把日子过成诗，把心事熬成茶。慢慢来，都会好的。'},
+  {ui:11, mood:'孤独', pol:'neg', text:'一个人住久了，连影子都成了室友。但我把它照顾得很好。'},
+  {ui:12, mood:'平静', pol:'pos', text:'加班到很晚，楼下便利店的灯还亮着，那一刻觉得城市也在陪我。'},
+  {ui:13, mood:'失落', pol:'neg', text:'又梦见了从前的家，醒来枕头是凉的。想念不打招呼就来。'},
+  {ui:14, mood:'平静', pol:'pos', text:'把手机调成勿扰，世界一下子安静了。原来清净是可以自己给的。'},
+  {ui:15, mood:'焦虑', pol:'neg', text:'明明很累却睡不着，脑子里在开一场没人报名的会。'},
+  {ui:16, mood:'还好', pol:'pos', text:'有人今天对我很好，我把这份好，悄悄记在了心里。'},
+  {ui:17, mood:'委屈', pol:'neg', text:'电话那头妈妈问我吃饭没，我说吃了，其实还没。报喜不报忧的人啊。', rep:'记得也对自己好一点。'},
+  {ui:18, mood:'孤独', pol:'neg', text:'走了很远的路，才发现最想回的是小时候那盏灯。'},
+  {ui:19, mood:'期待', pol:'pos', text:'给未来的自己写了封信，落款写：别怕，你会到的。'},
+  {ui:0, mood:'释然', pol:'pos', text:'今晚的风很温柔，像谁在说，辛苦了，可以歇一歇。'},
+  {ui:5, mood:'失落', pol:'neg', text:'删掉了那段聊天记录，也删掉了一部分自己。原来告别要分很多次。'},
+  {ui:9, mood:'想努力', pol:'pos', text:'只要还愿意早起看一次日出，就说明我还没放弃自己。'},
+  {ui:13, mood:'emo', pol:'neg', text:'深夜 emo 是真的，第二天照常上班也是真的。我们都很勇敢。'}
+];
+// 稳定的按天伪随机（同一天对所有人一致、跨天变化）——用于轮转与点灯数微扰
+const VLAMP_CAP = 30;    // 真实用户对单条虚拟帖的点灯累加上限（防刷灯霸榜 + 防 KV 写放大）
+const VFEAT_BOOST = 60;  // 当日"轮到霸榜"的隐藏排序加成（只影响排序、不改显示的灯数/时间，故不会数字倒退）
+// 稳定的 per-post 伪随机（只与帖子序号 i 有关，跨天不变）——保证灯数/时间/浏览数恒定、只增不减
+function vsz(i){ let s=((i*2654435761)>>>0)%233280; s=(s*9301+49297)%233280; return s/233280; }
+function cnDayIndex(now){ return Math.floor((now + 8*3600*1000)/86400000); }
+// 生成虚拟帖：灯数/时间恒定（真实用户点灯只会让灯数单调增长，不倒退）；
+// 每天用 (i-day) 轮换选出 W 个"团队号"给隐藏排序加成 _feat，使榜单每天在动、但显示数字稳定。
+function virtualPosts(now){
+  const day = cnDayIndex(now), N = VSEED.length, W = 6;
+  return VSEED.map((s, i) => {
+    const u = VUSERS[s.ui % VUSERS.length];
+    const baseLamps = 5 + Math.floor(vsz(i)*12);           // 5~16，恒定
+    const ageMin = 8 + Math.floor(vsz(i+50)*470);          // 8min~8h，恒定（不随天变化，绝不倒流；轮到榜首也显示得像刚发不久）
+    const views = baseLamps*4 + 8 + Math.floor(vsz(i+90)*40);
+    const featured = ((((i - day) % N) + N) % N) < W;
+    const reps = s.rep ? [{ text:s.rep, when: now - ageMin*60000 + 120000, role:'user', nick:'', code:'' }] : [];
+    return { id:'v'+i, mood:s.mood, pol:s.pol, text:s.text, card:'',
+      when: now - ageMin*60000, lamps: baseLamps, views,
+      lv: u.lv, nick: u.nick, av: u.av, vu:true, _feat: featured ? VFEAT_BOOST : 0,
+      replies: reps, lampers:[] };
+  });
 }
+async function vmetaGet(KV){ let m={}; try{ const raw=await KV.get('vmeta'); if(raw)m=JSON.parse(raw)||{}; }catch(e){} return m; }
 async function ballsGet(KV, phone){
   let d=null; try{ const raw=await KV.get('balls:'+phone); if(raw)d=JSON.parse(raw); }catch(e){}
   if(!d)d={ balls:[], total:0, jars:0, acts:0 };
@@ -487,16 +540,28 @@ async function handleWall(request, env, url) {
   if (request.method === 'GET') {
     if (!KV) return json(200, { ok: true, kv: false, posts: [] });
     let posts = []; try { const raw = await KV.get('wall'); if (raw) posts = JSON.parse(raw); } catch (e) {}
-    if (!posts.length) { posts = seedPosts(now); try { await KV.put('wall', JSON.stringify(posts)); } catch (e) {} }
+    posts = posts.filter(p => !String(p.id||'').startsWith('seed'));   // 清理历史遗留冷启动种子（已被虚拟账号叠加层取代）
+    // 虚拟用户铺量层：始终并入当日虚拟帖（叠加真实用户对其点灯/留言的 vmeta），让池子不空、榜单每天轮转
+    const vmeta = await vmetaGet(KV);
+    const vposts = virtualPosts(now).map(vp => {
+      const m = vmeta[vp.id]; if (!m) return vp;
+      vp = Object.assign({}, vp);
+      vp.lamps += Math.min(m.lamps||0, VLAMP_CAP);   // 真实点灯只增不减、且封顶（灯数单调、不会因轮转倒退）
+      vp.replies = (vp.replies||[]).concat(m.replies||[]);
+      vp.lampers = (vp.lampers||[]).concat(m.lampers||[]);
+      return vp;
+    });
     const phone = String(url.searchParams.get('phone') || '');
     const lim = Math.min(60, parseInt(url.searchParams.get('limit') || '40', 10) || 40);
+    const merged = posts.concat(vposts);
     // 沉底消失：零互动且超过 2 小时的内容移出公共池
-    const alive = posts.filter(p => (p.lamps||0)>0 || (p.replies||[]).length>0 || (now-(p.when||now))<2*3600000);
-    alive.sort((a,b)=>postScore(b,now)-postScore(a,now));
+    const alive = merged.filter(p => (p.lamps||0)>0 || (p.replies||[]).length>0 || (now-(p.when||now))<2*3600000);
+    // 排序含"当日团队号"的隐藏加成 _feat（只影响排序、不改任何显示字段）；真实帖无 _feat，靠真实互动竞争
+    alive.sort((a,b)=>(postScore(b,now)+(b._feat||0))-(postScore(a,now)+(a._feat||0)));
     const out = alive.slice(0, lim).map(p => {
       const mine = !!(phone && p.ap && p.ap===phone);
       return { id:p.id, mood:p.mood, pol:p.pol||moodPolarity(p.mood), text:p.text, card:p.card, when:p.when,
-        lamps:p.lamps||0, views:p.views||0, lv:p.lv||'', comments:(p.replies||[]).length,
+        lamps:p.lamps||0, views:p.views||0, lv:p.lv||'', nick:p.nick||'', av:p.av||'', vu:!!p.vu, comments:(p.replies||[]).length,
         replies:(p.replies||[]).slice(-6), mine,
         lampers: mine ? (p.lampers||[]).slice(-5) : undefined };
     });
@@ -522,7 +587,18 @@ async function handleWall(request, env, url) {
     return json(200, { ok:true, post:{ id:p.id, mood:p.mood, pol, text:p.text, when:p.when, lamps:0, views:0, lv, comments:0, replies:[], mine:true }, jar, level:lv, milestone:mile });
   }
   if (action === 'lamp') {
-    const p = posts.find(x => x.id === String(body.id || '')); if (!p) return json(404, { error: '这条心事已经不在了' });
+    const lid = String(body.id || '');
+    if (lid.charAt(0) === 'v') {   // 虚拟账号帖：真实用户点灯累加进 vmeta（在恒定基础灯数上单调叠加、封顶）
+      const base = virtualPosts(now).find(x => x.id === lid); if (!base) return json(404, { error: '这条心事已经不在了' });
+      const vmeta = await vmetaGet(KV); const m = vmeta[lid] || (vmeta[lid] = { lamps:0, lampers:[], replies:[] });
+      if ((m.lamps||0) >= VLAMP_CAP) return json(200, { ok:true, lamps: (base.lamps||0) + VLAMP_CAP, by: '有人' });  // 已封顶：不再写 KV，避免刷灯/写放大
+      let lv=''; if (phone && /^1[3-9]\d{9}$/.test(phone)) { const b=await ballsBump(KV, phone, { act:1 }); lv=yuchiLevel(b.acts); }
+      m.lamps = (m.lamps||0) + 1;
+      m.lampers = m.lampers || []; m.lampers.push({ lv:lv||'夜行者', when:now }); if (m.lampers.length > 20) m.lampers = m.lampers.slice(-20);
+      try { await KV.put('vmeta', JSON.stringify(vmeta)); } catch (e) {}
+      return json(200, { ok:true, lamps: (base.lamps||0) + Math.min(m.lamps, VLAMP_CAP), by: lv || '有人' });
+    }
+    const p = posts.find(x => x.id === lid); if (!p) return json(404, { error: '这条心事已经不在了' });
     p.lamps = (p.lamps || 0) + 1;
     let lv=''; if (phone && /^1[3-9]\d{9}$/.test(phone)) { const b=await ballsBump(KV, phone, { act:1 }); lv=yuchiLevel(b.acts); }
     p.lampers = p.lampers || []; p.lampers.push({ lv:lv||'夜行者', when:now }); if (p.lampers.length > 20) p.lampers = p.lampers.slice(-20);
@@ -539,11 +615,19 @@ async function handleWall(request, env, url) {
     let text = String(body.text || '').trim();
     if (text.length < 1 || text.length > 40) return json(400, { error: '留言 1-40 字' });
     if (wallBad(text)) return json(400, { error: '请不要留联系方式或广告～' });
-    const p = posts.find(x => x.id === String(body.id || '')); if (!p) return json(404, { error: '这条心事已经不在了' });
+    const rpid = String(body.id || '');
     let role = 'user', nick = '', code = '';
     const rid2 = String(body.readerId || ''), rkey = String(body.rkey || '');
     if (rid2 && rkey) { try { const all = await rdAll(env); const r = all.find(x => x.id === rid2 && x.key === rkey && x.status === 'approved'); if (r) { role = 'reader'; nick = (r.persona && r.persona.nick) || r.name || '起牌师'; code = r.code || ''; } } catch (e) {} }
     if (phone && /^1[3-9]\d{9}$/.test(phone)) { await ballsBump(KV, phone, { act:1 }); }
+    if (rpid.charAt(0) === 'v') {   // 虚拟账号帖：留言写入 vmeta
+      if (!virtualPosts(now).some(x => x.id === rpid)) return json(404, { error: '这条心事已经不在了' });
+      const vmeta = await vmetaGet(KV); const m = vmeta[rpid] || (vmeta[rpid] = { lamps:0, views:0, lampers:[], replies:[] });
+      m.replies = m.replies || []; m.replies.push({ text, when: now, role, nick, code }); if (m.replies.length > 30) m.replies = m.replies.slice(-30);
+      try { await KV.put('vmeta', JSON.stringify(vmeta)); } catch (e) { return json(502, { error: '留言失败' }); }
+      return json(200, { ok: true });
+    }
+    const p = posts.find(x => x.id === rpid); if (!p) return json(404, { error: '这条心事已经不在了' });
     p.replies = p.replies || []; p.replies.push({ text, when: now, role, nick, code }); if (p.replies.length > 30) p.replies = p.replies.slice(-30);
     try { await KV.put('wall', JSON.stringify(posts)); } catch (e) { return json(502, { error: '留言失败' }); }
     return json(200, { ok: true });
