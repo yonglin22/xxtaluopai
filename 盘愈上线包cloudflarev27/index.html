@@ -1185,8 +1185,14 @@
   #yuchi .yc-composer textarea:focus{border-color:var(--gold)}
   #yuchi .yc-comp-foot{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
   #yuchi .yc-cc{font-size:11px;color:var(--ink-faint)}
-  #yuchi .yc-postbtn{border:none;border-radius:999px;padding:9px 20px;font-size:13.5px;font-family:var(--serif);letter-spacing:.04em;background:linear-gradient(135deg,#8a7bbf,#5f4f96);color:#fff;cursor:pointer;box-shadow:0 6px 16px rgba(95,79,150,.3)}
+  #yuchi .yc-postbtn{border:none;border-radius:999px;padding:9px 20px;font-size:13.5px;font-family:var(--serif);letter-spacing:.04em;background:linear-gradient(135deg,#E7C892,var(--amber));color:#2a1f10;cursor:pointer;box-shadow:0 6px 16px rgba(201,162,78,.3)}
   #yuchi .yc-postbtn:disabled{opacity:.6}
+  /* 借句开头（PUGC）——玻璃白小药丸，横向可滑，暗金细描边，对齐首页调性 */
+  #yuchi .yc-tpls-h{font-size:11.5px;color:var(--ink-faint);letter-spacing:.04em;margin:12px 0 7px}
+  #yuchi .yc-tpls{display:flex;gap:7px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px;scrollbar-width:none}
+  #yuchi .yc-tpls::-webkit-scrollbar{display:none}
+  #yuchi .yc-tpls span{flex:0 0 auto;font-size:12px;color:var(--gold-deep);background:rgba(255,255,255,.55);border:1px solid rgba(201,162,78,.3);border-radius:999px;padding:6px 12px;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent;transition:transform .16s,background .16s}
+  #yuchi .yc-tpls span:active{transform:scale(.96);background:rgba(201,162,78,.14)}
   /* ---- 入口 ---- */
   #yuchi .yc-entries{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
   #yuchi .yc-entries>span{flex:1;text-align:center;white-space:nowrap;font-size:12px;color:var(--ink-soft);background:var(--bg-raise);border:1px solid var(--line);border-radius:10px;padding:9px 6px;cursor:pointer}
@@ -4954,6 +4960,7 @@ function renderYuchi(){
       '<div class="yc-comp-h">此刻，点亮一种情绪 · 写成一句诗，投进池子</div>'+
       '<div class="yc-mchips" id="ycMoods">'+chips+'</div>'+
       '<textarea id="ycText" maxlength="120" rows="3" placeholder="写下几十字诗意的话，让此刻被接住…" oninput="ycCount()"></textarea>'+
+      '<div class="yc-tpls-h">没灵感？借句诗开头 ✍</div>'+
       '<div class="yc-tpls" id="ycTpls">'+YC_TPLS.map(function(s,i){return '<span onclick="ycUseTpl('+i+')">'+esc(s.split('…')[0])+'…</span>';}).join('')+'</div>'+
       '<div class="yc-comp-foot"><span class="yc-cc" id="ycCc">0/120</span>'+
         '<button class="yc-postbtn" id="ycPostBtn" onclick="submitYuchiPost()">🫧 投进愈池</button></div>'+
