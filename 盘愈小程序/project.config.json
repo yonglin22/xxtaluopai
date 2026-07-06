@@ -11,5 +11,10 @@
     "minified": true,
     "bigPackageSizeSupport": true
   },
+  "packOptions": {
+    "ignore": [
+      { "type": "file", "value": "README.md" }
+    ]
+  },
   "condition": {}
 }

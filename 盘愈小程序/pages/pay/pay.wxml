@@ -6,6 +6,6 @@
     <view style="font-size:26rpx;color:var(--ink-faint);margin-top:20rpx">应付金额</view>
     <view class="serif" style="font-size:52rpx;color:var(--gold-deep);margin-top:6rpx">¥{{amount || '—'}}</view>
   </view>
-  <view class="btn btn-gold" style="margin-top:40rpx" bindtap="pay">微信支付</view>
+  <view class="btn btn-gold" style="margin-top:40rpx" bindtap="pay">{{paying ? '处理中…' : '微信支付'}}</view>
   <view class="btn btn-ghost" style="margin-top:20rpx" bindtap="back">返回</view>
 </view>

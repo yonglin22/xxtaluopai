@@ -23,10 +23,10 @@ Page({
   },
   onErr() { this._clear(); this.setData({ loading: false, fading: false, err: true }); },
   retry() {
-    this.setData({ err: false, url: '' });
+    // 先清空 src，下一帧再赋值，确保 web-view 的 src 真正经历 '' → url 而重新加载
+    this.setData({ err: false, url: '', loading: true, fading: false });
     const u = mp.urlFull(0);
-    this.setData({ url: u });
-    this._splash();
+    wx.nextTick(() => { this.setData({ url: u }); this._splash(); });
   },
   onShareAppMessage() { return { title: '盘愈 · 自我探索与情绪疏导', path: '/pages/webview/webview' }; },
   onShareTimeline() { return { title: '盘愈 · 自我探索与情绪疏导' }; }
