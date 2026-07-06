@@ -71,8 +71,8 @@
   .topbar{display:flex;align-items:center;height:50px;margin:0 -30px 6px;padding:0 24px;}
   .back{font-size:22px;color:var(--ink);line-height:1;padding:8px 8px 8px 0;cursor:pointer;}
   .topbar .tt{font-family:var(--serif);font-size:16px;letter-spacing:.1em;margin-left:4px;}
-  /* 底部 tab 一级页（星盘/问/商城）由悬浮 tabbar 导航，去掉多余的返回按钮+标题栏 */
-  #natal>.topbar,#ask>.topbar,#skinshop>.topbar{display:none!important;}
+  /* 底部 tab 一级页（愈池/问/星盘）由悬浮 tabbar 导航，去掉多余的返回按钮+标题栏 */
+  #natal>.topbar,#ask>.topbar,#yuchi>.topbar{display:none!important;}
 
   .btn{display:inline-flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:15px;letter-spacing:.08em;
     padding:14px 30px;border-radius:30px;background:var(--ink);color:var(--face);border:none;cursor:pointer;transition:opacity .3s;}
@@ -1144,6 +1144,32 @@
     <div class="disclaimer">每日一签仅供自我觉察与提点，不构成确定性预测；多牌阵深度解读按心元计。</div>
   </section>
 
+  <!-- ===== 愈池 · 公域情绪治愈池 ===== -->
+  <style>
+  #yuchi .yc-poem{position:relative;background:linear-gradient(180deg,rgba(250,245,235,.9),rgba(244,236,223,.86));border:1px solid rgba(201,162,78,.24);border-radius:18px;padding:22px 20px 14px;margin:2px 0 16px;text-align:center;overflow:hidden;cursor:pointer;box-shadow:0 8px 26px rgba(120,96,40,.07)}
+  #yuchi .yc-quote{position:absolute;top:2px;left:14px;font-family:var(--serif);font-size:52px;color:rgba(201,162,78,.28);line-height:1;pointer-events:none}
+  #yuchi .yc-poem-t{font-size:17px;line-height:2;color:var(--ink);letter-spacing:.02em;transition:opacity .28s;min-height:2em;padding:0 6px}
+  #yuchi .yc-poem-a{font-size:12px;color:var(--gold-deep);margin-top:8px;transition:opacity .28s;min-height:1em}
+  #yuchi .yc-poem-foot{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid rgba(201,162,78,.16)}
+  #yuchi .yc-poem-tag{font-size:11px;color:var(--ink-faint);letter-spacing:.08em}
+  #yuchi .yc-sound{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--ink-faint);border:1px solid var(--line);border-radius:999px;padding:5px 11px;background:rgba(255,255,255,.5)}
+  #yuchi .yc-sound.on{color:var(--gold-deep);border-color:rgba(201,162,78,.5);background:rgba(201,162,78,.12)}
+  #yuchi .yc-acts{display:flex;gap:11px;margin-bottom:20px}
+  #yuchi .yc-act{flex:1;border-radius:16px;padding:18px 14px 16px;cursor:pointer;text-align:center;border:1px solid rgba(201,162,78,.2);transition:transform .15s}
+  #yuchi .yc-act:active{transform:scale(.97)}
+  #yuchi .yc-act-drop{background:linear-gradient(180deg,#f3eef9,#ece5f4)}
+  #yuchi .yc-act-cap{background:linear-gradient(180deg,#fbf6ec,#f4ecdb)}
+  #yuchi .yc-act-ic{font-size:30px;line-height:1;margin-bottom:8px}
+  #yuchi .yc-act-t{font-size:16px;color:#2a2016;letter-spacing:.04em}
+  #yuchi .yc-act-d{font-size:11.5px;color:var(--ink-soft);margin-top:5px;line-height:1.5}
+  #yuchi .yc-feed-h{display:flex;align-items:baseline;justify-content:space-between;margin:6px 2px 12px}
+  #yuchi .yc-feed-h>span:first-child{font-size:12px;color:var(--ink-faint);letter-spacing:.18em}
+  #yuchi .yc-traj{font-size:12px;color:var(--gold-deep);cursor:pointer}
+  </style>
+  <section class="screen" id="yuchi">
+    <div id="yuchiBody"></div>
+  </section>
+
   <!-- ===== ASK 问事 ===== -->
   <section class="screen" id="ask">
     <div class="topbar"><div class="back" onclick="go('home')">‹</div><div class="tt"></div></div>
@@ -1451,9 +1477,9 @@
   <!-- ===== TABBAR ===== -->
   <nav class="tabbar" id="tabbar">
     <div class="tab" data-tab="home" onclick="go('home')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7"/><path d="M6 10v9h12v-9"/></svg></span>首页</div>
-    <div class="tab" data-tab="natal" onclick="go('natal')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><line x1="12" y1="3.5" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="20.5"/><circle cx="12" cy="12" r="2.3"/></svg></span>星盘</div>
+    <div class="tab" data-tab="yuchi" onclick="go('yuchi')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3.5c2.6 3.4 4.2 5.4 4.2 7.5a4.2 4.2 0 0 1-8.4 0c0-2.1 1.6-4.1 4.2-7.5z"/><path d="M4 18c2-1.4 3.8-1.4 5.8 0s3.8 1.4 5.8 0"/></svg></span>愈池</div>
     <div class="tab" data-tab="ask" onclick="go('ask')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/></svg></span>问</div>
-    <div class="tab" data-tab="skinshop" onclick="go('skinshop')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M6 8h12l-1 12H7z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg></span>商城</div>
+    <div class="tab" data-tab="natal" onclick="go('natal')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><line x1="12" y1="3.5" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="20.5"/><circle cx="12" cy="12" r="2.3"/></svg></span>星盘</div>
     <div class="tab" data-tab="mine" onclick="go('mine')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.6"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></svg></span>我的</div>
   </nav>
 </div>
@@ -2926,9 +2952,10 @@ const state={
 /* ============ 路由 ============ */
 const $=s=>document.querySelector(s);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-const TABS=["home","natal","ask","skinshop","mine"];
+const TABS=["home","yuchi","ask","natal","mine"];
 function go(id){
   if(id==='admin'&&!state.isAdmin){toast('仅管理员可进入');id='mine';}
+  if(window._yuchiAudio&&id!=='yuchi'&&typeof stopYuchiAmbient==='function')stopYuchiAmbient();
   if(state._pollTimer){clearInterval(state._pollTimer);state._pollTimer=null;}
   if(!document.getElementById(id)){id=(state&&state.profile)?"home":"home";}
    document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
@@ -2946,6 +2973,7 @@ function go(id){
   if(id==="diycart"&&typeof renderDiyCart==='function')renderDiyCart();
   if(id==="diyorders"&&typeof renderDiyOrders==='function')renderDiyOrders();
   if(id==="ask")renderAsk();
+  if(id==="yuchi")renderYuchi();
   if(id==="mine")renderMine();
   if(id==="recharge")renderRecharge();
   if(id==="admin")renderAdmin();
@@ -4524,6 +4552,110 @@ async function synastryPoster(){
 /* ============ 情绪树洞 + 塔罗回信（留存）============ */
 let _thMood='';
 function thMood(el){const on=el.classList.contains('on');document.querySelectorAll('.th-mood').forEach(m=>m.classList.remove('on'));if(on){_thMood='';}else{el.classList.add('on');_thMood=el.dataset.mood;}}
+/* ============ 愈池 · 公域情绪治愈枢纽（会议纪要：情感愈池）============ */
+var YUCHI_POEMS=[
+  {t:'心事是水，说出来就成了涟漪，散着散着，就轻了。',a:''},
+  {t:'你不必时时刻刻都好起来，允许自己此刻就是有点难。',a:''},
+  {t:'那些没说出口的夜晚，都在这片池水里，被轻轻接住。',a:''},
+  {t:'山有山的高度，水有水的深度，你有你的节奏。',a:''},
+  {t:'情绪来了就让它来，像潮水，退去时会带走一些沉重。',a:''},
+  {t:'今天也辛苦了。把累放进池子，明天再慢慢捞起来。',a:''},
+  {t:'愿你眼里有光，也愿你难过时，有处可以轻轻搁下。',a:''},
+  {t:'万物皆有裂痕，那是光照进来的地方。',a:'—— L. 科恩'},
+  {t:'黑夜给了我黑色的眼睛，我却用它寻找光明。',a:'—— 顾城'},
+  {t:'愿有人陪你颠沛流离；如果没有，愿你成为自己的太阳。',a:''}
+];
+var _yuchiPoemIdx=0;
+function YUCHI_SOUND_LABEL(on){return on?'🎧 沉浸中':'🎧 沉浸背景音';}
+function renderYuchi(){
+  var box=$("#yuchiBody");if(!box)return;
+  _yuchiPoemIdx=Math.floor(Math.random()*YUCHI_POEMS.length);
+  var p=YUCHI_POEMS[_yuchiPoemIdx],on=!!window._yuchiAudio;
+  box.innerHTML=
+    pHero('yù chí · a pool of feelings','愈池','把此刻的情绪，轻轻放进池子 · 也替别人，点亮一盏灯')+
+    '<div class="yc-poem" id="yuchiPoem" onclick="yuchiNextPoem()">'+
+      '<div class="yc-quote">“</div>'+
+      '<div class="yc-poem-t serif" id="yuchiPoemT">'+esc(p.t)+'</div>'+
+      '<div class="yc-poem-a" id="yuchiPoemA">'+esc(p.a||'')+'</div>'+
+      '<div class="yc-poem-foot"><span class="yc-poem-tag">精选诗句 · 轻触换一句</span>'+
+        '<span class="yc-sound'+(on?' on':'')+'" id="yuchiSoundBtn" onclick="event.stopPropagation();toggleYuchiSound()">'+YUCHI_SOUND_LABEL(on)+'</span>'+
+      '</div>'+
+    '</div>'+
+    '<div class="yc-acts">'+
+      '<div class="yc-act yc-act-drop" onclick="go(\'treehole\')">'+
+        '<div class="yc-act-ic">🫧</div><div class="yc-act-t serif">投一颗情绪</div>'+
+        '<div class="yc-act-d">写下此刻 · 抽一张陪伴牌</div>'+
+      '</div>'+
+      '<div class="yc-act yc-act-cap" onclick="go(\'capsule\')">'+
+        '<div class="yc-act-ic">🫙</div><div class="yc-act-t serif">情绪胶囊</div>'+
+        '<div class="yc-act-d">封存此刻 · 寄给未来的你</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="yc-feed-h"><span>池 水 · 大 家 的 心 事</span><span class="yc-traj" onclick="go(\'trajectory\')">我的情绪轨迹 →</span></div>'+
+    '<div id="yuchiFeed"><div class="panel" style="text-align:center"><div class="pv-d">池水正在漾开…</div></div></div>'+
+    '<div class="disclaimer">愈池是情绪陪伴，不评判、不诊断；点亮与暖话都会被对方看见，请温柔以待。</div>';
+  yuchiStartPoemRotate();
+  yuchiLoadFeed();
+}
+function yuchiSetPoem(){
+  var el=$("#yuchiPoemT");if(!el)return;
+  var p=YUCHI_POEMS[_yuchiPoemIdx%YUCHI_POEMS.length],ae=$("#yuchiPoemA");
+  el.style.opacity=0;if(ae)ae.style.opacity=0;
+  setTimeout(function(){var e2=$("#yuchiPoemT"),a2=$("#yuchiPoemA");if(e2){e2.textContent=p.t;e2.style.opacity=1;}if(a2){a2.textContent=p.a||'';a2.style.opacity=1;}},260);
+}
+function yuchiNextPoem(){_yuchiPoemIdx=(_yuchiPoemIdx+1)%YUCHI_POEMS.length;yuchiSetPoem();}
+function yuchiStartPoemRotate(){
+  if(window._yuchiPoemTimer)clearInterval(window._yuchiPoemTimer);
+  window._yuchiPoemTimer=setInterval(function(){
+    var a=document.querySelector('.screen.active');
+    if(!a||a.id!=='yuchi'||!document.getElementById('yuchiPoemT')){clearInterval(window._yuchiPoemTimer);window._yuchiPoemTimer=null;return;}
+    yuchiNextPoem();
+  },9000);
+}
+async function yuchiLoadFeed(){
+  var list=$("#yuchiFeed");if(!list)return;
+  var r=await apiGet('/api/wall?limit=30'),ok=r.ok,j=r.j;
+  list=$("#yuchiFeed");if(!list)return;
+  if(!ok){list.innerHTML='<div class="panel" style="text-align:center"><div class="pv-d">池水没漾开，返回重进试试</div></div>';return;}
+  if(j&&j.kv===false){list.innerHTML='<div class="panel" style="text-align:center"><div class="pv-d">愈池即将开启（部署后绑定 KV 即可上线）。</div></div>';return;}
+  var posts=(j&&j.posts)||[];
+  if(!posts.length){list.innerHTML='<div class="panel" style="text-align:center"><div class="pv-d">池水还很静。做第一个，把心事放进来吧 🌙</div><button class="btn block" style="margin-top:12px;background:linear-gradient(135deg,#8a7bbf,#5f4f96);color:#fff;border:none" onclick="go(\'treehole\')">🫧 投一颗情绪进池</button></div>';return;}
+  var lamped=lampedSet();
+  list.innerHTML=posts.map(function(p){return wallItem(p,lamped.has(p.id));}).join('');
+}
+/* 沉浸背景音：无音频文件，用 WebAudio 生成一段柔和环境音垫（用户轻触才启动，符合自动播放限制）*/
+function startYuchiAmbient(){
+  try{
+    var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return false;
+    var ctx=new AC();
+    var master=ctx.createGain();master.gain.value=0.0001;master.connect(ctx.destination);
+    var lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=640;lp.Q.value=0.6;lp.connect(master);
+    var freqs=[196.00,246.94,293.66],oscs=[];
+    freqs.forEach(function(f,i){
+      var o=ctx.createOscillator();o.type='sine';o.frequency.value=f;
+      var g=ctx.createGain();g.gain.value=0.14/(i+1);
+      var lfo=ctx.createOscillator();lfo.type='sine';lfo.frequency.value=0.05+i*0.017;
+      var lg=ctx.createGain();lg.gain.value=1.8;lfo.connect(lg);lg.connect(o.detune);
+      o.connect(g);g.connect(lp);o.start();lfo.start();oscs.push(o,lfo);
+    });
+    try{master.gain.setValueAtTime(0.0001,ctx.currentTime);master.gain.linearRampToValueAtTime(0.2,ctx.currentTime+2.4);}catch(e){master.gain.value=0.2;}
+    if(ctx.state==='suspended'&&ctx.resume)ctx.resume();
+    window._yuchiAudio={ctx:ctx,master:master,nodes:oscs};
+    return true;
+  }catch(e){return false;}
+}
+function stopYuchiAmbient(){
+  var a=window._yuchiAudio;if(!a)return;window._yuchiAudio=null;
+  try{var t=a.ctx.currentTime;a.master.gain.cancelScheduledValues(t);a.master.gain.linearRampToValueAtTime(0.0001,t+0.7);}catch(e){}
+  setTimeout(function(){try{a.ctx.close();}catch(e){}},900);
+  var b=document.getElementById('yuchiSoundBtn');if(b){b.classList.remove('on');b.innerHTML=YUCHI_SOUND_LABEL(false);}
+}
+function toggleYuchiSound(){
+  if(window._yuchiAudio){stopYuchiAmbient();toast('已静音');return;}
+  var ok=startYuchiAmbient(),b=document.getElementById('yuchiSoundBtn');
+  if(ok){if(b){b.classList.add('on');b.innerHTML=YUCHI_SOUND_LABEL(true);}toast('沉浸背景音 · 已开启 🎧');}
+  else toast('当前环境不支持背景音');
+}
 function renderTreehole(){
   const box=$("#thBody");if(!box)return;_thMood='';
   const moods=[['😔','焦虑'],['🥺','委屈'],['🌫️','emo'],['😤','生气'],['😞','失落'],['🌙','孤独']];
