@@ -411,7 +411,9 @@ async function handleShelf(request, env, url){
     if(!/^1[3-9]\d{9}$/.test(phone)) return json(400, { error:'需要登录' });
     const d=await ballsGet(KV, phone);
     let caps=[]; try{ const raw=await KV.get('ecap:'+phone); if(raw)caps=JSON.parse(raw); }catch(e){}
-    return json(200, { ok:true, kv:true, level:yuchiLevel(d.acts),
+    // 作品集：我投进池子的诗（用于年度合集）
+    let myPoems=[]; try{ const raw=await KV.get('wall'); if(raw){ const posts=JSON.parse(raw); myPoems=posts.filter(p=>p.ap===phone).slice(0,60).map(p=>({ mood:p.mood, pol:p.pol||moodPolarity(p.mood), text:p.text, lamps:p.lamps||0, when:p.when })); } }catch(e){}
+    return json(200, { ok:true, kv:true, level:yuchiLevel(d.acts), myPoems,
       jars:d.jars||0, fill:(d.balls||[]).length, curBalls:d.balls||[], shelf:d.shelf||[], year:d.year||[],
       total:d.total||0, pos:d.posT||0, neg:d.negT||0, streak:d.streak||0, maxStreak:d.maxStreak||0, capsules:caps });
   }

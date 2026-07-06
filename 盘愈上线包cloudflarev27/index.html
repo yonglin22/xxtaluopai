@@ -1327,6 +1327,13 @@
   #shelf .sh-cap-t{font-size:13.5px;line-height:1.8;color:var(--ink-soft);white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   #shelf .sh-cap.open .sh-cap-t{-webkit-line-clamp:unset;overflow:visible}
   #shelf .sh-empty{font-size:12.5px;color:var(--ink-faint);text-align:center;padding:16px;background:var(--bg-raise);border:1px dashed var(--line);border-radius:13px}
+  #shelf .sh-works{display:grid;gap:9px}
+  #shelf .sh-work{position:relative;background:var(--bg-raise);border:1px solid var(--line);border-radius:13px;padding:12px 14px 11px 16px;overflow:hidden}
+  #shelf .sh-work::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px}
+  #shelf .sh-work.pol-pos::before{background:linear-gradient(180deg,#F0D79B,#D9A84E)}
+  #shelf .sh-work.pol-neg::before{background:linear-gradient(180deg,#a99fca,#7d719e)}
+  #shelf .sh-work-t{font-size:14px;line-height:1.8;color:var(--ink)}
+  #shelf .sh-work-m{font-size:11px;color:var(--ink-faint);margin-top:6px}
   /* 复用愈池发布器组件（#shelf 作用域）*/
   #shelf .yc-composer{background:var(--bg-raise);border:1px solid var(--line);border-radius:16px;padding:14px 15px;margin-bottom:12px}
   #shelf .yc-comp-h{font-size:13px;color:var(--ink-soft);margin-bottom:10px;letter-spacing:.02em;line-height:1.6}
@@ -1349,6 +1356,54 @@
   <section class="screen" id="shelf">
     <div class="topbar"><div class="back" onclick="go('yuchi')">‹</div><div class="tt">情绪架</div></div>
     <div id="shelfBody"></div>
+  </section>
+
+  <!-- ===== 今日缘分 · 站内匿名加好友 + 24h阅后即焚 ===== -->
+  <style>
+  #fate .ft-sec,#anthology .ant-sec{font-size:12px;color:var(--ink-faint);letter-spacing:.16em;margin:20px 2px 10px}
+  #fate .ft-friend{display:flex;align-items:center;gap:12px;background:var(--bg-raise);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:9px;cursor:pointer;transition:.15s}
+  #fate .ft-friend:active{transform:scale(.98);border-color:var(--gold)}
+  #fate .ft-av{width:38px;height:38px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:19px;background:radial-gradient(circle at 40% 35%,#fbf5e9,#efe4cf);border:1px solid rgba(201,162,78,.3)}
+  #fate .ft-fmain{flex:1;min-width:0}
+  #fate .ft-fn{font-size:15px;color:var(--ink)}
+  #fate .ft-fl{font-size:11px;color:var(--gold-deep);margin-top:2px}
+  #fate .ft-go{font-size:12.5px;color:var(--gold-deep)}
+  #fate .ft-card{background:var(--bg-raise);border:1px solid var(--line);border-radius:16px;padding:14px 15px;margin-bottom:11px}
+  #fate .ft-c-top{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+  #fate .ft-c-m{font-size:12px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+  #fate .ft-c-h{font-size:13px;color:var(--gold-deep)}
+  #fate .ft-c-l{font-size:10.5px;color:var(--ink-faint);margin-left:auto}
+  #fate .ft-c-t{font-size:14.5px;line-height:1.8;color:var(--ink);margin-bottom:12px}
+  #fate .ft-add{width:100%;border:none;border-radius:999px;padding:11px;font-size:13.5px;font-family:var(--serif);letter-spacing:.04em;background:linear-gradient(135deg,#E7C892,var(--amber));color:#2a1f10;cursor:pointer;box-shadow:0 6px 16px rgba(201,162,78,.28)}
+  #fate .ft-add:disabled{opacity:.6}
+  #fate .ft-empty,#anthology .ant-empty{font-size:12.5px;color:var(--ink-faint);text-align:center;padding:18px;background:var(--bg-raise);border:1px dashed var(--line);border-radius:14px}
+  #fate .fc-note{font-size:11.5px;color:var(--gold-deep);text-align:center;background:rgba(201,162,78,.1);border-radius:999px;padding:7px 12px;margin:2px 0 12px}
+  #fate .fc-list{display:flex;flex-direction:column;gap:9px;min-height:46vh;max-height:60vh;overflow-y:auto;padding:4px 2px 10px}
+  #fate .fc-b{max-width:78%;padding:10px 13px;border-radius:15px;font-size:14px;line-height:1.65;word-break:break-word}
+  #fate .fc-b.me{align-self:flex-end;background:linear-gradient(135deg,#E7C892,var(--amber));color:#2a1f10;border-bottom-right-radius:5px}
+  #fate .fc-b.ta{align-self:flex-start;background:var(--bg-raise);border:1px solid var(--line);color:var(--ink);border-bottom-left-radius:5px}
+  #fate .fc-empty{text-align:center;color:var(--ink-faint);font-size:12.5px;margin:auto;padding:30px 10px}
+  #fate .fc-input{display:flex;gap:9px;padding-top:10px;border-top:1px solid var(--line-soft)}
+  #fate .fc-input input{flex:1;min-width:0;padding:11px 13px;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--ink);font-size:14px;outline:none}
+  #fate .fc-input input:focus{border-color:var(--gold)}
+  #fate .fc-input button{flex:none;border:none;border-radius:999px;padding:0 18px;background:var(--ink);color:var(--face);font-size:14px;cursor:pointer}
+  #anthology .ant-list{display:grid;gap:10px}
+  #anthology .ant-card{position:relative;background:linear-gradient(180deg,#fbf7ef,#f4ecdc);border:1px solid rgba(201,162,78,.22);border-radius:16px;padding:18px 18px 16px;box-shadow:0 6px 18px rgba(120,96,40,.05)}
+  #anthology .ant-card.top{background:var(--bg-raise);border-color:var(--line)}
+  #anthology .ant-q{position:absolute;top:2px;left:12px;font-family:var(--serif);font-size:40px;color:rgba(201,162,78,.28);line-height:1}
+  #anthology .ant-t{font-size:16px;line-height:1.95;color:var(--ink);letter-spacing:.02em;position:relative}
+  #anthology .ant-a{font-size:12px;color:var(--gold-deep);margin-top:9px;text-align:right}
+  #anthology .ant-card.top .ant-a{text-align:left}
+  </style>
+  <section class="screen" id="fate">
+    <div class="topbar"><div class="back" onclick="fateBack()">‹</div><div class="tt" id="fateTitle">今日缘分</div></div>
+    <div id="fateBody"></div>
+  </section>
+
+  <!-- ===== 精选诗集 ===== -->
+  <section class="screen" id="anthology">
+    <div class="topbar"><div class="back" onclick="go('yuchi')">‹</div><div class="tt">精选诗集</div></div>
+    <div id="anthologyBody"></div>
   </section>
 
   <!-- ===== ASK 问事 ===== -->
@@ -3211,6 +3266,8 @@ function go(id){
   if(id==="ask")renderAsk();
   if(id==="yuchi")renderYuchi();
   if(id==="shelf")renderShelf();
+  if(id==="fate")renderFate();
+  if(id==="anthology")renderAnthology();
   if(id==="mine")renderMine();
   if(id==="recharge")renderRecharge();
   if(id==="admin")renderAdmin();
@@ -4833,7 +4890,16 @@ var YUCHI_POEMS=[
   {t:'愿有人陪你颠沛流离；如果没有，愿你成为自己的太阳。',a:''}
 ];
 var _yuchiPoemIdx=0;
-function YUCHI_SOUND_LABEL(on){return on?'🎧 沉浸中':'🎧 沉浸背景音';}
+/* 每日随机背景音乐：按当天日期轮换一首柔和睡前曲（程序合成，真实歌单可在此替换为音频文件）*/
+var YC_TRACKS=[
+  {name:'月光钢琴',freqs:[196.00,246.94,293.66]},
+  {name:'雨夜白噪',freqs:[174.61,220.00,261.63]},
+  {name:'深海冥想',freqs:[164.81,207.65,246.94]},
+  {name:'晨雾竖琴',freqs:[220.00,277.18,329.63]},
+  {name:'星河入眠',freqs:[146.83,185.00,220.00]}
+];
+function ycTodayTrack(){try{var d=new Date();var doy=Math.floor((d-new Date(d.getFullYear(),0,0))/86400000);return YC_TRACKS[doy%YC_TRACKS.length];}catch(e){return YC_TRACKS[0];}}
+function YUCHI_SOUND_LABEL(on){return on?('🎧 '+ycTodayTrack().name):'🎧 沉浸背景音';}
 /* 愈池 v2 情绪：极性/表情 */
 var YC_MOODS=[['🌙','孤独','neg'],['😔','焦虑','neg'],['🥺','委屈','neg'],['🌫️','emo','neg'],['😞','失落','neg'],['🌱','期待','pos'],['🙂','还好','pos'],['🌿','平静','pos'],['✨','释然','pos'],['💪','想努力','pos']];
 /* PUGC · 引导文案模板（借句诗开头，帮没文采的用户起笔）*/
@@ -4969,8 +5035,8 @@ function yuchiRenderJar(jar,level){
       '<div class="yc-jar-glass"><span class="yc-jar-lid"></span><div class="yc-jar-gems">'+gems+'</div><span class="yc-jar-shine"></span>'+
         (fill===0?'<span class="yc-jar-empty">投一颗<br>情绪</span>':'')+'</div>'+
       '<div class="yc-jar-info">'+
-        '<div class="yc-jar-top"><span class="yc-jar-title serif">情绪储蓄罐</span><span class="yc-lvl">Lv · '+esc(level||'初来乍到')+'</span></div>'+
-        '<div class="yc-jar-sub">第 '+((jar.jars||0)+1)+' 罐 · 满 30 颗自动封存进情绪架</div>'+
+        '<div class="yc-jar-top"><span class="yc-jar-title serif">情绪储蓄罐</span><span class="yc-lvl">Lv · '+esc(level||'初来乍到')+((jar.streak||0)>1?(' · 🔥'+jar.streak+'天'):'')+'</span></div>'+
+        '<div class="yc-jar-sub">第 '+((jar.jars||0)+1)+' 罐 · 满 30 颗自动封存进情绪架'+((jar.streak||0)>1?(' · 已连续投递 '+jar.streak+' 天'):'')+'</div>'+
         '<div class="yc-jar-bar"><i style="width:'+pct+'%"></i></div>'+
         '<div class="yc-jar-foot">已收集 <b>'+fill+'</b>/30 · 累计封存 '+(jar.total||0)+' 颗'+((jar.jars||0)>0?(' · 架上 '+jar.jars+' 罐'):'')+' <em>情绪架 →</em></div>'+
       '</div>'+
@@ -4994,6 +5060,7 @@ async function submitYuchiPost(){
   try{rewardFeat('wall','愈池投递');}catch(e){}
   if(r.j.jar&&r.j.jar.filled)setTimeout(function(){toast('一整罐情绪已封存进情绪架 🫙 第 '+r.j.jar.jars+' 罐');},900);
   else toast('已投进池子 · 情绪球 +1 🫧');
+  if(r.j.milestone)setTimeout(function(){confirmBox('🎉 达成里程碑 ·「'+r.j.milestone.t+'」\n你已经投下第 '+r.j.milestone.n+' 颗情绪 · 谢谢你一直愿意面对自己','继续','');},r.j.jar&&r.j.jar.filled?1600:1100);
   var newId=r.j.post&&r.j.post.id;
   setTimeout(function(){yuchiLoadFeed().then(function(){
     try{var el=newId&&document.getElementById('yp-'+newId);if(el)el.scrollIntoView({block:'center',behavior:'smooth'});}catch(e){}
@@ -5155,7 +5222,9 @@ async function renderShelf(){
       '<div class="yc-comp-foot"><span class="yc-cc" id="scCc">0/120</span><button class="yc-postbtn" id="scBtn" style="background:linear-gradient(135deg,#E7C892,var(--amber));color:#2a1f10" onclick="submitCapsule()">🫙 永久封存</button></div></div>'+
     (caps.length?'<div class="sh-cap-h">已封存 '+caps.length+' 颗 · 轻触展开</div>':'')+
     '<div class="sh-caps">'+capList+'</div>'+
+    yuchiWorksSec(j.myPoems||[])+
     '<div class="disclaimer">情绪架只属于你；情绪胶囊永久保存，随时回看当时的心境。</div>';
+  state._myPoems=j.myPoems||[];
 }
 async function submitCapsule(){
   var t=$("#scText"),text=((t&&t.value)||'').trim();
@@ -5168,6 +5237,112 @@ async function submitCapsule(){
   toast('已永久封存 🫙 第 '+(r.j.count||1)+' 颗情绪胶囊');
   renderShelf();
 }
+/* 作品集 / 年度合集 */
+function yuchiWorksSec(poems){
+  if(!poems||!poems.length)return '';
+  var list=poems.slice(0,20).map(function(pm){return '<div class="sh-work pol-'+(pm.pol==='pos'?'pos':'neg')+'"><div class="sh-work-t">'+esc(pm.text)+'</div><div class="sh-work-m">'+ycMoodEmoji(pm.mood)+' '+esc(pm.mood||'')+((pm.lamps||0)>0?(' · 🕯'+pm.lamps):'')+' · '+shDate(pm.when)+'</div></div>';}).join('');
+  return '<div class="sh-sec">我 的 作 品 集 · '+poems.length+' 首</div><div class="sh-works">'+list+'</div>'+
+    '<button class="btn block" style="margin-top:12px;background:linear-gradient(135deg,#E7C892,var(--amber));color:#2a1f10;border:none" onclick="yearAnthologyPoster()">✦ 生成我的年度合集 · 分享</button>';
+}
+async function yearAnthologyPoster(){
+  var poems=(state._myPoems||[]).slice();
+  if(!poems.length){toast('先去愈池投几首诗吧');return;}
+  poems.sort(function(a,b){return (b.lamps||0)-(a.lamps||0);});
+  var top=poems.slice(0,5);toast('正在生成年度合集…');
+  var W=668,PAD=56,mc=document.createElement('canvas').getContext('2d');mc.font='600 21px "Songti SC",serif';
+  var blocks=top.map(function(pm){return {lines:wrapLines(mc,pm.text,W-PAD*2),meta:ycMoodEmoji(pm.mood)+' '+(pm.mood||'')+((pm.lamps||0)>0?(' · 🕯'+pm.lamps):'')};});
+  var qr=await loadImg('img/c6ea61553378.png');
+  var yy=200,bh=[];blocks.forEach(function(bk){bh.push(yy);yy+=bk.lines.length*34+30;});
+  var qy=yy+6,qSize=112,qx=Math.round(W/2-qSize/2),capY=qy+qSize+30,H=Math.round(capY+56);
+  var c=document.createElement('canvas');c.width=W;c.height=H;var x=c.getContext('2d');
+  var bg=x.createRadialGradient(W/2,200,40,W/2,240,560);bg.addColorStop(0,'#241b2e');bg.addColorStop(1,'#120e1c');x.fillStyle=bg;x.fillRect(0,0,W,H);
+  for(var i=0;i<44;i++){x.globalAlpha=0.1+Math.random()*0.5;x.fillStyle=Math.random()<0.5?'#cbb3ee':'#e8cf94';x.beginPath();x.arc(20+Math.random()*(W-40),20+Math.random()*(H-40),Math.random()*1.4+0.4,0,6.29);x.fill();}x.globalAlpha=1;
+  x.strokeStyle='rgba(201,162,78,.42)';x.lineWidth=1.4;roundRectP(x,22,22,W-44,H-44,16);x.stroke();
+  x.textAlign='center';x.fillStyle='#f0e6cf';x.font='600 26px "Songti SC",serif';x.fillText('我 的 年 度 情 绪 合 集',W/2,104);
+  x.fillStyle='#b9a6dd';x.font='12px sans-serif';x.fillText('盘愈 · 愈池 · '+(new Date().getFullYear())+' 年',W/2,132);
+  x.strokeStyle='rgba(201,162,78,.5)';x.beginPath();x.moveTo(W/2-40,156);x.lineTo(W/2+40,156);x.stroke();
+  blocks.forEach(function(bk,bi){var by=bh[bi];x.fillStyle='#f4eefb';x.font='600 21px "Songti SC",serif';bk.lines.forEach(function(ln,li){x.fillText(ln,W/2,by+li*34);});x.fillStyle='#a99bcf';x.font='12px sans-serif';x.fillText(bk.meta,W/2,by+bk.lines.length*34+14);});
+  if(qr){x.fillStyle='#fff';roundRectP(x,qx-7,qy-7,qSize+14,qSize+14,10);x.fill();x.drawImage(qr,qx,qy,qSize,qSize);}
+  x.fillStyle='#cbb3ee';x.font='13px sans-serif';x.fillText('扫码 · 也把心事写成一首诗',W/2,capY);
+  x.fillStyle='#8d7fb0';x.font='12px sans-serif';x.fillText('盘愈 PANYU · 情感愈池',W/2,capY+22);
+  try{$("#posterImg").src=c.toDataURL('image/png');$("#posterMask").style.display='flex';}catch(e){toast('生成失败');}
+}
+/* ============ 今日缘分 · 站内匿名加好友 + 24h 阅后即焚 ============ */
+function fateBack(){if(state._fateWith){state._fateWith='';renderFate();}else{go('yuchi');}}
+async function renderFate(){
+  var box=$("#fateBody"),tt=$("#fateTitle");if(!box)return;
+  if(!state.phone){box.innerHTML='<div class="panel" style="text-align:center"><div class="pv-d">登录后，才能遇见今晚的缘分</div><button class="btn block" style="margin-top:12px" onclick="doLogin()">去登录</button></div>';return;}
+  if(state._fateWith){return renderFateChat(state._fateWith);}
+  if(tt)tt.textContent='今日缘分';
+  box.innerHTML='<div class="panel" style="text-align:center"><div class="pv-d">正在寻找今晚和你一样醒着的人…</div></div>';
+  var r=await apiGet('/api/fate?phone='+encodeURIComponent(state.phone));
+  box=$("#fateBody");if(!box)return;
+  if(!r.ok||!r.j||!r.j.ok){box.innerHTML='<div class="panel" style="text-align:center"><div class="pv-d">'+((r.j&&r.j.error)||'缘分没找到，返回重进试试')+((r.j&&r.j.kv===false)?'（部署绑定 KV 后开启）':'')+'</div></div>';return;}
+  var friends=(r.j.friends||[]),cands=(r.j.candidates||[]);
+  var fh=friends.length?('<div class="ft-sec">我 的 缘 分</div>'+friends.map(function(f){return '<div class="ft-friend" onclick="fateOpen(\''+f.fid+'\',\''+esc(f.handle)+'\')"><div class="ft-av">🌙</div><div class="ft-fmain"><div class="ft-fn serif">'+esc(f.handle)+'</div><div class="ft-fl">Lv · '+esc(f.lv||'夜行者')+'</div></div><div class="ft-go">私信 →</div></div>';}).join('')):'';
+  var ch=cands.length?('<div class="ft-sec">今 晚 可 结 缘</div>'+cands.map(function(c){return '<div class="ft-card"><div class="ft-c-top"><span class="ft-c-m">'+ycMoodEmoji(c.mood)+' '+esc(c.mood||'心事')+'</span><span class="ft-c-h serif">'+esc(c.handle)+'</span><span class="ft-c-l">Lv·'+esc(c.lv||'夜行者')+'</span></div><div class="ft-c-t">'+esc(c.text)+'</div><button class="ft-add" onclick="fateAdd(\''+c.fid+'\',this)">✦ 点亮缘分 · 加为好友</button></div>';}).join('')):'<div class="ft-empty">今晚还没有新的缘分。去愈池投一颗情绪，让别人也遇见你 🌙</div>';
+  box.innerHTML=
+    pHeroBare('<div class="apr-title serif" style="font-size:23px">今日缘分</div><div class="apr-sub" style="margin-top:8px">今晚，和另一个醒着的人说说话 · 仅限站内，24 小时后各自散去</div>')+
+    fh+ch+
+    '<div class="disclaimer">缘分只在站内，聊天记录 24 小时自动消散；请温柔以待，勿传播、勿骚扰、勿留站外联系方式。</div>';
+}
+async function fateAdd(fid,btn){
+  if(btn){btn.disabled=true;btn.textContent='结缘中…';}
+  var r=await apiPost('/api/fate',{action:'add',phone:state.phone,fid:fid});
+  if(r.ok&&r.j&&r.j.ok){toast('缘分已点亮 ✦ 你们成为了好友');renderFate();}
+  else{if(btn){btn.disabled=false;btn.innerHTML='✦ 点亮缘分 · 加为好友';}toast((r.j&&r.j.error)||'结缘失败');}
+}
+function fateOpen(fid,handle){state._fateWith=fid;state._fateHandle=handle||'';renderFate();}
+async function renderFateChat(fid){
+  var box=$("#fateBody"),tt=$("#fateTitle");if(!box)return;
+  box.innerHTML='<div class="panel" style="text-align:center"><div class="pv-d">正在接通…</div></div>';
+  var r=await apiGet('/api/fate?phone='+encodeURIComponent(state.phone)+'&with='+encodeURIComponent(fid));
+  box=$("#fateBody");if(!box)return;
+  if(!r.ok||!r.j||!r.j.ok){box.innerHTML='<div class="panel" style="text-align:center"><div class="pv-d">'+((r.j&&r.j.error)||'这段缘分已经散了')+'</div><button class="btn block" style="margin-top:12px" onclick="fateBack()">返回</button></div>';return;}
+  if(tt)tt.textContent=r.j.handle||state._fateHandle||'缘分';
+  var msgs=(r.j.messages||[]);
+  var bubbles=msgs.length?msgs.map(function(m){return '<div class="fc-b '+(m.mine?'me':'ta')+'">'+esc(m.text)+'</div>';}).join(''):'<div class="fc-empty">还没有对话。说一句「今晚也辛苦了」开始吧 🌙</div>';
+  box.innerHTML=
+    '<div class="fc-note">🕯 阅后即焚 · 这段对话 24 小时后自动消散</div>'+
+    '<div class="fc-list" id="fcList">'+bubbles+'</div>'+
+    '<div class="fc-input"><input id="fcText" maxlength="200" placeholder="说点什么…（仅限站内）" onkeydown="if(event.key===\'Enter\')fateSend()"/><button onclick="fateSend()">送出</button></div>';
+  var l=$("#fcList");if(l)l.scrollTop=l.scrollHeight;
+}
+async function fateSend(){
+  var i=$("#fcText"),text=((i&&i.value)||'').trim();if(text.length<1)return;
+  if(i)i.value='';
+  var r=await apiPost('/api/fate',{action:'msg',phone:state.phone,fid:state._fateWith,text:text});
+  if(r.ok&&r.j&&r.j.ok){renderFateChat(state._fateWith);}
+  else toast((r.j&&r.j.error)||'发送失败');
+}
+/* ============ 精选诗集 · 可翻阅 ============ */
+var ANTHO=[
+  {t:'愿你走出半生，归来仍是少年。',a:'—— 苏轼(意)'},
+  {t:'万物皆有裂痕，那是光照进来的地方。',a:'—— L. 科恩'},
+  {t:'黑夜给了我黑色的眼睛，我却用它寻找光明。',a:'—— 顾城'},
+  {t:'从前的日色变得慢，车，马，邮件都慢，一生只够爱一个人。',a:'—— 木心'},
+  {t:'愿有岁月可回首，且以深情共白头。',a:''},
+  {t:'我不去想是否能够成功，既然选择了远方，便只顾风雨兼程。',a:'—— 汪国真'},
+  {t:'你来人间一趟，你要看看太阳。',a:'—— 海子'},
+  {t:'心之所向，素履以往；生如逆旅，一苇以航。',a:''},
+  {t:'愿你眼里有光，笑里有星辰，从此山高水长，皆是温柔。',a:''},
+  {t:'纵有疾风起，人生不言弃。',a:'—— 宫崎骏(意)'}
+];
+async function renderAnthology(){
+  var box=$("#anthologyBody");if(!box)return;
+  box.innerHTML=
+    pHeroBare('<div class="apr-title serif" style="font-size:23px">精选诗集</div><div class="apr-sub" style="margin-top:8px">把日子过成诗 · 收藏那些照亮过你的句子</div>')+
+    '<div class="ant-sec">诗 · 精 选</div>'+
+    '<div class="ant-list">'+ANTHO.map(function(p){return '<div class="ant-card"><div class="ant-q">“</div><div class="ant-t serif">'+esc(p.t)+'</div>'+(p.a?'<div class="ant-a">'+esc(p.a)+'</div>':'')+'</div>';}).join('')+'</div>'+
+    '<div class="ant-sec">池 水 · 被 点 亮 最 多 的 心 事</div>'+
+    '<div id="antTop"><div class="panel" style="text-align:center"><div class="pv-d">正在从愈池捞起被最多人点亮的诗…</div></div></div>'+
+    '<div class="disclaimer">精选诗句用于自我觉察与陪伴；池水精选来自真实用户的匿名投递。</div>';
+  var r=await apiGet('/api/wall?limit=40');
+  var wrap=$("#antTop");if(!wrap)return;
+  var posts=((r.j&&r.j.posts)||[]).slice().sort(function(a,b){return (b.lamps||0)-(a.lamps||0);}).slice(0,6).filter(function(p){return (p.lamps||0)>0;});
+  if(!posts.length){wrap.innerHTML='<div class="ant-empty">还没有被点亮的心事。去愈池，点亮第一盏灯 🕯</div>';return;}
+  wrap.innerHTML='<div class="ant-list">'+posts.map(function(p){return '<div class="ant-card top"><div class="ant-t serif">'+esc(p.text)+'</div><div class="ant-a">🕯 '+(p.lamps||0)+' 盏灯'+(p.lv?(' · '+esc(p.lv)):'')+'</div></div>';}).join('')+'</div>';
+}
 /* 沉浸背景音：无音频文件，用 WebAudio 生成一段柔和环境音垫（用户轻触才启动，符合自动播放限制）*/
 function startYuchiAmbient(){
   try{
@@ -5175,7 +5350,7 @@ function startYuchiAmbient(){
     var ctx=new AC();
     var master=ctx.createGain();master.gain.value=0.0001;master.connect(ctx.destination);
     var lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=640;lp.Q.value=0.6;lp.connect(master);
-    var freqs=[196.00,246.94,293.66],oscs=[];
+    var freqs=ycTodayTrack().freqs,oscs=[];
     freqs.forEach(function(f,i){
       var o=ctx.createOscillator();o.type='sine';o.frequency.value=f;
       var g=ctx.createGain();g.gain.value=0.14/(i+1);
