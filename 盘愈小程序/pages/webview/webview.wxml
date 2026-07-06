@@ -1,1 +1,16 @@
 <web-view src="{{url}}" binderror="onErr"></web-view>
+
+<!-- 品牌加载遮罩（cover-view 才能盖在 web-view 之上）· 纯白玻璃 -->
+<cover-view class="splash {{fading ? 'fade' : ''}}" wx:if="{{loading}}">
+  <cover-view class="sp-eyebrow">pán yù · PANYU</cover-view>
+  <cover-view class="sp-title">盘愈</cover-view>
+  <cover-view class="sp-rule"></cover-view>
+  <cover-view class="sp-tip">正在为你铺开命盘…</cover-view>
+</cover-view>
+
+<!-- 加载失败 · 重试 -->
+<cover-view class="errmask" wx:if="{{err}}">
+  <cover-view class="em-title">网络开小差了</cover-view>
+  <cover-view class="em-sub">请检查网络后重试。开发者工具预览请先勾选「不校验合法域名、web-view…」。</cover-view>
+  <cover-view class="em-btn" bindtap="retry">重新加载</cover-view>
+</cover-view>

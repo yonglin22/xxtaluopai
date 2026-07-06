@@ -23,7 +23,7 @@ App({
   // 全局登录校验：未登录跳登录页
   requireLogin() {
     if (store.isLoggedIn()) return true;
-    wx.navigateTo({ url: '/pages/login/login' });
+    wx.navigateTo({ url: '/pages/wxlogin/wxlogin' });
     return false;
   }
 });
