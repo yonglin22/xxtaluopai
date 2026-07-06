@@ -1174,7 +1174,8 @@
   #yuchi .yc-jar-foot{font-size:11.5px;color:var(--ink-soft)}
   #yuchi .yc-jar-foot b{color:var(--gold-deep);font-family:var(--serif);font-size:14px}
   /* ---- 诗句发布器 ---- */
-  #yuchi .yc-composer{background:var(--bg-raise);border:1px solid var(--line);border-radius:16px;padding:14px 15px;margin-bottom:12px}
+  #yuchi .yc-composer{background:var(--bg-raise);border:1px solid var(--line);border-radius:16px;padding:14px 15px;margin-bottom:12px;transition:box-shadow .4s,border-color .4s}
+  #yuchi .yc-composer.yc-hl{border-color:rgba(201,162,78,.6);box-shadow:0 0 0 3px rgba(201,162,78,.16),0 10px 26px rgba(201,162,78,.18)}
   #yuchi .yc-comp-h{font-size:13px;color:var(--ink-soft);margin-bottom:10px;letter-spacing:.02em}
   #yuchi .yc-mchips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:11px}
   #yuchi .yc-mchip{font-size:12.5px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);color:var(--ink-soft);background:var(--bg);cursor:pointer;transition:.15s}
@@ -1222,19 +1223,20 @@
   .yc-fly.pol-pos{background:radial-gradient(circle at 35% 30%,#F6E4B6,#D9A84E 70%,#9A7226)}
   .yc-fly.pol-neg{background:radial-gradient(circle at 35% 30%,#c9c3b8,#8f8880 70%,#5f5a52)}
   /* ============ 愈池 v3 · 池水 + 玻璃罐 + 宝石 ============ */
-  #yuchi .yc-pool{position:relative;height:210px;border-radius:26px;overflow:hidden;margin:2px 0 16px;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.72);box-shadow:0 20px 54px rgba(70,62,48,.12);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);cursor:pointer}
-  #yuchi .yc-pool-glow{position:absolute;left:50%;top:44%;width:300px;height:300px;border-radius:50%;filter:blur(34px);background:radial-gradient(circle at 60% 40%,rgba(226,168,88,.28),rgba(224,146,92,.12) 46%,rgba(228,196,150,0) 72%);transform:translate(-50%,-50%);animation:ehBreathe 6.5s ease-in-out infinite;pointer-events:none;z-index:0}
-  #yuchi .yc-pool canvas{position:absolute;inset:0;display:block;width:100%;height:100%;z-index:1}
-  #yuchi .yc-pool-ov,#yuchi .yc-pool-foot{z-index:2}
-  #yuchi .yc-pool-ov{position:absolute;left:0;right:0;top:0;padding:22px 22px 0;text-align:center;pointer-events:none}
-  #yuchi .yc-pool-guide{font-size:19px;color:#2a2016;letter-spacing:.02em;line-height:1.45;text-shadow:0 1px 2px rgba(255,255,255,.6)}
-  #yuchi .yc-pool-poem{font-size:13px;line-height:1.7;color:var(--ink-soft);max-width:92%;margin:9px auto 0;text-shadow:0 1px 2px rgba(255,255,255,.55);pointer-events:auto;transition:opacity .28s;cursor:pointer;min-height:1.7em}
-  #yuchi .yc-pool-a{font-size:11px;color:var(--gold-deep);margin-top:3px;transition:opacity .28s;min-height:1em}
-  #yuchi .yc-pool-steps{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:11px}
-  #yuchi .yc-pool-steps span{font-size:11px;color:var(--gold-deep);background:rgba(255,255,255,.58);border:1px solid rgba(201,162,78,.32);border-radius:999px;padding:4px 10px;white-space:nowrap}
-  #yuchi .yc-pool-foot{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:space-between;padding:0 16px 13px}
+  #yuchi .yc-pool{position:relative;overflow:hidden;border-radius:26px;margin:2px 0 16px;padding:20px 20px 15px;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.72);box-shadow:0 20px 54px rgba(70,62,48,.12);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);text-align:center}
+  #yuchi .yc-pool-glow{position:absolute;left:50%;top:38%;width:300px;height:300px;border-radius:50%;filter:blur(34px);background:radial-gradient(circle at 60% 40%,rgba(226,168,88,.24),rgba(224,146,92,.1) 46%,rgba(228,196,150,0) 72%);transform:translate(-50%,-50%);animation:ehBreathe 6.5s ease-in-out infinite;pointer-events:none;z-index:0}
+  #yuchi .yc-pool-ov{position:relative;z-index:1}
+  #yuchi .yc-pool-eyebrow{font-size:10.5px;color:var(--gold-deep);letter-spacing:.06em;margin-bottom:9px}
+  #yuchi .yc-pool-guide{font-size:20px;color:#2a2016;letter-spacing:.02em;line-height:1.4}
+  #yuchi .yc-guide-steps{display:flex;align-items:flex-start;justify-content:center;gap:4px;margin-top:16px}
+  #yuchi .yc-gs{flex:0 0 auto;width:76px;text-align:center}
+  #yuchi .yc-gs-i{font-size:23px;line-height:1;margin-bottom:6px}
+  #yuchi .yc-gs-t{font-size:12.5px;color:var(--ink);font-family:var(--serif);letter-spacing:.02em}
+  #yuchi .yc-gs-d{font-size:10px;color:var(--ink-faint);margin-top:3px;line-height:1.35}
+  #yuchi .yc-gs-arrow{color:rgba(201,162,78,.7);font-size:13px;padding-top:9px;flex:none}
+  #yuchi .yc-pool-foot{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;margin-top:16px}
   #yuchi .yc-pool-hint{font-size:11px;color:var(--ink-faint);letter-spacing:.04em}
-  #yuchi .yc-pool .yc-sound{pointer-events:auto;background:rgba(255,255,255,.62);border:1px solid rgba(201,162,78,.42);color:var(--gold-deep)}
+  #yuchi .yc-pool .yc-sound{background:rgba(255,255,255,.62);border:1px solid rgba(201,162,78,.42);color:var(--gold-deep)}
   #yuchi .yc-pool .yc-sound.on{background:rgba(201,162,78,.5);border-color:rgba(201,162,78,.7);color:#fff}
   #yuchi .yc-jar{background:linear-gradient(180deg,#fbf7ef,#f4ecdc);border:1px solid rgba(201,162,78,.24);border-radius:16px;padding:15px 16px;margin-bottom:14px;box-shadow:0 6px 20px rgba(120,96,40,.06)}
   #yuchi .yc-jar2{display:flex;gap:16px;align-items:center;cursor:pointer}
@@ -1390,6 +1392,11 @@
   #anthology .ant-t{font-size:16px;line-height:1.95;color:var(--ink);letter-spacing:.02em;position:relative}
   #anthology .ant-a{font-size:12px;color:var(--gold-deep);margin-top:9px;text-align:right}
   #anthology .ant-card.top .ant-a{text-align:left}
+  #anthology .ant-acts{display:flex;gap:8px;margin-top:13px;position:relative}
+  #anthology .ant-acts button{flex:1;font-size:12px;padding:8px 6px;border-radius:11px;border:1px solid rgba(201,162,78,.3);background:rgba(255,255,255,.55);color:var(--gold-deep);letter-spacing:.03em;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .16s,background .16s}
+  #anthology .ant-acts button:active{transform:scale(.96)}
+  #anthology .ant-fav.on{background:rgba(201,162,78,.16);border-color:rgba(201,162,78,.5)}
+  #anthology .ant-use{background:linear-gradient(180deg,rgba(201,162,78,.15),rgba(201,162,78,.07))}
   </style>
   <section class="screen" id="fate">
     <div class="topbar"><div class="back" onclick="fateBack()">‹</div><div class="tt" id="fateTitle">今日缘分</div></div>
@@ -1414,16 +1421,17 @@
   @keyframes askSlide{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
   @keyframes askSlideBack{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:none}}
   @media(prefers-reduced-motion:reduce){#ask .ask-step.ask-slide,#ask .ask-step.ask-slideback{animation:none}}
-  #ask .ask-hero2{position:relative;overflow:hidden;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.72);border-radius:24px;padding:18px 20px 18px 22px;margin-bottom:22px;box-shadow:0 18px 44px rgba(70,55,30,.1);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+  #ask .ask-hero2{position:relative;overflow:hidden;display:flex;align-items:center;gap:8px;min-height:132px;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.72);border-radius:24px;padding:16px 18px 16px 22px;margin-bottom:22px;box-shadow:0 18px 44px rgba(70,55,30,.1);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
   #ask .ask-hero2::before{content:"";position:absolute;left:36%;top:46%;width:220px;height:220px;border-radius:50%;filter:blur(30px);background:radial-gradient(circle,rgba(226,168,88,.24),rgba(226,168,88,0) 68%);transform:translate(-50%,-50%);animation:ehBreathe 6.5s ease-in-out infinite;pointer-events:none;z-index:0}
   #ask .ah-tx{flex:1;min-width:0;position:relative;z-index:1}
   #ask .ah-fanwrap{position:relative;z-index:1}
   #ask .ah-py{font-family:"Courier New",monospace;letter-spacing:.3em;color:#B4B1A9;font-size:10px;text-transform:uppercase}
   #ask .ah-tt{font-size:28px;font-weight:600;color:#1E1C18;letter-spacing:.06em;margin-top:8px}
   #ask .ah-sub{font-size:11.5px;color:#7A766E;line-height:1.7;margin-top:9px}
-  #ask .ah-fanwrap{flex:none;width:134px;height:106px;position:relative;overflow:hidden;margin-right:-6px}
-  #ask .ah-fanwrap .apr-fan{position:absolute;top:0;left:50%;width:280px;margin-left:-140px;height:198px;transform:scale(.47);transform-origin:top center}
+  #ask .ah-fanwrap{flex:none;width:132px;height:118px;position:relative;overflow:visible;margin-right:-6px}
+  #ask .ah-fanwrap .apr-fan{position:absolute;top:50%;left:50%;width:280px;margin-left:-140px;height:198px;transform:translateY(-50%) scale(.44);transform-origin:center center}
   #ask .ah-fanwrap .apr-card{box-shadow:0 8px 14px rgba(40,34,26,.2)}
+  #ask .ah-fanwrap .apr-cap{display:none}
   #ask .ask-summary{margin-top:4px}
   #ask .asu-grid{display:flex;gap:9px}
   #ask .asu-cell{flex:1;background:#FFFFFF;border:1px solid #EEEDE9;border-radius:16px;padding:12px 11px 11px;box-shadow:0 6px 16px rgba(70,55,30,.04);min-width:0}
@@ -3412,6 +3420,7 @@ function saveProfile(){
     try{const r=SL()&&SL().lunar2solar(by,bm,bd,leap);if(r&&r.cYear){sy=r.cYear;sm=r.cMonth;sd=r.cDay;note=`农历${leap?'闰':''}${bm}月${bd} → 公历${sy}.${sm}.${sd}`;}}catch(e){}
   }
   state.profile={cal:pfCal,sex:pfSex,by,bm,bd,leap,sy,sm,sd,bh:+$('#pfH').value,prov,city,dist,region:[prov,city,dist].filter(Boolean).join(' '),zodiac:zodiacOf(sy),cons:constOf(sm,sd)};
+  try{localStorage.setItem('ft_profile',JSON.stringify(state.profile));}catch(e){}   // 永久记住出生信息，刷新/充值后不再重填
   todaySign=null; toast(note?('已保存 · '+note):'档案已保存');
   if(state._pendingUnlock){state._pendingUnlock=false;go('report');unlockReport();return;}
   if(state._pendingNatal){state._pendingNatal=false;go('natal');return;}
@@ -4919,15 +4928,19 @@ function renderYuchi(){
   box.innerHTML=
     '<div class="yc-pool" id="ycPool">'+
       '<div class="yc-pool-glow"></div>'+
-      '<canvas id="ycPoolC"></canvas>'+
       '<div class="yc-pool-ov">'+
-        '<div class="yc-pool-guide serif">把情绪，写成一句诗投进池子 🌙</div>'+
-        '<div class="yc-pool-poem serif" id="yuchiPoemT" onclick="yuchiNextPoem()">'+esc(p.t)+'</div>'+
-        '<div class="yc-pool-a" id="yuchiPoemA">'+esc(p.a||'')+'</div>'+
-        '<div class="yc-pool-steps"><span>🫧 收情绪水晶</span><span>🕯 点灯顶球</span><span>🔮 今日缘分</span></div>'+
+        '<div class="yc-pool-eyebrow">情 感 愈 池 · 安 放 深 夜 情 绪 的 地 方</div>'+
+        '<div class="yc-pool-guide serif">把心事，写成一句诗投进池子</div>'+
+        '<div class="yc-guide-steps">'+
+          '<div class="yc-gs"><div class="yc-gs-i">🫧</div><div class="yc-gs-t">投一颗情绪</div><div class="yc-gs-d">收获情绪水晶</div></div>'+
+          '<div class="yc-gs-arrow">→</div>'+
+          '<div class="yc-gs"><div class="yc-gs-i">🕯</div><div class="yc-gs-t">互相点灯</div><div class="yc-gs-d">灯球升起霸榜</div></div>'+
+          '<div class="yc-gs-arrow">→</div>'+
+          '<div class="yc-gs"><div class="yc-gs-i">🔮</div><div class="yc-gs-t">今日缘分</div><div class="yc-gs-d">遇见醒着的人</div></div>'+
+        '</div>'+
       '</div>'+
       '<div class="yc-pool-foot">'+
-        '<span class="yc-pool-hint">轻触水面 · 荡开涟漪</span>'+
+        '<span class="yc-pool-hint">下滑，把心事投进来 ↓</span>'+
         '<span class="yc-sound'+(on?' on':'')+'" id="yuchiSoundBtn" onclick="event.stopPropagation();toggleYuchiSound()">'+YUCHI_SOUND_LABEL(on)+'</span>'+
       '</div>'+
     '</div>'+
@@ -4952,6 +4965,7 @@ function renderYuchi(){
   yuchiStartPoemRotate();
   yuchiPool();
   yuchiLoadFeed();
+  if(window._pendingYcText){var _pt=window._pendingYcText;window._pendingYcText='';setTimeout(function(){var t=$("#ycText");if(!t)return;t.value=_pt;try{ycCount();}catch(e){}var c=$("#yuchiComposer");if(c){c.classList.add('yc-hl');setTimeout(function(){c.classList.remove('yc-hl');},1400);if(c.scrollIntoView)c.scrollIntoView({behavior:'smooth',block:'center'});}try{t.focus();t.setSelectionRange(t.value.length,t.value.length);}catch(e){}},80);}
 }
 /* 池水：活的水面 + 升起的情绪气泡 + 轻触涟漪（canvas 动画，离开愈池自动停）*/
 function yuchiPool(seedPols){
@@ -5324,20 +5338,34 @@ var ANTHO=[
   {t:'愿你眼里有光，笑里有星辰，从此山高水长，皆是温柔。',a:''},
   {t:'纵有疾风起，人生不言弃。',a:'—— 宫崎骏(意)'}
 ];
+/* 收藏（本地永久保存喜欢的诗句）+ 借句投池（跳愈池发布器并带上开头）*/
+function favPoems(){try{return JSON.parse(localStorage.getItem('ft_favpoems')||'[]')||[];}catch(e){return [];}}
+function saveFavPoems(a){try{localStorage.setItem('ft_favpoems',JSON.stringify((a||[]).slice(0,80)));}catch(e){}}
+function isFavPoem(t){return favPoems().some(function(p){return p.t===t;});}
+function _antItem(src,i){if(src==='a')return ANTHO[i];if(src==='f')return favPoems()[i];if(src==='p'){var q=(window._antPool||[])[i];return q?{t:q.text,a:''}:null;}return null;}
+function anthoFav(src,i){var it=_antItem(src,i);if(!it)return;var arr=favPoems(),k=arr.findIndex(function(p){return p.t===it.t;});if(k>=0){arr.splice(k,1);toast('已移出我的诗集');}else{arr.unshift({t:it.t,a:it.a||''});toast('已收藏进「我的诗集」♥');}saveFavPoems(arr);renderAnthology();}
+function anthoBorrow(src,i){var it=_antItem(src,i);if(!it)return;window._pendingYcText=String(it.t||'');go('yuchi');toast('已带上这句，续写你的心事 ✍');}
+function _antCard(p,src,i,top){var fav=isFavPoem(p.t);return '<div class="ant-card'+(top?' top':'')+'">'+(top?'':'<div class="ant-q">“</div>')+'<div class="ant-t serif">'+esc(p.t)+'</div>'+(p.a?'<div class="ant-a">'+esc(p.a)+'</div>':'')+
+  '<div class="ant-acts"><button class="ant-fav'+(fav?' on':'')+'" onclick="anthoFav(\''+src+'\','+i+')">'+(fav?'♥ 已收藏':'♡ 收藏')+'</button><button class="ant-use" onclick="anthoBorrow(\''+src+'\','+i+')">✍ 借这句投池</button></div></div>';}
 async function renderAnthology(){
   var box=$("#anthologyBody");if(!box)return;
+  var favs=favPoems();
   box.innerHTML=
-    pHeroBare('<div class="apr-title serif" style="font-size:23px">精选诗集</div><div class="apr-sub" style="margin-top:8px">把日子过成诗 · 收藏那些照亮过你的句子</div>')+
+    pHeroBare('<div class="apr-title serif" style="font-size:23px">精选诗集</div><div class="apr-sub" style="margin-top:8px">读一句 · 收藏它 · 借它开头，投进愈池</div>')+
+    (favs.length?('<div class="ant-sec">我 · 收 藏（'+favs.length+'）</div>'+
+      '<div class="ant-list">'+favs.map(function(p,i){return _antCard(p,'f',i,false);}).join('')+'</div>'):'')+
     '<div class="ant-sec">诗 · 精 选</div>'+
-    '<div class="ant-list">'+ANTHO.map(function(p){return '<div class="ant-card"><div class="ant-q">“</div><div class="ant-t serif">'+esc(p.t)+'</div>'+(p.a?'<div class="ant-a">'+esc(p.a)+'</div>':'')+'</div>';}).join('')+'</div>'+
+    '<div class="ant-list">'+ANTHO.map(function(p,i){return _antCard(p,'a',i,false);}).join('')+'</div>'+
     '<div class="ant-sec">池 水 · 被 点 亮 最 多 的 心 事</div>'+
     '<div id="antTop"><div class="panel" style="text-align:center"><div class="pv-d">正在从愈池捞起被最多人点亮的诗…</div></div></div>'+
-    '<div class="disclaimer">精选诗句用于自我觉察与陪伴；池水精选来自真实用户的匿名投递。</div>';
+    '<div class="disclaimer">收藏永久保存在本机；「借这句投池」会把开头带到愈池发布器，帮你起笔。池水精选来自真实用户的匿名投递。</div>';
   var r=await apiGet('/api/wall?limit=40');
   var wrap=$("#antTop");if(!wrap)return;
   var posts=((r.j&&r.j.posts)||[]).slice().sort(function(a,b){return (b.lamps||0)-(a.lamps||0);}).slice(0,6).filter(function(p){return (p.lamps||0)>0;});
+  window._antPool=posts;
   if(!posts.length){wrap.innerHTML='<div class="ant-empty">还没有被点亮的心事。去愈池，点亮第一盏灯 🕯</div>';return;}
-  wrap.innerHTML='<div class="ant-list">'+posts.map(function(p){return '<div class="ant-card top"><div class="ant-t serif">'+esc(p.text)+'</div><div class="ant-a">🕯 '+(p.lamps||0)+' 盏灯'+(p.lv?(' · '+esc(p.lv)):'')+'</div></div>';}).join('')+'</div>';
+  wrap.innerHTML='<div class="ant-list">'+posts.map(function(p,i){var fav=isFavPoem(p.text);return '<div class="ant-card top"><div class="ant-t serif">'+esc(p.text)+'</div><div class="ant-a">🕯 '+(p.lamps||0)+' 盏灯'+(p.lv?(' · '+esc(p.lv)):'')+'</div>'+
+    '<div class="ant-acts"><button class="ant-fav'+(fav?' on':'')+'" onclick="anthoFav(\'p\','+i+')">'+(fav?'♥ 已收藏':'♡ 收藏')+'</button><button class="ant-use" onclick="anthoBorrow(\'p\','+i+')">✍ 借这句投池</button></div></div>';}).join('')+'</div>';
 }
 /* 沉浸背景音：无音频文件，用 WebAudio 生成一段柔和环境音垫（用户轻触才启动，符合自动播放限制）*/
 function startYuchiAmbient(){
@@ -7153,6 +7181,7 @@ function studioIntroClose(){var ov=document.getElementById('diyIntro');if(window
 <script>
 (function(){
   try{var raw=localStorage.getItem('ft_archives');if(raw)state.archives=JSON.parse(raw)||[];}catch(e){}
+  try{if(!state.profile){var _pp=localStorage.getItem('ft_profile');if(_pp)state.profile=JSON.parse(_pp);}}catch(e){}   // 恢复本人出生信息：刷新/充值回来不再重填
   if(!state.archives)state.archives=[];
   var host=document.getElementById('home')&&document.getElementById('home').parentNode;
   if(host){
@@ -7250,6 +7279,7 @@ window.archSave=function(){
   var t=state._archEditing;
   if(t==='self'){
     state.profile=Object.assign({},state.profile||{},obj);
+    try{localStorage.setItem('ft_profile',JSON.stringify(state.profile));}catch(e){}   // 永久记住出生信息
     try{todaySign=null;}catch(e){}
     try{if(typeof setHomeZodiac==='function')setHomeZodiac();}catch(e){}
     if(typeof toast==='function')toast('已保存我的档案');
