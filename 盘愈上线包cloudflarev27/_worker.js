@@ -274,22 +274,39 @@ async function handleWxPayNotify(request, env) {
   } catch (e) {}
   return json(200, { code: 'SUCCESS', message: '成功' });
 }
-// 排查用：显示 Worker 到底读到了哪些环境变量（只显示有/无，不显示值）。排查完可删本函数+路由。
-function handleWxPayDiag(request, env) {
+// 排查用：一次性体检所有微信支付变量（存在 + 格式 + 私钥能否解析），不显示值。排查完可删本函数+路由。
+async function handleWxPayDiag(request, env) {
   const has = (k) => !!(env && env[k]);
   const len = (k) => (env && env[k]) ? String(env[k]).length : 0;
+  const appid = String(env.WX_APPID || ''), serial = String(env.WX_PAY_SERIAL || '');
+  // 实际尝试解析私钥（最能暴露"没粘全/格式不对"）
+  let pkeyOk = false, pkeyErr = '';
+  if (env.WX_PAY_PRIVATE_KEY) {
+    try { await crypto.subtle.importKey('pkcs8', pemToDer(env.WX_PAY_PRIVATE_KEY), { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['sign']); pkeyOk = true; }
+    catch (e) { pkeyErr = String((e && e.message) || e); }
+  }
+  const checks = {
+    'WX_APPID 存在': !!appid,
+    'WX_APPID 格式对(wx开头共18位)': /^wx[0-9a-f]{16}$/i.test(appid),
+    'WX_APPSECRET 存在': has('WX_APPSECRET'),
+    'WX_MCHID 存在': has('WX_MCHID'),
+    'WX_PAY_SERIAL 存在': !!serial,
+    'WX_PAY_SERIAL 是40位十六进制': /^[0-9A-Fa-f]{40}$/.test(serial),
+    'WX_PAY_PRIVATE_KEY 存在': has('WX_PAY_PRIVATE_KEY'),
+    'WX_PAY_PRIVATE_KEY 能正确解析(最关键)': pkeyOk,
+    'WX_PAY_APIV3_KEY 存在(32位)': /^.{32}$/.test(String(env.WX_PAY_APIV3_KEY || '')),
+    'CONFIG_KV 已绑定': !!env.CONFIG_KV
+  };
+  const failed = Object.keys(checks).filter((k) => !checks[k]);
   return json(200, {
     ok: true,
-    note: '仅排查用，显示变量是否被读到（不含值），排查完请删除本接口',
-    present: {
-      WX_APPID: has('WX_APPID'), WX_APPSECRET: has('WX_APPSECRET'), WX_MCHID: has('WX_MCHID'),
-      WX_PAY_SERIAL: has('WX_PAY_SERIAL'), WX_PAY_PRIVATE_KEY: has('WX_PAY_PRIVATE_KEY'),
-      WX_PAY_NOTIFY_URL: has('WX_PAY_NOTIFY_URL'), WX_PAY_APIV3_KEY: has('WX_PAY_APIV3_KEY'),
-      AI_KEY: has('AI_KEY'), CONFIG_ADMIN_TOKEN: has('CONFIG_ADMIN_TOKEN')
-    },
-    kv_bound: !!env.CONFIG_KV,
-    lengths: { WX_APPID: len('WX_APPID'), WX_MCHID: len('WX_MCHID'), WX_PAY_SERIAL: len('WX_PAY_SERIAL'), WX_PAY_PRIVATE_KEY: len('WX_PAY_PRIVATE_KEY') },
-    all_env_keys: env ? Object.keys(env).sort() : []
+    全部通过: failed.length === 0,
+    还需修复: failed,
+    checks,
+    lengths: { WX_APPID: len('WX_APPID'), WX_MCHID: len('WX_MCHID'), WX_PAY_SERIAL: serial.length + '（应=40）', WX_PAY_PRIVATE_KEY: len('WX_PAY_PRIVATE_KEY') + '（应≈1700）' },
+    私钥解析错误: pkeyErr || '无',
+    all_env_keys: env ? Object.keys(env).sort() : [],
+    note: '仅排查用，不含任何值；排查完请删除本接口'
   });
 }
 async function handleConfig(request, env) {
