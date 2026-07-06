@@ -3365,6 +3365,8 @@ function renderReportResult(d,card){
 function premiumCardFan(){const idx=[2,10,18],rot=[-14,0,14],dx=[-72,0,72];return idx.map((n,i)=>{const c=DECK[n]||DECK[0];return `<div class="apr-card" style="transform:translateX(-50%) translateX(${dx[i]}px) rotate(${rot[i]}deg);z-index:${i===1?3:2-Math.abs(i-1)}"><img src="${c.img}" alt=""></div>`;}).join('')+'<div class="apr-cap"></div>';}
 // 浅色高级感页面头（拼音+衬线标题+副标）
 function pHero(py,title,sub,extra){return `<div class="ask-premium" style="text-align:center;padding:24px 22px 18px;margin-bottom:14px"><div class="apr-py-top" style="text-align:center">${py}</div><div class="apr-title serif" style="font-size:26px">${title}</div>${sub?`<div class="apr-sub" style="max-width:100%;text-align:center;margin:11px auto 0">${sub}</div>`:''}${extra||''}</div>`;}
+/* 无大标题/拼音的简洁头卡（子页标题已在返回栏，避免重复）*/
+function pHeroBare(inner,extra){return `<div class="ask-premium" style="text-align:center;padding:20px 22px 18px;margin-bottom:14px">${inner||''}${extra||''}</div>`;}
 function spreadIco(n){let s='';for(let i=0;i<n;i++){const rot=n>1?(i-(n-1)/2)*11:0;s+=`<span class="sc-card" style="margin-left:${i?-6:0}px;transform:rotate(${rot.toFixed(1)}deg);transform-origin:50% 92%"></span>`;}return s;}
 function spreadChipHTML(s,sel,fn){return `<div class="spread-chip ${sel?'sel':''}" onclick="${fn}('${s.id}')">${s.adv?'<div class="sc-adv">进阶</div>':''}<div class="sc-ico">${spreadIco(s.positions.length)}</div><div class="sc-n">${s.name}</div><div class="sc-d">${s.positions.length}张 · ${s.price?s.price+'分':'免费'}</div></div>`;}
 function renderAsk(){
@@ -4298,12 +4300,12 @@ function renderNatal(){
   let ch;try{ch=window.Astro.compute(b);}catch(e){body.innerHTML='<div class="panel"><div class="pv-d">排盘失败：'+(e.message||'')+'</div></div>';return;}
   _natalChart=ch;
   const p=state.profile,sun=ch.bodies.sun,moon=ch.bodies.moon;
-  const head=pHero('běn mìng xīng pán','本命星盘',`太阳${sun.sign} · 月亮${moon.sign} · 上升${b.hasTime?ch.asc.sign:'—'}<br>${p.sy}.${p.sm}.${p.sd} · ${p.prov}`,b.hasTime?'':'<div style="font-size:11.5px;color:#c99a3e;margin-top:9px">补出生时辰，解锁上升星座与宫位</div>');
+  const head=pHeroBare(`<div class="apr-sub" style="max-width:100%;text-align:center;margin:0 auto">太阳${sun.sign} · 月亮${moon.sign} · 上升${b.hasTime?ch.asc.sign:'—'}<br>${p.sy}.${p.sm}.${p.sd} · ${p.prov}</div>`,b.hasTime?'':'<div style="font-size:11.5px;color:#c99a3e;margin-top:9px">补出生时辰，解锁上升星座与宫位</div>');
   const ring=`<div class="natal-sky" id="natalSky"><div class="ns-bi">${p.sy}.${p.sm}.${p.sd}${b.hasTime?('  '+(p.prov||'')):(' · 时辰未填 · '+(p.prov||''))}</div><canvas id="natalCv" width="716" height="716"></canvas><div class="ns-hint">拖动旋转星空 · 点亮任意行星</div></div>
   <div class="ns-detail" id="natalDetail"><div class="ns-g" id="nsG">\u2609</div><div class="ns-m"><div class="ns-nm" id="nsNm"></div><div class="ns-d" id="nsD"></div></div></div>
   <div class="ns-three" id="natalThree"></div>`;
   const full=`<div style="text-align:center;margin:2px 0 4px"><button id="natalFullBtn" class="btn ghost" style="font-size:13px;padding:8px 18px;border-color:#6b5a2e;color:#cbb78a" onclick="toggleNatalFull()">查看完整星盘图 ▾</button></div><div id="natalFullWrap" style="display:none"><div style="background:radial-gradient(120% 120% at 50% 40%,#2a2216,#17110a);border-radius:18px;padding:16px 10px;margin:8px 0 4px"><div id="natalWheel" style="width:100%;max-width:360px;margin:0 auto;min-height:200px"></div></div></div>`;
-  body.innerHTML=`<div style="display:flex;gap:8px;margin:2px 0 14px"><div onclick="try{(document.getElementById('natalSky')||document.body).scrollIntoView({behavior:'smooth',block:'start'});}catch(e){}" style="flex:1;min-width:0;cursor:pointer;text-align:center;position:relative;border-radius:15px;padding:13px 5px 11px;border:1.5px solid var(--amber);background:rgba(201,162,78,.12)"><div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-size:9px;color:#fff;background:var(--amber);border-radius:8px;padding:1px 8px;white-space:nowrap">当前</div><div style="font-size:21px;line-height:1">🌌</div><div class="serif" style="font-size:13.5px;font-weight:700;color:var(--gold-deep);margin-top:7px">本命星盘</div><div style="font-size:9.5px;color:var(--ink-faint);margin-top:3px">日月升 · 十星</div></div><div onclick="go('bazichart')" style="flex:1;min-width:0;cursor:pointer;text-align:center;border-radius:15px;padding:13px 5px 11px;border:1px solid var(--line);background:var(--bg-raise)"><div style="font-size:21px;line-height:1">🀄</div><div class="serif" style="font-size:13.5px;font-weight:700;color:var(--ink);margin-top:7px">八字命盘</div><div style="font-size:9.5px;color:var(--ink-faint);margin-top:3px">五行喜忌 · 体质</div></div><div onclick="go('synastry')" style="flex:1;min-width:0;cursor:pointer;text-align:center;border-radius:15px;padding:13px 5px 11px;border:1px solid var(--line);background:var(--bg-raise)"><div style="font-size:21px;line-height:1">💞</div><div class="serif" style="font-size:13.5px;font-weight:700;color:var(--ink);margin-top:7px">关系合盘</div><div style="font-size:9.5px;color:var(--ink-faint);margin-top:3px">和 TA 的契合度</div></div></div>`+fateHookTop('natal')+head+ring+full+`<button class="btn block" style="margin-top:12px" onclick="natalDeepRead()">🔮 深度人格图谱解读</button><div style="text-align:center;margin-top:14px"><span onclick="personaPoster()" style="font-size:12.5px;color:var(--ink-faint);cursor:pointer;border-bottom:1px solid var(--line)">✦ 生成人格标签海报 · 分享</span></div>${readerHookHTML('natalToReader()','想更懂这份人格图谱、聊聊最近的状态？找 {nick} 深聊一次 →')}<div class="disclaimer">星盘基于公历出生时间排算；时辰越精确，上升与宫位越准。</div><div id="natalDeep" style="margin-top:18px"></div>`;
+  body.innerHTML=`<div style="display:flex;gap:8px;margin:24px 0 14px"><div onclick="try{(document.getElementById('natalSky')||document.body).scrollIntoView({behavior:'smooth',block:'start'});}catch(e){}" style="flex:1;min-width:0;cursor:pointer;text-align:center;position:relative;border-radius:15px;padding:13px 5px 11px;border:1.5px solid var(--amber);background:rgba(201,162,78,.12)"><div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-size:9px;color:#fff;background:var(--amber);border-radius:8px;padding:1px 8px;white-space:nowrap">当前</div><div style="font-size:21px;line-height:1">🌌</div><div class="serif" style="font-size:13.5px;font-weight:700;color:var(--gold-deep);margin-top:7px">本命星盘</div><div style="font-size:9.5px;color:var(--ink-faint);margin-top:3px">日月升 · 十星</div></div><div onclick="go('bazichart')" style="flex:1;min-width:0;cursor:pointer;text-align:center;border-radius:15px;padding:13px 5px 11px;border:1px solid var(--line);background:var(--bg-raise)"><div style="font-size:21px;line-height:1">🀄</div><div class="serif" style="font-size:13.5px;font-weight:700;color:var(--ink);margin-top:7px">八字命盘</div><div style="font-size:9.5px;color:var(--ink-faint);margin-top:3px">五行喜忌 · 体质</div></div><div onclick="go('synastry')" style="flex:1;min-width:0;cursor:pointer;text-align:center;border-radius:15px;padding:13px 5px 11px;border:1px solid var(--line);background:var(--bg-raise)"><div style="font-size:21px;line-height:1">💞</div><div class="serif" style="font-size:13.5px;font-weight:700;color:var(--ink);margin-top:7px">关系合盘</div><div style="font-size:9.5px;color:var(--ink-faint);margin-top:3px">和 TA 的契合度</div></div></div>`+fateHookTop('natal')+'<div style="height:12px"></div>'+head+ring+full+`<button class="btn block" style="margin-top:12px" onclick="natalDeepRead()">🔮 深度人格图谱解读</button><div style="text-align:center;margin-top:14px"><span onclick="personaPoster()" style="font-size:12.5px;color:var(--ink-faint);cursor:pointer;border-bottom:1px solid var(--line)">✦ 生成人格标签海报 · 分享</span></div>${readerHookHTML('natalToReader()','想更懂这份人格图谱、聊聊最近的状态？找 {nick} 深聊一次 →')}<div class="disclaimer">星盘基于公历出生时间排算；时辰越精确，上升与宫位越准。</div><div id="natalDeep" style="margin-top:18px"></div>`;
   startNatalCanvas(ch);
   if(state._natalRead)renderNatalDeep(state._natalRead);
 }
@@ -5660,7 +5662,14 @@ window.fpSync=function(el){try{var c=el.children[0];if(!c)return;var step=c.offs
   var persona=(BZ_PERSONA[wx.dayMaster]&&BZ_PERSONA[wx.dayMaster][wx.shen])||'';
   var care=BZ_CARE[tz.key]||'作息规律、饮食清淡即养。';
   var fav=(wx.favorable||[]).map(function(e){return E[e];}).join('')||'—',avo=(wx.avoid||[]).map(function(e){return E[e];}).join('')||'—';
-  var _head=pHero('bā zì mìng pán','八字命盘','四柱五行 · 喜用忌神 · 中医体质')
+  /* 头卡改为「用户出生信息 + 生肖头像」（标题已在返回栏，去掉重复的大标题+拼音）*/
+  var _bp=state.profile||{};
+  var _bzc=(_bp.zodiac||((typeof zodiacOf==='function'&&(_bp.sy||_bp.by))?zodiacOf(_bp.sy||_bp.by):''))||'';
+  var _bav=(_bzc&&typeof zodiacImgSrc==='function')?('<span class="bazi-zod-inline"><img class="zav-img" src="'+zodiacImgSrc(_bzc)+'" alt="属'+_bzc+'"></span>'):'';
+  var _btitle=(_bzc?('属'+_bzc):'')+(_bp.cons?(' · '+_bp.cons+'座'):'');
+  var _bdate=_bp.sy?(_bp.sy+'年'+_bp.sm+'月'+_bp.sd+'日'):'';
+  var _breg=_bp.region||_bp.prov||'';
+  var _head='<div class="ask-premium" style="text-align:center;padding:18px 22px;margin-bottom:14px"><div style="display:inline-flex;align-items:center;gap:14px">'+_bav+'<div style="text-align:left">'+(_btitle?'<div class="serif" style="font-size:19px;color:var(--ink);letter-spacing:.03em">'+_btitle+'</div>':'')+(_bdate?'<div style="font-size:12.5px;color:var(--ink-soft);margin-top:5px">'+_bdate+'</div>':'')+(_breg?'<div style="font-size:12px;color:var(--ink-faint);margin-top:2px">'+_breg+'</div>':'')+'</div></div></div>'
    +((typeof fateHookTop==='function')?fateHookTop('bazi'):'')
    +'<div style="font-size:11px;color:var(--ink-faint);letter-spacing:.1em;margin:14px 2px 8px">四 柱 · 十 神 · 藏 干 · 纳 音 <span style="color:var(--gold-deep)">· 代码排盘</span></div>'
    +'<div class="bz-grid">'+cols+'</div>';
@@ -5873,7 +5882,7 @@ window.fpSync=function(el){try{var c=el.children[0];if(!c)return;var step=c.offs
   var _tProv=(taPre&&taPre.prov)||'上海市';
   var _tUnk=taPre?(taPre.bh>0?'':' checked'):' checked';
   var cityOpts=function(sel){return provs.map(function(pv){return '<option'+(pv===sel?' selected':'')+'>'+pv+'</option>';}).join('');};
-  box.innerHTML=pHero('bā zì hé pán','关系合盘','走心合拍 · 相位实算 · 八字五行喜忌')
+  box.innerHTML=pHeroBare('<div class="apr-sub" style="margin:0 auto">走心合拍 · 相位实算 · 八字五行喜忌</div>')
    +'<div id="synInputs">'
    +'<div class="sy-who"><h4><span class="sy-inm"><span class="sy-dot her"></span>你</span><button type="button" class="sy-arch-btn" onclick="synPickArch(\'h\')">📁 从档案选择</button></h4>'
      +'<div class="sy-lab">出生日期</div><input class="sy-in" type="date" id="h_date" value="'+hd+'">'
@@ -6640,10 +6649,9 @@ window.diyOrderContact=function(code){if(code&&typeof copyText==='function')copy
   -webkit-backdrop-filter:blur(11px) saturate(1.4);backdrop-filter:blur(11px) saturate(1.4);overflow:hidden;
   box-shadow:inset 0 1px 1px rgba(255,255,255,.6),0 3px 10px rgba(80,60,20,.06)!important;}
 .zav-img{width:92%;height:92%;object-fit:contain;display:block;}
-/* 八字命盘：生肖头像悬浮在标题卡右上角 */
-#bazichart .ask-premium{position:relative;}
-.bazi-zod{position:absolute;top:16px;left:18px;width:54px;height:54px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;overflow:hidden;z-index:3;
+/* 八字命盘：生肖头像（内联在出生信息左侧）· 玻璃白毛玻璃 */
+.bazi-zod-inline{flex:none;width:54px;height:54px;border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;overflow:hidden;
   background:rgba(252,248,240,.5);border:1px solid rgba(201,162,80,.3);
   -webkit-backdrop-filter:blur(11px) saturate(1.4);backdrop-filter:blur(11px) saturate(1.4);
   box-shadow:inset 0 1px 1px rgba(255,255,255,.6),0 3px 10px rgba(80,60,20,.07);}
@@ -6662,21 +6670,7 @@ window.diyOrderContact=function(code){if(code&&typeof copyText==='function')copy
     else{av.innerHTML='<span class="brand-mark" data-size="24"></span>';if(typeof paintBrandMarks==='function')paintBrandMarks();}
   };
   window.archZodSvg=function(z){return z?('<span class="arch-zod" title="属'+z+'"><img class="zav-img" src="'+zodiacImgSrc(z)+'" alt="属'+z+'"></span>'):'';};
-  var _rb=window.renderBazichart;
-  if(typeof _rb==='function'){
-    window.renderBazichart=function(){
-      _rb.apply(this,arguments);
-      try{
-        var box=document.getElementById('baziBody');if(!box)return;
-        var hero=box.querySelector('.ask-premium');if(!hero)return;
-        var old=hero.querySelector('.bazi-zod');if(old)old.parentNode.removeChild(old);
-        var zc=zodOf(state.profile);
-        if(zc){var d=document.createElement('div');d.className='bazi-zod';d.title='属'+zc;
-          d.innerHTML='<img class="zav-img" src="'+zodiacImgSrc(zc)+'" alt="属'+zc+'">';hero.appendChild(d);
-          var _t=hero.querySelector('.apr-title');if(_t)d.style.top=Math.max(10,Math.round(_t.offsetTop+_t.offsetHeight/2-d.offsetHeight/2))+'px';}
-      }catch(e){}
-    };
-  }
+  /* 八字命盘头像已内联进头卡（renderBazichart 内），无需再注入 */
   try{if(typeof setHomeZodiac==='function')setHomeZodiac();}catch(e){}
 })();
 </script>
