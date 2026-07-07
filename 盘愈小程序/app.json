@@ -1,0 +1,16 @@
+{
+  "pages": [
+    "pages/webview/webview",
+    "pages/wxlogin/wxlogin",
+    "pages/pay/pay"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#FFFFFF",
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "盘愈 PANYU",
+    "backgroundColor": "#F1EADC",
+    "backgroundTextStyle": "dark"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

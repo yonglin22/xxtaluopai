@@ -1,0 +1,78 @@
+/* ============================================================
+ * 盘愈 PANYU · 全局设计系统（米白玻璃 + 暗金 + 衬线）
+ * 与 H5 盘愈风保持一致
+ * ========================================================= */
+@import "./icons.wxss";
+
+page {
+  /* 与 H5 默认主题（:root）完全一致 */
+  --bg: #F1EADC;
+  --bg-raise: #FAF5EB;
+  --ink: #1C1712;
+  --ink-soft: #5B5347;
+  --ink-faint: #A89C86;
+  --line: #E1D7C3;
+  --line-soft: #ECE4D4;
+  --amber: #B0843A;
+  --gold: #C9A24E;
+  --gold-deep: #8C6B2A;
+  --gold-lite: #F0D79B;
+
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
+  font-size: 28rpx;
+  line-height: 1.7;
+}
+
+.serif {
+  font-family: "Songti SC", "STSongti-SC-Regular", "Noto Serif SC", "PingFang SC", serif;
+}
+
+/* 通用容器 */
+.page { padding: 0 30rpx 60rpx; box-sizing: border-box; }
+.hero-eyebrow { font-size: 22rpx; letter-spacing: .3em; color: var(--ink-faint); text-align: center; }
+.hero-title { font-size: 52rpx; font-weight: 700; letter-spacing: .12em; text-align: center; color: var(--ink); margin-top: 8rpx; }
+
+/* 玻璃卡 */
+.glass {
+  background: linear-gradient(180deg, #fdfaf4, #f4eddf);
+  border: 1rpx solid rgba(180,158,112,.30);
+  box-shadow: 0 20rpx 44rpx rgba(70,58,40,.08), inset 0 1rpx 0 rgba(255,255,255,.6);
+  border-radius: 32rpx;
+}
+.panel { background: var(--bg-raise); border: 1rpx solid var(--line); border-radius: 28rpx; padding: 28rpx; }
+
+/* 暗金海报卡 */
+.poster {
+  position: relative; overflow: hidden; border-radius: 36rpx; padding: 30rpx 34rpx;
+  background: linear-gradient(180deg, #fdfaf4, #f4eddf);
+  border: 1rpx solid rgba(180,158,112,.30);
+  box-shadow: 0 26rpx 56rpx rgba(70,58,40,.10), inset 0 1rpx 0 rgba(255,255,255,.6);
+}
+.poster-en { font-size: 20rpx; letter-spacing: .22em; color: var(--gold-deep); }
+.poster-seal {
+  width: 52rpx; height: 52rpx; border-radius: 14rpx; border: 1rpx solid rgba(201,162,78,.5);
+  display: flex; align-items: center; justify-content: center;
+  font-family: "Songti SC", serif; font-size: 24rpx; color: var(--gold-deep); background: rgba(201,162,78,.1);
+}
+.poster-title { font-size: 40rpx; font-weight: 700; color: var(--ink); letter-spacing: .04em; }
+.poster-sub { font-size: 24rpx; color: var(--ink-soft); line-height: 1.65; margin-top: 10rpx; }
+
+/* 按钮 */
+.btn { display: flex; align-items: center; justify-content: center; height: 92rpx; border-radius: 46rpx; font-size: 30rpx; font-weight: 600; }
+.btn::after { border: none; }
+.btn-gold { background: linear-gradient(135deg, #F0D79B, #D9A84E); color: #2a1f10; box-shadow: 0 20rpx 40rpx rgba(201,162,78,.3); }
+.btn-ghost { background: var(--bg-raise); color: var(--ink); border: 1rpx solid rgba(201,162,78,.5); }
+.btn-dark { background: #211E18; color: #F0E1BE; border: 1rpx solid rgba(201,162,78,.45); }
+
+/* 列表行 */
+.exrow { display: flex; align-items: center; gap: 20rpx; padding: 24rpx 24rpx; background: var(--bg-raise); border: 1rpx solid var(--line); border-radius: 24rpx; margin-top: 16rpx; }
+.exrow .ex-main { flex: 1; min-width: 0; }
+.exrow .ex-t { font-size: 29rpx; color: var(--ink); font-weight: 600; }
+.exrow .ex-d { font-size: 23rpx; color: var(--ink-faint); margin-top: 5rpx; }
+.exrow .ex-chev { flex: none; margin-left: auto; color: var(--ink-faint); font-size: 34rpx; }
+
+.section-h { font-size: 24rpx; color: var(--ink-faint); letter-spacing: .2em; margin: 36rpx 6rpx 16rpx; }
+.disclaimer { font-size: 22rpx; color: var(--ink-faint); line-height: 1.7; text-align: center; margin-top: 30rpx; }
+.hl { color: var(--gold-deep); }

@@ -163,6 +163,8 @@ export default {
     if (url.pathname === '/api/treehole') { if (request.method !== 'POST') return json(405, { error: 'Method Not Allowed' }); return handle(request, env, 'treehole'); }
     if (url.pathname === '/api/config') { return handleConfig(request, env); }
     if (url.pathname === '/api/wall') { return handleWall(request, env, url); }
+    if (url.pathname === '/api/shelf') { return handleShelf(request, env, url); }
+    if (url.pathname === '/api/fate') { return handleFate(request, env, url); }
     if (url.pathname === '/api/capsule') { return handleCapsule(request, env, url); }
     if (url.pathname === '/api/mood') { return handleMood(request, env, url); }
     if (url.pathname === '/api/wallet') { return handleWallet(request, env, url); }
@@ -171,7 +173,12 @@ export default {
     if (url.pathname === '/api/goods') { return handleGoods(request, env, url); }
     if (url.pathname.startsWith('/api/reader/')) { return handleReader(request, env, url.pathname.slice(12), url); }
     if (url.pathname === '/api/bind') { return handleBind(request, env, url); }
-    return env.ASSETS.fetch(request);
+    if (url.pathname === '/api/wxphone') { if (request.method !== 'POST') return json(405, { error: 'Method Not Allowed' }); return handleWxPhone(request, env); }
+    if (url.pathname === '/api/wxpay') { if (request.method !== 'POST') return json(405, { error: 'Method Not Allowed' }); return handleWxPay(request, env); }
+    if (url.pathname === '/api/wxpay/notify') { if (request.method !== 'POST') return json(405, { error: 'Method Not Allowed' }); return handleWxPayNotify(request, env); }
+    if (url.pathname === '/api/wxpay/query') { if (request.method !== 'POST') return json(405, { error: 'Method Not Allowed' }); return handleWxPayQuery(request, env); }
+    if (url.pathname === '/api/wxpay/diag') { return handleWxPayDiag(request, env); }
+    { const _r = await env.ASSETS.fetch(request); const _ct = _r.headers.get('content-type') || ''; if (_ct.includes('text/html')) { const _h = new Headers(_r.headers); _h.set('cache-control', 'no-cache, must-revalidate'); return new Response(_r.body, { status: _r.status, statusText: _r.statusText, headers: _h }); } return _r; }
   }
 };
 function json(code, obj) { return new Response(JSON.stringify(obj), { status: code, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } }); }
@@ -186,6 +193,149 @@ async function callAI(env, KEY, sys, userMsg, maxTokens) {
   let s = String(raw).replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
   const a = s.indexOf('{'), b = s.lastIndexOf('}'); if (a >= 0 && b > a) s = s.slice(a, b + 1);
   return JSON.parse(s);
+}
+// ===== 微信一键登录：用 getPhoneNumber 的 code 换手机号 =====
+// 需配置 env.WX_APPID + env.WX_APPSECRET（小程序后台）。
+async function handleWxPhone(request, env) {
+  let body = {}; try { body = await request.json(); } catch (e) {}
+  const code = body.code;
+  if (!code) return json(400, { error: 'missing code' });
+  const APPID = env.WX_APPID, SECRET = env.WX_APPSECRET;
+  if (!APPID || !SECRET) return json(200, { ok: false, error: 'not_configured', hint: '后端未配置 WX_APPID / WX_APPSECRET' });
+  try {
+    const t = await (await fetch('https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=' + APPID + '&secret=' + SECRET)).json();
+    if (!t.access_token) return json(200, { ok: false, error: 'token_failed', detail: t });
+    const r = await (await fetch('https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token=' + t.access_token, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code }) })).json();
+    const phone = r && r.phone_info && r.phone_info.purePhoneNumber;
+    if (phone) return json(200, { ok: true, phone });
+    return json(200, { ok: false, error: 'phone_failed', detail: r });
+  } catch (e) { return json(200, { ok: false, error: String(e) }); }
+}
+// ===== 微信支付 V3 · JSAPI 统一下单 =====
+// 需配置环境变量：
+//   WX_APPID           小程序 AppID（与一键登录同一个）
+//   WX_APPSECRET       小程序密钥（用 wx.login 的 code 换 openid）
+//   WX_MCHID           微信支付商户号
+//   WX_PAY_SERIAL      商户 API 证书「序列号」
+//   WX_PAY_PRIVATE_KEY 商户 API 私钥 apiclient_key.pem 全文（含 BEGIN/END）
+//   WX_PAY_NOTIFY_URL  支付结果回调地址（如 https://你的备案域名/api/wxpay/notify）
+//   WX_PAY_APIV3_KEY   APIv3 密钥（32 位，回调解密用；不配则回调只应答不解密）
+function pemToDer(pem) {
+  // 兼容粘贴事故：先去掉字面量转义 \n \r \t（Cloudflare 里换行常被转义），再去头尾，最后只保留 base64 字符
+  const b64 = String(pem).replace(/\\[nrtf]/g, '').replace(/-----BEGIN [^-]+-----/g, '').replace(/-----END [^-]+-----/g, '').replace(/[^A-Za-z0-9+/=]/g, '');
+  const bin = atob(b64); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u.buffer;
+}
+async function rsaSign(privatePem, message) {
+  const key = await crypto.subtle.importKey('pkcs8', pemToDer(privatePem), { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, new TextEncoder().encode(message));
+  let s = ''; const b = new Uint8Array(sig); for (let i = 0; i < b.length; i++) s += String.fromCharCode(b[i]); return btoa(s);
+}
+async function aesGcmDecrypt(apiv3key, nonce, aad, ciphertextB64) {
+  const ck = await crypto.subtle.importKey('raw', new TextEncoder().encode(apiv3key), { name: 'AES-GCM' }, false, ['decrypt']);
+  const bin = atob(ciphertextB64); const data = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) data[i] = bin.charCodeAt(i);
+  const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: new TextEncoder().encode(nonce), additionalData: new TextEncoder().encode(aad || '') }, ck, data);
+  return new TextDecoder().decode(plain);
+}
+async function handleWxPay(request, env) {
+  let body = {}; try { body = await request.json(); } catch (e) {}
+  const APPID = env.WX_APPID, SECRET = env.WX_APPSECRET, MCHID = env.WX_MCHID, SERIAL = env.WX_PAY_SERIAL, PKEY = env.WX_PAY_PRIVATE_KEY;
+  if (!APPID || !MCHID || !SERIAL || !PKEY) return json(200, { ok: false, error: 'not_configured', present: { WX_APPID: !!APPID, WX_MCHID: !!MCHID, WX_PAY_SERIAL: !!SERIAL, WX_PAY_PRIVATE_KEY: !!PKEY }, hint: '需配置 WX_APPID / WX_MCHID / WX_PAY_SERIAL / WX_PAY_PRIVATE_KEY（+ WX_APPSECRET 换 openid）' });
+  // JSAPI 支付必须要付款人 openid：优先用前端传的 openid，否则用 wx.login 的 code 换
+  let openid = String(body.openid || ''), _sess = null;
+  if (!openid && !SECRET) return json(200, { ok: false, error: 'no_openid', hint: '未配置 WX_APPSECRET，无法用 code 换 openid' });
+  if (!openid && body.code) {
+    try { const s = await (await fetch('https://api.weixin.qq.com/sns/jscode2session?appid=' + APPID + '&secret=' + SECRET + '&js_code=' + encodeURIComponent(body.code) + '&grant_type=authorization_code')).json(); openid = s.openid || ''; if (!openid) _sess = s; } catch (e) { _sess = String(e); }
+  }
+  if (!openid) return json(200, { ok: false, error: 'no_openid', hint: '换 openid 失败：多为 WX_APPSECRET 错、或 AppID 与商户未关联', detail: _sess });
+  const total = Math.round(Number(body.amountFen || 0)) || Math.round(Number(body.amountYuan || body.amount || 0) * 100);
+  if (!(total > 0)) return json(200, { ok: false, error: 'bad_amount' });
+  const outTradeNo = String(body.orderNo || ('py' + Date.now() + Math.random().toString(36).slice(2, 6)));
+  const notify = env.WX_PAY_NOTIFY_URL || (new URL(request.url).origin + '/api/wxpay/notify');
+  const reqBody = JSON.stringify({ appid: APPID, mchid: MCHID, description: String(body.desc || '盘愈 · 心元充值').slice(0, 120), out_trade_no: outTradeNo, notify_url: notify, amount: { total, currency: 'CNY' }, payer: { openid } });
+  const path = '/v3/pay/transactions/jsapi';
+  const nonce = rkey().toUpperCase(), ts = Math.floor(Date.now() / 1000).toString();
+  let signature; try { signature = await rsaSign(PKEY, 'POST\n' + path + '\n' + ts + '\n' + nonce + '\n' + reqBody + '\n'); } catch (e) { return json(200, { ok: false, error: 'sign_failed', detail: String(e) }); }
+  const auth = 'WECHATPAY2-SHA256-RSA2048 mchid="' + MCHID + '",nonce_str="' + nonce + '",signature="' + signature + '",timestamp="' + ts + '",serial_no="' + SERIAL + '"';
+  let up, txt; try { up = await fetch('https://api.mch.weixin.qq.com' + path, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': auth, 'User-Agent': 'panyu-cf-worker' }, body: reqBody }); txt = await up.text(); } catch (e) { return json(200, { ok: false, error: 'network', detail: String(e) }); }
+  let pj = {}; try { pj = JSON.parse(txt); } catch (e) {}
+  if (!up.ok || !pj.prepay_id) return json(200, { ok: false, error: 'unifiedorder_failed', status: up.status, detail: pj });
+  const pkg = 'prepay_id=' + pj.prepay_id, pts = Math.floor(Date.now() / 1000).toString(), pnonce = rkey().toUpperCase();
+  let paySign; try { paySign = await rsaSign(PKEY, APPID + '\n' + pts + '\n' + pnonce + '\n' + pkg + '\n'); } catch (e) { return json(200, { ok: false, error: 'paysign_failed' }); }
+  // 记录下单意图 + 服务端权威到账额度，供回调/查单按订单幂等发放心元（前端无法自定金额）
+  try { if (env.CONFIG_KV) { const credits = PAY_PACKS_W[total] || total; await env.CONFIG_KV.put('order:' + outTradeNo, JSON.stringify({ status: 'created', total, credits, phone: String(body.phone || ''), openid, when: Date.now() }), { expirationTtl: 2592000 }); } } catch (e) {}
+  return json(200, { ok: true, timeStamp: pts, nonceStr: pnonce, package: pkg, signType: 'RSA', paySign, orderNo: outTradeNo });
+}
+// 支付结果回调：解密后把订单标记为已支付（返回 SUCCESS 才停止重推）
+async function handleWxPayNotify(request, env) {
+  let body = {}; try { body = await request.json(); } catch (e) {}
+  try {
+    const res = body.resource, KV = env.CONFIG_KV, KEY = env.WX_PAY_APIV3_KEY;
+    if (KEY && res && res.ciphertext) {
+      const data = JSON.parse(await aesGcmDecrypt(KEY, res.nonce, res.associated_data, res.ciphertext));
+      if (data.trade_state === 'SUCCESS' && KV && data.out_trade_no) {
+        await creditOrder(KV, data.out_trade_no, data); // 幂等发放：验签解密后按订单意图给用户加心元
+      }
+    }
+  } catch (e) {}
+  return json(200, { code: 'SUCCESS', message: '成功' });
+}
+// 前端支付成功后调用：服务端向微信「查单」核实 trade_state=SUCCESS 后按订单意图幂等发放心元。
+// 不信任前端金额；即使回调 notify 未到达也能安全到账。
+async function handleWxPayQuery(request, env) {
+  const KV = env.CONFIG_KV; if (!KV) return json(200, { ok: false, error: '未绑定KV' });
+  let body = {}; try { body = await request.json(); } catch (e) {}
+  const phone = String(body.phone || ''), orderNo = String(body.orderNo || '');
+  if (!/^1[3-9]\d{9}$/.test(phone)) return json(400, { error: '需要登录' });
+  if (!orderNo) return json(400, { error: '缺少订单号' });
+  let o = null; try { const raw = await KV.get('order:' + orderNo); if (raw) o = JSON.parse(raw); } catch (e) {}
+  if (!o) return json(200, { ok: false, error: 'order_not_found' });
+  if (o.phone && o.phone !== phone) return json(403, { error: '订单不属于该用户' });
+  if (o.credited) return json(200, { ok: true, credited: true, already: true, balance: (await walletGet(KV, phone)).balance });
+  const MCHID = env.WX_MCHID, SERIAL = env.WX_PAY_SERIAL, PKEY = env.WX_PAY_PRIVATE_KEY;
+  if (!MCHID || !SERIAL || !PKEY) return json(200, { ok: false, error: 'not_configured', pending: true });
+  const path = '/v3/pay/transactions/out-trade-no/' + encodeURIComponent(orderNo) + '?mchid=' + MCHID;
+  const ts = Math.floor(Date.now() / 1000).toString(), nonce = rkey().toUpperCase();
+  let sig; try { sig = await rsaSign(PKEY, 'GET\n' + path + '\n' + ts + '\n' + nonce + '\n\n'); } catch (e) { return json(200, { ok: false, error: 'sign_failed', detail: String(e) }); }
+  const auth = 'WECHATPAY2-SHA256-RSA2048 mchid="' + MCHID + '",nonce_str="' + nonce + '",signature="' + sig + '",timestamp="' + ts + '",serial_no="' + SERIAL + '"';
+  let up, txt; try { up = await fetch('https://api.mch.weixin.qq.com' + path, { headers: { 'Accept': 'application/json', 'Authorization': auth, 'User-Agent': 'panyu-cf-worker' } }); txt = await up.text(); } catch (e) { return json(200, { ok: false, error: 'network', pending: true }); }
+  let qj = {}; try { qj = JSON.parse(txt); } catch (e) {}
+  if (qj.trade_state === 'SUCCESS') { const cr = await creditOrder(KV, orderNo, qj); return json(200, { ok: true, credited: true, awarded: cr.credits || (o.credits | 0), balance: (await walletGet(KV, phone)).balance }); }
+  return json(200, { ok: false, pending: true, trade_state: qj.trade_state || 'UNKNOWN' });
+}
+// 排查用：一次性体检所有微信支付变量（存在 + 格式 + 私钥能否解析），不显示值。排查完可删本函数+路由。
+async function handleWxPayDiag(request, env) {
+  const has = (k) => !!(env && env[k]);
+  const len = (k) => (env && env[k]) ? String(env[k]).length : 0;
+  const appid = String(env.WX_APPID || ''), serial = String(env.WX_PAY_SERIAL || '');
+  // 实际尝试解析私钥（最能暴露"没粘全/格式不对"）
+  let pkeyOk = false, pkeyErr = '';
+  if (env.WX_PAY_PRIVATE_KEY) {
+    try { await crypto.subtle.importKey('pkcs8', pemToDer(env.WX_PAY_PRIVATE_KEY), { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['sign']); pkeyOk = true; }
+    catch (e) { pkeyErr = String((e && e.message) || e); }
+  }
+  const checks = {
+    'WX_APPID 存在': !!appid,
+    'WX_APPID 格式对(wx开头共18位)': /^wx[0-9a-f]{16}$/i.test(appid),
+    'WX_APPSECRET 存在': has('WX_APPSECRET'),
+    'WX_MCHID 存在': has('WX_MCHID'),
+    'WX_PAY_SERIAL 存在': !!serial,
+    'WX_PAY_SERIAL 是40位十六进制': /^[0-9A-Fa-f]{40}$/.test(serial),
+    'WX_PAY_PRIVATE_KEY 存在': has('WX_PAY_PRIVATE_KEY'),
+    'WX_PAY_PRIVATE_KEY 能正确解析(最关键)': pkeyOk,
+    'WX_PAY_APIV3_KEY 存在(32位)': /^.{32}$/.test(String(env.WX_PAY_APIV3_KEY || '')),
+    'CONFIG_KV 已绑定': !!env.CONFIG_KV
+  };
+  const failed = Object.keys(checks).filter((k) => !checks[k]);
+  return json(200, {
+    ok: true,
+    全部通过: failed.length === 0,
+    还需修复: failed,
+    checks,
+    lengths: { WX_APPID: len('WX_APPID'), WX_MCHID: len('WX_MCHID'), WX_PAY_SERIAL: serial.length + '（应=40）', WX_PAY_PRIVATE_KEY: len('WX_PAY_PRIVATE_KEY') + '（应≈1700）' },
+    私钥解析错误: pkeyErr || '无',
+    all_env_keys: env ? Object.keys(env).sort() : [],
+    note: '仅排查用，不含任何值；排查完请删除本接口'
+  });
 }
 async function handleConfig(request, env) {
   const KV = env.CONFIG_KV || null;
@@ -206,54 +356,318 @@ async function handleConfig(request, env) {
   try { await KV.put('appcfg', JSON.stringify(cfg)); } catch (e) { return json(502, { error: '写入失败：' + ((e && e.message) || '') }); }
   return json(200, { ok: true });
 }
-// ---- 匿名情绪墙（KV：键 wall = 帖子数组）----
+// ---- 愈池 · 公域情绪治愈池（KV：wall=帖子数组；balls:<手机号>=情绪球储蓄罐）----
 function wallBad(s){ return /(微信|加我|vx|VX|qq|QQ|http|www\.|代购|出售|加群|联系方式|\d{6,})/.test(s); }
+// 会员等级：按累计互动（投递/点灯/留言）成长
+function yuchiLevel(n){ n=n|0; if(n>=80)return '守灯人'; if(n>=30)return '深夜活跃'; if(n>=10)return '暖心常客'; if(n>=3)return '夜行者'; return '初来乍到'; }
+const POS_MOODS = { '期待':1,'开心':1,'想努力':1,'平静':1,'还好':1,'感恩':1,'释然':1,'温暖':1 };
+function moodPolarity(mood, pol){ if(pol==='pos'||pol==='neg')return pol; return POS_MOODS[mood] ? 'pos' : 'neg'; }
+// 霸榜/沉底：综合分＝点亮×3＋评论×2＋观看×0.15；新贴有递减冒泡加成（约 3h 内衰减），
+// 让刚投的心事能先被看见，随后靠真实互动霸榜或自然沉底
+function postScore(p, now){
+  const lamps=p.lamps||0, comm=(p.replies||[]).length, views=p.views||0;
+  const ageH=(now-(p.when||now))/3600000;
+  return lamps*3 + comm*2 + views*0.15 + Math.max(0, 18 - ageH*5);
+}
+// ===== 虚拟用户铺量 · 每日轮流霸榜（冷启动/低峰期让公共池始终有人、榜单每天在动）=====
+// ~20 个带雅号+头像的虚拟账号；每天按日期确定性地轮换一批顶到榜前（"团队号带节奏"），
+// 跨天变化、同一天对所有人一致。真实用户对虚拟帖的点灯/留言累加进 vmeta 持久化，体感真实。
+const VUSERS = [
+  {nick:'临川听雨', av:'🌧️', lv:'守灯人'},
+  {nick:'南山旧友', av:'🌿', lv:'深夜活跃'},
+  {nick:'半夏微凉', av:'🍃', lv:'暖心常客'},
+  {nick:'江南烟客', av:'🌊', lv:'守灯人'},
+  {nick:'眠云', av:'☁️', lv:'深夜活跃'},
+  {nick:'拾光者', av:'🕯', lv:'守灯人'},
+  {nick:'北岛未眠', av:'🌙', lv:'深夜活跃'},
+  {nick:'温酒', av:'☕', lv:'暖心常客'},
+  {nick:'白露成霜', av:'🍂', lv:'夜行者'},
+  {nick:'星子入海', av:'⭐', lv:'守灯人'},
+  {nick:'竹外一枝', av:'🎋', lv:'深夜活跃'},
+  {nick:'晚风信', av:'🕊️', lv:'暖心常客'},
+  {nick:'青灯客', av:'🪔', lv:'守灯人'},
+  {nick:'折纸鸢', av:'🪁', lv:'夜行者'},
+  {nick:'荼蘼记', av:'🌸', lv:'深夜活跃'},
+  {nick:'潮汐旧梦', av:'🐚', lv:'暖心常客'},
+  {nick:'云中君', av:'🌛', lv:'守灯人'},
+  {nick:'一苇渡', av:'🪷', lv:'深夜活跃'},
+  {nick:'拂晓前', av:'🌅', lv:'夜行者'},
+  {nick:'松间照', av:'🌾', lv:'暖心常客'}
+];
+// 每条虚拟诗句：ui=作者索引，mood/pol=情绪，text=内容，rep=可选一条暖回
+const VSEED = [
+  {ui:0, mood:'孤独', pol:'neg', text:'深夜的城市像一片海，我在这头，你在那头，可我们都还醒着。'},
+  {ui:1, mood:'释然', pol:'pos', text:'把心事写下来的那一刻，它就轻了一半。晚安，明天见。'},
+  {ui:2, mood:'焦虑', pol:'neg', text:'明天还没来，我却已经担心了一整夜。谁来替我，把灯关上。', rep:'你已经很勇敢了，先睡吧。'},
+  {ui:3, mood:'期待', pol:'pos', text:'我把愿望折成一只纸船，放进这片池水，愿它替我漂到有光的地方。'},
+  {ui:4, mood:'委屈', pol:'neg', text:'今天又忍住没哭。其实我只是想，被人轻轻抱一下。'},
+  {ui:5, mood:'平静', pol:'pos', text:'月亮不争，也不辩，只是安静地亮着。今晚，我也想这样。'},
+  {ui:6, mood:'想努力', pol:'pos', text:'再撑一下下。天亮以后，我请自己喝一杯热的。'},
+  {ui:7, mood:'失落', pol:'neg', text:'有些人只是路过，却教会我怎么好好告别。谢谢你来过。', rep:'会遇到更好的。'},
+  {ui:8, mood:'还好', pol:'pos', text:'今天没什么特别的，平平安安地过完了。这样也很好。'},
+  {ui:9, mood:'emo', pol:'neg', text:'不知道为什么，就是有点想哭。也许只是累了，允许自己脆弱一下。'},
+  {ui:10, mood:'期待', pol:'pos', text:'把日子过成诗，把心事熬成茶。慢慢来，都会好的。'},
+  {ui:11, mood:'孤独', pol:'neg', text:'一个人住久了，连影子都成了室友。但我把它照顾得很好。'},
+  {ui:12, mood:'平静', pol:'pos', text:'加班到很晚，楼下便利店的灯还亮着，那一刻觉得城市也在陪我。'},
+  {ui:13, mood:'失落', pol:'neg', text:'又梦见了从前的家，醒来枕头是凉的。想念不打招呼就来。'},
+  {ui:14, mood:'平静', pol:'pos', text:'把手机调成勿扰，世界一下子安静了。原来清净是可以自己给的。'},
+  {ui:15, mood:'焦虑', pol:'neg', text:'明明很累却睡不着，脑子里在开一场没人报名的会。'},
+  {ui:16, mood:'还好', pol:'pos', text:'有人今天对我很好，我把这份好，悄悄记在了心里。'},
+  {ui:17, mood:'委屈', pol:'neg', text:'电话那头妈妈问我吃饭没，我说吃了，其实还没。报喜不报忧的人啊。', rep:'记得也对自己好一点。'},
+  {ui:18, mood:'孤独', pol:'neg', text:'走了很远的路，才发现最想回的是小时候那盏灯。'},
+  {ui:19, mood:'期待', pol:'pos', text:'给未来的自己写了封信，落款写：别怕，你会到的。'},
+  {ui:0, mood:'释然', pol:'pos', text:'今晚的风很温柔，像谁在说，辛苦了，可以歇一歇。'},
+  {ui:5, mood:'失落', pol:'neg', text:'删掉了那段聊天记录，也删掉了一部分自己。原来告别要分很多次。'},
+  {ui:9, mood:'想努力', pol:'pos', text:'只要还愿意早起看一次日出，就说明我还没放弃自己。'},
+  {ui:13, mood:'emo', pol:'neg', text:'深夜 emo 是真的，第二天照常上班也是真的。我们都很勇敢。'}
+];
+// 稳定的按天伪随机（同一天对所有人一致、跨天变化）——用于轮转与点灯数微扰
+const VLAMP_CAP = 30;    // 真实用户对单条虚拟帖的点灯累加上限（防刷灯霸榜 + 防 KV 写放大）
+const VFEAT_BOOST = 60;  // 当日"轮到霸榜"的隐藏排序加成（只影响排序、不改显示的灯数/时间，故不会数字倒退）
+// 稳定的 per-post 伪随机（只与帖子序号 i 有关，跨天不变）——保证灯数/时间/浏览数恒定、只增不减
+function vsz(i){ let s=((i*2654435761)>>>0)%233280; s=(s*9301+49297)%233280; return s/233280; }
+function cnDayIndex(now){ return Math.floor((now + 8*3600*1000)/86400000); }
+// 生成虚拟帖：灯数/时间恒定（真实用户点灯只会让灯数单调增长，不倒退）；
+// 每天用 (i-day) 轮换选出 W 个"团队号"给隐藏排序加成 _feat，使榜单每天在动、但显示数字稳定。
+function virtualPosts(now){
+  const day = cnDayIndex(now), N = VSEED.length, W = 6;
+  return VSEED.map((s, i) => {
+    const u = VUSERS[s.ui % VUSERS.length];
+    const baseLamps = 5 + Math.floor(vsz(i)*12);           // 5~16，恒定
+    const ageMin = 8 + Math.floor(vsz(i+50)*470);          // 8min~8h，恒定（不随天变化，绝不倒流；轮到榜首也显示得像刚发不久）
+    const views = baseLamps*4 + 8 + Math.floor(vsz(i+90)*40);
+    const featured = ((((i - day) % N) + N) % N) < W;
+    const reps = s.rep ? [{ text:s.rep, when: now - ageMin*60000 + 120000, role:'user', nick:'', code:'' }] : [];
+    return { id:'v'+i, mood:s.mood, pol:s.pol, text:s.text, card:'',
+      when: now - ageMin*60000, lamps: baseLamps, views,
+      lv: u.lv, nick: u.nick, av: u.av, vu:true, _feat: featured ? VFEAT_BOOST : 0,
+      replies: reps, lampers:[] };
+  });
+}
+async function vmetaGet(KV){ let m={}; try{ const raw=await KV.get('vmeta'); if(raw)m=JSON.parse(raw)||{}; }catch(e){} return m; }
+async function ballsGet(KV, phone){
+  let d=null; try{ const raw=await KV.get('balls:'+phone); if(raw)d=JSON.parse(raw); }catch(e){}
+  if(!d)d={ balls:[], total:0, jars:0, acts:0 };
+  if(!d.shelf)d.shelf=[];   // 已封存的瓶子（情绪架陈列）
+  if(!d.year)d.year=[];     // 全年情绪日志（{pol,when}），供年度色彩可视化
+  if(d.posT==null)d.posT=0; if(d.negT==null)d.negT=0;  // 累计正/负计数
+  return d;
+}
+// 长期养成里程碑（累计投递数触发）
+const YUCHI_MILES=[{n:1,t:'第一颗情绪'},{n:7,t:'一周之约'},{n:30,t:'满月心事'},{n:100,t:'百颗星光'},{n:365,t:'一年同行'}];
+function milestoneFor(total){ let hit=null; for(const m of YUCHI_MILES){ if(total===m.n)hit=m; } return hit; }
+// drop=投一颗情绪球入罐（满30颗自动封存成一瓶上情绪架）；act=累计互动数（涨等级）
+async function ballsBump(KV, phone, opt){
+  const d=await ballsGet(KV, phone); opt=opt||{};
+  if(!d.streak)d.streak=0; if(!d.maxStreak)d.maxStreak=0; if(!d.lastDay)d.lastDay='';
+  if(opt.drop){
+    const pol=opt.pol==='pos'?'pos':'neg';
+    d.balls.push({ pol, mood:String(opt.mood||'').slice(0,6), when:Date.now() });
+    d.year.push({ pol, when:Date.now() }); if(d.year.length>500)d.year=d.year.slice(-500);
+    if(pol==='pos')d.posT++; else d.negT++;
+    // 连续投递养成：跨天则按是否昨天连续来累计/重置
+    const today=cnDayKey(Date.now());
+    if(d.lastDay!==today){ const yest=cnDayKey(Date.now()-86400000); d.streak=(d.lastDay===yest)?(d.streak+1):1; d.lastDay=today; if(d.streak>d.maxStreak)d.maxStreak=d.streak; }
+    if(d.balls.length>=30){
+      const pos=d.balls.filter(x=>x.pol==='pos').length;
+      d.jars=(d.jars||0)+1;
+      d.shelf.push({ n:d.jars, pos, neg:d.balls.length-pos, sealedAt:Date.now() }); if(d.shelf.length>80)d.shelf=d.shelf.slice(-80);
+      d.balls=[]; d._filled=true;
+    } else d._filled=false;
+    d.total=(d.total||0)+1;
+    d._mile=milestoneFor(d.total);   // 命中里程碑（供前端弹祝贺）
+  }
+  d.acts=(d.acts||0)+(opt.act||0);
+  try{ await KV.put('balls:'+phone, JSON.stringify(d)); }catch(e){}
+  return d;
+}
+// ---- 情绪架 + 永久情绪胶囊（KV：balls:<手机号> 存架/年；ecap:<手机号> 存永久胶囊）----
+async function handleShelf(request, env, url){
+  const KV = env.CONFIG_KV || null;
+  if(!KV) return json(200, { ok:true, kv:false, shelf:[], year:[], capsules:[] });
+  if(request.method==='GET'){
+    const phone=String(url.searchParams.get('phone')||'');
+    if(!/^1[3-9]\d{9}$/.test(phone)) return json(400, { error:'需要登录' });
+    const d=await ballsGet(KV, phone);
+    let caps=[]; try{ const raw=await KV.get('ecap:'+phone); if(raw)caps=JSON.parse(raw); }catch(e){}
+    // 作品集：我投进池子的诗（用于年度合集）
+    let myPoems=[]; try{ const raw=await KV.get('wall'); if(raw){ const posts=JSON.parse(raw); myPoems=posts.filter(p=>p.ap===phone).slice(0,60).map(p=>({ mood:p.mood, pol:p.pol||moodPolarity(p.mood), text:p.text, lamps:p.lamps||0, when:p.when })); } }catch(e){}
+    return json(200, { ok:true, kv:true, level:yuchiLevel(d.acts), myPoems,
+      jars:d.jars||0, fill:(d.balls||[]).length, curBalls:d.balls||[], shelf:d.shelf||[], year:d.year||[],
+      total:d.total||0, pos:d.posT||0, neg:d.negT||0, streak:d.streak||0, maxStreak:d.maxStreak||0, capsules:caps });
+  }
+  if(request.method!=='POST') return json(405, { error:'Method Not Allowed' });
+  let body; try{ body=await request.json(); }catch(e){ body={}; }
+  const phone=String(body.phone||'');
+  if(!/^1[3-9]\d{9}$/.test(phone)) return json(400, { error:'需要登录' });
+  const action=String(body.action||'').trim();
+  if(action==='seal'){
+    let text=String(body.text||'').trim();
+    if(text.length<2||text.length>300) return json(400, { error:'内容太短或太长' });
+    if(wallBad(text)) return json(400, { error:'请不要留联系方式或广告～' });
+    let caps=[]; try{ const raw=await KV.get('ecap:'+phone); if(raw)caps=JSON.parse(raw); }catch(e){}
+    const pol=moodPolarity(String(body.mood||''), body.pol);
+    const cap={ id:'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,5), mood:String(body.mood||'').slice(0,6), pol, text, card:String(body.card||'').slice(0,20), when:Date.now() };
+    caps.unshift(cap); if(caps.length>200)caps=caps.slice(0,200);
+    try{ await KV.put('ecap:'+phone, JSON.stringify(caps)); }catch(e){ return json(502,{ error:'封存失败，再试一次' }); }
+    await ballsBump(KV, phone, { act:1 });   // 封存也算一次互动
+    return json(200, { ok:true, capsule:cap, count:caps.length });
+  }
+  return json(400, { error:'未知操作' });
+}
+// ---- 今日缘分 · 站内匿名加好友 + 24h 阅后即焚（KV：fate:<手机号>=好友；fmsg:<配对>=消息；fidmap:<fid>=手机号）----
+function fidOf(p){ let h=0; for(let i=0;i<p.length;i++){ h=(h*31+p.charCodeAt(i))>>>0; } return 'f'+h.toString(36); }
+function fateHandle(phone){ let s=0; const f=fidOf(phone); for(let i=0;i<f.length;i++)s+=f.charCodeAt(i); const nm=['临风','踏雪','听雨','望舒','拾光','煮酒','观星','守夜','采薇','南栀','清欢','怀瑾']; return nm[s%nm.length]+'·'+f.slice(-3); }
+async function handleFate(request, env, url){
+  const KV=env.CONFIG_KV||null;
+  if(!KV) return json(200,{ ok:true, kv:false, friends:[], candidates:[] });
+  if(request.method==='GET'){
+    const phone=String(url.searchParams.get('phone')||'');
+    if(!/^1[3-9]\d{9}$/.test(phone)) return json(400,{ error:'需要登录' });
+    const withFid=String(url.searchParams.get('with')||'');
+    let me=null; try{ const raw=await KV.get('fate:'+phone); if(raw)me=JSON.parse(raw); }catch(e){}
+    if(!me)me={ friends:[] };
+    const now=Date.now();
+    if(withFid){
+      let tp=''; try{ tp=(await KV.get('fidmap:'+withFid))||''; }catch(e){}
+      if(!tp) return json(404,{ error:'这段缘分已经散了' });
+      const pk=[phone,tp].sort().join('|'); let msgs=[]; try{ const raw=await KV.get('fmsg:'+pk); if(raw)msgs=JSON.parse(raw); }catch(e){}
+      msgs=msgs.filter(m=>now-m.when<24*3600000);
+      return json(200,{ ok:true, with:withFid, handle:fateHandle(tp), messages:msgs.map(m=>({ mine:m.from===phone, text:m.text, when:m.when })) });
+    }
+    const friends=[]; for(const fp of (me.friends||[])){ const fid=fidOf(fp); try{ await KV.put('fidmap:'+fid,fp); }catch(e){} const b=await ballsGet(KV,fp); friends.push({ fid, handle:fateHandle(fp), lv:yuchiLevel(b.acts) }); }
+    let posts=[]; try{ const raw=await KV.get('wall'); if(raw)posts=JSON.parse(raw); }catch(e){}
+    const seen={}, cands=[];
+    for(const p of posts){ const ap=p.ap; if(!ap||ap===phone||seen[ap]||(me.friends||[]).indexOf(ap)>=0)continue; seen[ap]=1; const fid=fidOf(ap); try{ await KV.put('fidmap:'+fid,ap); }catch(e){} cands.push({ fid, handle:fateHandle(ap), mood:p.mood, lv:p.lv||'', text:p.text }); if(cands.length>=6)break; }
+    return json(200,{ ok:true, friends, candidates:cands });
+  }
+  if(request.method!=='POST') return json(405,{ error:'Method Not Allowed' });
+  let body; try{ body=await request.json(); }catch(e){ body={}; }
+  const phone=String(body.phone||''); if(!/^1[3-9]\d{9}$/.test(phone)) return json(400,{ error:'需要登录' });
+  const action=String(body.action||''), fid=String(body.fid||'');
+  let tp=''; try{ tp=(await KV.get('fidmap:'+fid))||''; }catch(e){}
+  if(!tp||tp===phone) return json(400,{ error:'缘分不存在' });
+  if(action==='add'){
+    for(const pair of [[phone,tp],[tp,phone]]){ let d=null; try{ const raw=await KV.get('fate:'+pair[0]); if(raw)d=JSON.parse(raw); }catch(e){} if(!d)d={ friends:[] }; if((d.friends||[]).indexOf(pair[1])<0)d.friends.push(pair[1]); try{ await KV.put('fate:'+pair[0],JSON.stringify(d)); }catch(e){} }
+    return json(200,{ ok:true, fid, handle:fateHandle(tp) });
+  }
+  if(action==='msg'){
+    let text=String(body.text||'').trim(); if(text.length<1||text.length>200) return json(400,{ error:'消息 1-200 字' }); if(wallBad(text)) return json(400,{ error:'仅限站内聊天，请不要留站外联系方式～' });
+    const now=Date.now(),pk=[phone,tp].sort().join('|'); let msgs=[]; try{ const raw=await KV.get('fmsg:'+pk); if(raw)msgs=JSON.parse(raw); }catch(e){}
+    msgs=msgs.filter(m=>now-m.when<24*3600000); msgs.push({ from:phone, text, when:now }); if(msgs.length>200)msgs=msgs.slice(-200);
+    try{ await KV.put('fmsg:'+pk,JSON.stringify(msgs)); }catch(e){ return json(502,{ error:'发送失败' }); }
+    return json(200,{ ok:true });
+  }
+  return json(400,{ error:'未知操作' });
+}
 async function handleWall(request, env, url) {
   const KV = env.CONFIG_KV || null;
+  const now = Date.now();
   if (request.method === 'GET') {
     if (!KV) return json(200, { ok: true, kv: false, posts: [] });
     let posts = []; try { const raw = await KV.get('wall'); if (raw) posts = JSON.parse(raw); } catch (e) {}
+    posts = posts.filter(p => !String(p.id||'').startsWith('seed'));   // 清理历史遗留冷启动种子（已被虚拟账号叠加层取代）
+    // 虚拟用户铺量层：始终并入当日虚拟帖（叠加真实用户对其点灯/留言的 vmeta），让池子不空、榜单每天轮转
+    const vmeta = await vmetaGet(KV);
+    const vposts = virtualPosts(now).map(vp => {
+      const m = vmeta[vp.id]; if (!m) return vp;
+      vp = Object.assign({}, vp);
+      vp.lamps += Math.min(m.lamps||0, VLAMP_CAP);   // 真实点灯只增不减、且封顶（灯数单调、不会因轮转倒退）
+      vp.replies = (vp.replies||[]).concat(m.replies||[]);
+      vp.lampers = (vp.lampers||[]).concat(m.lampers||[]);
+      return vp;
+    });
+    const phone = String(url.searchParams.get('phone') || '');
     const lim = Math.min(60, parseInt(url.searchParams.get('limit') || '40', 10) || 40);
-    return json(200, { ok: true, kv: true, posts: posts.slice(0, lim).map(p => ({ id: p.id, mood: p.mood, text: p.text, card: p.card, when: p.when, lamps: p.lamps || 0, replies: (p.replies || []).slice(-6) })) });
+    const merged = posts.concat(vposts);
+    // 沉底消失：零互动且超过 2 小时的内容移出公共池
+    const alive = merged.filter(p => (p.lamps||0)>0 || (p.replies||[]).length>0 || (now-(p.when||now))<2*3600000);
+    // 排序含"当日团队号"的隐藏加成 _feat（只影响排序、不改任何显示字段）；真实帖无 _feat，靠真实互动竞争
+    alive.sort((a,b)=>(postScore(b,now)+(b._feat||0))-(postScore(a,now)+(a._feat||0)));
+    const out = alive.slice(0, lim).map(p => {
+      const mine = !!(phone && p.ap && p.ap===phone);
+      return { id:p.id, mood:p.mood, pol:p.pol||moodPolarity(p.mood), text:p.text, card:p.card, when:p.when,
+        lamps:p.lamps||0, views:p.views||0, lv:p.lv||'', nick:p.nick||'', av:p.av||'', vu:!!p.vu, comments:(p.replies||[]).length,
+        replies:(p.replies||[]).slice(-6), mine,
+        lampers: mine ? (p.lampers||[]).slice(-5) : undefined };
+    });
+    let extra = {};
+    if (phone && /^1[3-9]\d{9}$/.test(phone)) { const b=await ballsGet(KV, phone); extra = { jar:{ fill:b.balls.length, balls:b.balls.slice(-30), jars:b.jars||0, total:b.total||0, streak:b.streak||0, maxStreak:b.maxStreak||0 }, level:yuchiLevel(b.acts) }; }
+    return json(200, Object.assign({ ok:true, kv:true, posts:out }, extra));
   }
   if (request.method !== 'POST') return json(405, { error: 'Method Not Allowed' });
-  if (!KV) return json(501, { error: '情绪墙还没开启（需要在 Pages 绑定 KV）' });
+  if (!KV) return json(501, { error: '愈池还没开启（需要在 Pages 绑定 KV）' });
   let body; try { body = await request.json(); } catch (e) { body = {}; }
   const action = String(body.action || '').trim();
+  const phone = String(body.phone || '');
   let posts = []; try { const raw = await KV.get('wall'); if (raw) posts = JSON.parse(raw); } catch (e) {}
   if (action === 'post') {
     let text = String(body.text || '').trim();
     if (text.length < 2 || text.length > 300) return json(400, { error: '内容太短或太长' });
-    if (wallBad(text)) return json(400, { error: '为了大家的树洞，请不要留联系方式或广告～' });
-    const p = { id: 'w' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), mood: String(body.mood || '').slice(0, 6), text, card: String(body.card || '').slice(0, 20), when: Date.now(), lamps: 0, replies: [] };
+    if (wallBad(text)) return json(400, { error: '为了这片池水，请不要留联系方式或广告～' });
+    let lv='',jar=null,mile=null; if (phone && /^1[3-9]\d{9}$/.test(phone)) { const b=await ballsBump(KV, phone, { drop:true, pol:body.pol, mood:body.mood, act:1 }); lv=yuchiLevel(b.acts); jar={ fill:b.balls.length, jars:b.jars||0, total:b.total||0, filled:!!b._filled, streak:b.streak||0, maxStreak:b.maxStreak||0 }; mile=b._mile||null; }
+    const pol = moodPolarity(String(body.mood||''), body.pol);
+    const p = { id:'w'+now.toString(36)+Math.random().toString(36).slice(2,5), mood:String(body.mood||'').slice(0,6), pol, text, card:String(body.card||'').slice(0,20), when:now, lamps:0, views:0, replies:[], lv, lampers:[], ap:phone||'' };
     posts.unshift(p); if (posts.length > 200) posts = posts.slice(0, 200);
-    try { await KV.put('wall', JSON.stringify(posts)); } catch (e) { return json(502, { error: '放上墙失败，再试一次' }); }
-    return json(200, { ok: true, post: { id: p.id, mood: p.mood, text: p.text, card: p.card, when: p.when, lamps: 0, replies: [] } });
+    try { await KV.put('wall', JSON.stringify(posts)); } catch (e) { return json(502, { error: '投进池子失败，再试一次' }); }
+    return json(200, { ok:true, post:{ id:p.id, mood:p.mood, pol, text:p.text, when:p.when, lamps:0, views:0, lv, comments:0, replies:[], mine:true }, jar, level:lv, milestone:mile });
   }
   if (action === 'lamp') {
-    const p = posts.find(x => x.id === String(body.id || '')); if (!p) return json(404, { error: '这条心事已经不在了' });
+    const lid = String(body.id || '');
+    if (lid.charAt(0) === 'v') {   // 虚拟账号帖：真实用户点灯累加进 vmeta（在恒定基础灯数上单调叠加、封顶）
+      const base = virtualPosts(now).find(x => x.id === lid); if (!base) return json(404, { error: '这条心事已经不在了' });
+      const vmeta = await vmetaGet(KV); const m = vmeta[lid] || (vmeta[lid] = { lamps:0, lampers:[], replies:[] });
+      if ((m.lamps||0) >= VLAMP_CAP) return json(200, { ok:true, lamps: (base.lamps||0) + VLAMP_CAP, by: '有人' });  // 已封顶：不再写 KV，避免刷灯/写放大
+      let lv=''; if (phone && /^1[3-9]\d{9}$/.test(phone)) { const b=await ballsBump(KV, phone, { act:1 }); lv=yuchiLevel(b.acts); }
+      m.lamps = (m.lamps||0) + 1;
+      m.lampers = m.lampers || []; m.lampers.push({ lv:lv||'夜行者', when:now }); if (m.lampers.length > 20) m.lampers = m.lampers.slice(-20);
+      try { await KV.put('vmeta', JSON.stringify(vmeta)); } catch (e) {}
+      return json(200, { ok:true, lamps: (base.lamps||0) + Math.min(m.lamps, VLAMP_CAP), by: lv || '有人' });
+    }
+    const p = posts.find(x => x.id === lid); if (!p) return json(404, { error: '这条心事已经不在了' });
     p.lamps = (p.lamps || 0) + 1;
+    let lv=''; if (phone && /^1[3-9]\d{9}$/.test(phone)) { const b=await ballsBump(KV, phone, { act:1 }); lv=yuchiLevel(b.acts); }
+    p.lampers = p.lampers || []; p.lampers.push({ lv:lv||'夜行者', when:now }); if (p.lampers.length > 20) p.lampers = p.lampers.slice(-20);
     try { await KV.put('wall', JSON.stringify(posts)); } catch (e) {}
-    return json(200, { ok: true, lamps: p.lamps });
+    return json(200, { ok: true, lamps: p.lamps, by: lv || '有人' });
+  }
+  if (action === 'view') {
+    const ids = Array.isArray(body.ids) ? body.ids.slice(0, 60) : [];
+    let changed=false; for(const id of ids){ const p=posts.find(x=>x.id===String(id)); if(p){ p.views=(p.views||0)+1; changed=true; } }
+    if(changed){ try { await KV.put('wall', JSON.stringify(posts)); } catch(e){} }
+    return json(200, { ok:true });
   }
   if (action === 'reply') {
     let text = String(body.text || '').trim();
     if (text.length < 1 || text.length > 40) return json(400, { error: '留言 1-40 字' });
     if (wallBad(text)) return json(400, { error: '请不要留联系方式或广告～' });
-    const p = posts.find(x => x.id === String(body.id || '')); if (!p) return json(404, { error: '这条心事已经不在了' });
+    const rpid = String(body.id || '');
     let role = 'user', nick = '', code = '';
     const rid2 = String(body.readerId || ''), rkey = String(body.rkey || '');
     if (rid2 && rkey) { try { const all = await rdAll(env); const r = all.find(x => x.id === rid2 && x.key === rkey && x.status === 'approved'); if (r) { role = 'reader'; nick = (r.persona && r.persona.nick) || r.name || '起牌师'; code = r.code || ''; } } catch (e) {} }
-    p.replies = p.replies || []; p.replies.push({ text, when: Date.now(), role, nick, code }); if (p.replies.length > 30) p.replies = p.replies.slice(-30);
+    if (phone && /^1[3-9]\d{9}$/.test(phone)) { await ballsBump(KV, phone, { act:1 }); }
+    if (rpid.charAt(0) === 'v') {   // 虚拟账号帖：留言写入 vmeta
+      if (!virtualPosts(now).some(x => x.id === rpid)) return json(404, { error: '这条心事已经不在了' });
+      const vmeta = await vmetaGet(KV); const m = vmeta[rpid] || (vmeta[rpid] = { lamps:0, views:0, lampers:[], replies:[] });
+      m.replies = m.replies || []; m.replies.push({ text, when: now, role, nick, code }); if (m.replies.length > 30) m.replies = m.replies.slice(-30);
+      try { await KV.put('vmeta', JSON.stringify(vmeta)); } catch (e) { return json(502, { error: '留言失败' }); }
+      return json(200, { ok: true });
+    }
+    const p = posts.find(x => x.id === rpid); if (!p) return json(404, { error: '这条心事已经不在了' });
+    p.replies = p.replies || []; p.replies.push({ text, when: now, role, nick, code }); if (p.replies.length > 30) p.replies = p.replies.slice(-30);
     try { await KV.put('wall', JSON.stringify(posts)); } catch (e) { return json(502, { error: '留言失败' }); }
     return json(200, { ok: true });
   }
   return json(400, { error: '未知操作' });
 }
 // ---- 情绪轨迹（KV：键 mood:<手机号> = 情绪记录数组）----
-// ---- 积分钱包（KV：键 wallet:<手机号> = {balance,lastDay,streak}）----
+// ---- 心元钱包（KV：键 wallet:<手机号> = {balance,lastDay,streak}）----
 function cnDayKey(ts) { const d = new Date(ts + 8 * 3600 * 1000); return d.getUTCFullYear() + '-' + (d.getUTCMonth() + 1) + '-' + d.getUTCDate(); }
-async function walletGet(KV, phone) { let w = null; try { const raw = await KV.get('wallet:' + phone); if (raw) w = JSON.parse(raw); } catch (e) {} return w ? { balance: w.balance | 0, lastDay: w.lastDay || '', streak: w.streak | 0 } : { balance: 300, lastDay: '', streak: 0 }; }
+async function walletGet(KV, phone) {
+  let w = null; try { const raw = await KV.get('wallet:' + phone); if (raw) w = JSON.parse(raw); } catch (e) {}
+  if (!w) w = { balance: 300, lastDay: '', streak: 0 };
+  return { balance: w.balance | 0, lastDay: w.lastDay || '', streak: w.streak | 0 };
+}
 async function walletCheckin(KV, phone) {
   const w = await walletGet(KV, phone); const today = cnDayKey(Date.now()); let awarded = 0;
   if (w.lastDay !== today) {
@@ -269,6 +683,21 @@ async function walletAdjust(KV, phone, delta) {
   const w = await walletGet(KV, phone); w.balance = Math.max(0, w.balance + (Number(delta) || 0));
   try { await KV.put('wallet:' + phone, JSON.stringify(w)); } catch (e) {}
   return { balance: w.balance, streak: w.streak, signedToday: w.lastDay === cnDayKey(Date.now()) };
+}
+// 充值档位(分→心元，服务端权威额度，含赠送)：¥1=100 / ¥6=600 / ¥30=3300 / ¥68=8000；未知金额按 1分=1心元 兜底(无赠送)
+const PAY_PACKS_W = { 100: 100, 600: 600, 3000: 3300, 6800: 8000 };
+// 每日陪伴奖励(服务端权威固定额度，前端不可改)
+const FEAT_REWARD_W = { treehole: 5, wall: 2, sos: 5 };
+// 按订单幂等发放心元：先置 credited 标记(防并发重复到账)再加余额。只对有下单意图记录的订单发放，杜绝凭空发钱。
+async function creditOrder(KV, outTradeNo, wxData) {
+  let o = null; try { const raw = await KV.get('order:' + outTradeNo); if (raw) o = JSON.parse(raw); } catch (e) {}
+  if (!o) { try { await KV.put('order:' + outTradeNo, JSON.stringify({ status: 'paid', credited: false, amount: (wxData || {}).amount || null, when: Date.now() }), { expirationTtl: 2592000 }); } catch (e) {} return { credited: false, reason: 'no_intent' }; }
+  if (o.credited) return { credited: false, already: true, credits: o.credits | 0 };
+  o.status = 'paid'; o.credited = true; o.paidAt = Date.now();
+  try { await KV.put('order:' + outTradeNo, JSON.stringify(o), { expirationTtl: 2592000 }); } catch (e) {}
+  let balance = null;
+  if (o.phone && /^1[3-9]\d{9}$/.test(o.phone) && (o.credits | 0) > 0) balance = (await walletAdjust(KV, o.phone, o.credits | 0)).balance;
+  return { credited: true, credits: o.credits | 0, balance };
 }
 // ---- 邀请裂变（KV：inv:<手机号>={code,invited,earned}, invcode:<CODE>=手机号, invby:<手机号>=邀请人）----
 const INV_INVITER = 50, INV_INVITEE = 30;
@@ -340,7 +769,7 @@ async function handleSkins(request, env, url) {
     const skin = String(body.skin || ''); const price = SKIN_PRICE_W[skin];
     if (price === undefined) return json(400, { error: '皮肤不存在' });
     if (s.owned.indexOf(skin) >= 0) { s.equipped = skin; await skinPut(KV, phone, s); return json(200, Object.assign({ ok: true, already: true }, s)); }
-    const w = await walletGet(KV, phone); if (w.balance < price) return json(200, { ok: false, error: '积分不足' });
+    const w = await walletGet(KV, phone); if (w.balance < price) return json(200, { ok: false, error: '心元不足' });
     const wr = await walletAdjust(KV, phone, -price);
     s.owned.push(skin); s.equipped = skin; await skinPut(KV, phone, s);
     return json(200, { ok: true, owned: s.owned, equipped: s.equipped, balance: wr.balance });
@@ -378,7 +807,7 @@ async function handleGoods(request, env, url) {
   if (String(body.action || '') !== 'redeem') return json(400, { error: '未知操作' });
   const ptOff = Math.max(0, parseInt(body.ptOff, 10) || 0);
   const w = await walletGet(KV, phone);
-  if (w.balance < ptOff) return json(200, { ok: false, error: '积分不足' });
+  if (w.balance < ptOff) return json(200, { ok: false, error: '心元不足' });
   const wr = await walletAdjust(KV, phone, -ptOff);
   let code = rcode(); try { while (await KV.get('gorder:' + code)) code = rcode(); } catch (e) {}
   const order = { phone, goodId: String(body.goodId || ''), name: String(body.name || '').slice(0, 40), ptOff, yuanOff: Math.max(0, +body.yuanOff || 0), price: Math.max(0, +body.price || 0), when: Date.now(), used: '' };
@@ -399,9 +828,27 @@ async function handleWallet(request, env, url) {
   let body; try { body = await request.json(); } catch (e) { body = {}; }
   const phone = String(body.phone || '');
   if (!/^1[3-9]\d{9}$/.test(phone)) return json(400, { error: '需要登录' });
-  if (String(body.action || '') !== 'adjust') return json(400, { error: '未知操作' });
-  const r = await walletAdjust(KV, phone, body.delta);
-  return json(200, { ok: true, balance: r.balance, streak: r.streak, signedToday: r.signedToday });
+  const act = String(body.action || '');
+  if (act === 'adjust') {
+    const delta = Number(body.delta) || 0;
+    // 安全：公开端点只允许「花掉自己的心元」(负数)。加心元(正数)必须走服务端可信来源
+    // (签到/邀请/兑换/支付到账/每日陪伴奖励)，或携带管理员令牌；否则任何人可无限刷心元。
+    if (delta > 0 && !adminOk(request, env)) return json(403, { error: '不允许直接加心元' });
+    const r = await walletAdjust(KV, phone, delta);
+    return json(200, { ok: true, balance: r.balance, streak: r.streak, signedToday: r.signedToday });
+  }
+  if (act === 'reward') {
+    // 每日陪伴奖励：额度由服务端固定，按 手机号+功能+自然日 去重，杜绝前端刷分
+    const feat = String(body.feat || ''), amt = Math.min(50, FEAT_REWARD_W[feat] || 0);
+    if (amt <= 0) return json(200, { ok: true, awarded: 0, balance: (await walletGet(KV, phone)).balance });
+    const dk = 'rwd:' + phone + ':' + feat + ':' + cnDayKey(Date.now());
+    let claimed = false; try { claimed = !!(await KV.get(dk)); } catch (e) {}
+    if (claimed) return json(200, { ok: true, awarded: 0, already: true, balance: (await walletGet(KV, phone)).balance });
+    try { await KV.put(dk, '1', { expirationTtl: 172800 }); } catch (e) {}
+    const r = await walletAdjust(KV, phone, amt);
+    return json(200, { ok: true, awarded: amt, balance: r.balance });
+  }
+  return json(400, { error: '未知操作' });
 }
 async function handleMood(request, env, url) {
   const KV = env.CONFIG_KV || null;
@@ -763,14 +1210,17 @@ async function handle(request, env, mode) {
   const persona = reader ? reader.persona : null;
   if (mode === 'tarot') {
     const domain = String((pl && pl.domain) || '').trim(), situation = String((pl && pl.situation) || '').trim(), cardsText = String((pl && pl.cardsText) || '').trim();
-    if (!['姻缘', '事业', '财运'].includes(domain) || situation.length < 4 || !cardsText) return json(400, { error: '参数不完整' });
+    if (!['姻缘', '事业', '财运', '运势'].includes(domain) || situation.length < 4 || !cardsText) return json(400, { error: '参数不完整' });
     const astro = String((pl && pl.astro) || '').trim();
     const userMsg = `领域：${domain}\n我的处境：${situation}\n${astro ? ('我的本命星盘：' + astro + '\n') : ''}\n抽到的牌：${cardsText}\n\n请结合处境${astro ? '与我的本命星盘特质（并填好 starEcho，把牌面与我的星盘对照）' : ''}，按系统设定的 JSON 结构给出解读。`;
     const chunks = reader ? await kbRetrieve(env, reader.id, situation, 3) : [];
     const qa = reader ? await qaRetrieve(env, reader.id, situation, 2) : [];
     const cMean = reader ? cardMeaningText(await cardsGet(env, reader.id), pl.cards) : '';
     const sysFull = personaText(persona) + cMean + kbText(chunks) + qaText(qa) + SYSTEM_PROMPT;
-    try { return json(200, await callAI(env, KEY, sysFull, userMsg, 1500)); } catch (e) { return json(502, { error: '解读没接上，再试一次' }); }
+    let rep = null, rerr = '';
+    for (let i = 0; i < 2 && !rep; i++) { try { rep = await callAI(env, KEY, sysFull, userMsg, 1500); } catch (e) { rerr = (e && e.message) || ''; } }
+    if (!rep) return json(502, { error: '解读没接上：' + rerr });
+    return json(200, rep);
   } else if (mode === 'report') {
     const year = String((pl && pl.year) || '').trim(), sex = String((pl && pl.sex) || '未知').trim(), zodiac = String((pl && pl.zodiac) || '').trim(), cons = String((pl && pl.cons) || '').trim(), birth = String((pl && pl.birth) || '').trim(), cardsText = String((pl && pl.cardsText) || '').trim();
     if (!year || (!zodiac && !birth)) return json(400, { error: '参数不完整' });

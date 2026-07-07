@@ -1,0 +1,11 @@
+<view class="page" style="padding-top:140rpx;text-align:center">
+  <view class="hero-eyebrow">pán yù · PANYU</view>
+  <view class="hero-title serif" style="font-size:64rpx">盘愈</view>
+  <view style="font-size:24rpx;color:var(--ink-faint);margin-top:16rpx;letter-spacing:.1em">自我探索 · 情绪疏导 · 稳住心神</view>
+  <view class="glass" style="margin:70rpx 40rpx 0;padding:44rpx 34rpx">
+    <view style="font-size:26rpx;color:var(--ink-soft);line-height:1.8;margin-bottom:30rpx">用微信一键登录，绑定手机号即可同步你的心元与档案</view>
+    <button class="btn btn-gold" open-type="getPhoneNumber" bindgetphonenumber="onGetPhone" loading="{{loading}}">微信一键登录</button>
+    <view class="btn btn-ghost" style="margin-top:20rpx" bindtap="skip">暂不登录 · 先体验</view>
+  </view>
+  <view class="disclaimer" style="margin-top:40rpx">手机号仅用于联系与心元权益，不会公开。</view>
+</view>
