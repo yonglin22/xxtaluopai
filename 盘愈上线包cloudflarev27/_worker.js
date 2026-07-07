@@ -666,8 +666,6 @@ function cnDayKey(ts) { const d = new Date(ts + 8 * 3600 * 1000); return d.getUT
 async function walletGet(KV, phone) {
   let w = null; try { const raw = await KV.get('wallet:' + phone); if (raw) w = JSON.parse(raw); } catch (e) {}
   if (!w) w = { balance: 300, lastDay: '', streak: 0 };
-  // 管理员测试号预充值：保证 ≥ 100000 心元，方便测试充值/消费流程（上线前可删此行）
-  if (phone === '18268346784' && (w.balance | 0) < 100000) { w.balance = 100000; try { await KV.put('wallet:' + phone, JSON.stringify(w)); } catch (e) {} }
   return { balance: w.balance | 0, lastDay: w.lastDay || '', streak: w.streak | 0 };
 }
 async function walletCheckin(KV, phone) {
