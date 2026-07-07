@@ -3645,7 +3645,9 @@ let FEAT_COST={synastry:100,capsule:50,decide:50};
 let FEAT_REWARD={treehole:5,wall:2,sos:5};
 const FEAT_LABEL={synastry:'关系合盘',capsule:'时光胶囊',decide:'两难天平',treehole:'情绪树洞',wall:'情绪墙点灯',sos:'深夜急救'};
 function chargeFeat(key,label){const cost=FEAT_COST[key]||0;if(cost<=0)return true;if(!state.phone){toast('登录后可使用');go('login');return false;}if(state.balance<cost){confirmBox(`${label}需 ${cost} 心元，当前 ${state.balance}，去充值？`,'去充值','再想想').then(ok=>{if(ok)go('recharge');});return false;}state.balance-=cost;walletPush(-cost);state.ledger.unshift({type:label,amount:'-'+cost,when:'刚刚'});refreshBalanceUI();return true;}
-function rewardFeat(key,label){const amt=FEAT_REWARD[key]||0;if(amt<=0||!state.phone)return;const today=(typeof orbDayKey==='function')?orbDayKey(Date.now()):new Date().toDateString();let done={};try{done=JSON.parse(localStorage.getItem('ft_featreward')||'{}');}catch(e){}if(done[key]===today)return;done[key]=today;try{localStorage.setItem('ft_featreward',JSON.stringify(done));}catch(e){}state.balance+=amt;walletPush(amt);state.ledger.unshift({type:label+' · 奖励',amount:'+'+amt,when:'刚刚'});refreshBalanceUI();toast(label+' +'+amt+' 心元');}
+function rewardFeat(key,label){if(!state.phone)return;const today=(typeof orbDayKey==='function')?orbDayKey(Date.now()):new Date().toDateString();let done={};try{done=JSON.parse(localStorage.getItem('ft_featreward')||'{}');}catch(e){}if(done[key]===today)return;done[key]=today;try{localStorage.setItem('ft_featreward',JSON.stringify(done));}catch(e){}
+  /* 奖励额度由服务端权威发放并按天去重（前端不再自行加心元，杜绝刷分）*/
+  apiPost('/api/wallet',{action:'reward',phone:state.phone,feat:key}).then(function(r){if(r&&r.j&&typeof r.j.balance==='number'){state.balance=r.j.balance;if(r.j.awarded>0){state.ledger.unshift({type:label+' · 奖励',amount:'+'+r.j.awarded,when:'刚刚'});if(typeof toast==='function')toast(label+' +'+r.j.awarded+' 心元');}if(typeof refreshBalanceUI==='function')refreshBalanceUI();}});}
 function featCostTag(key){const c=FEAT_COST[key]||0;return c>0?`<span style="font-size:11px;color:var(--gold-deep)"> · ${c} 心元</span>`:'';}
 function renderReport(){
   const p=state.profile,dn=$("#rpDesc");
@@ -4164,7 +4166,9 @@ async function saveOps(){
 function confirmOrderAdmin(no){
   const o=state.orders.find(x=>x.no===no); if(!o||o.status==='paid')return;
   o.status='paid';
-  state.balance+=o.credits;walletPush(o.credits);
+  state.balance+=o.credits;
+  /* 后台手动开通=管理员操作：带管理员令牌调用（普通用户无法借此加心元）*/
+  if(state.phone&&typeof apiPost==='function')apiPost('/api/wallet',{action:'adjust',phone:state.phone,delta:o.credits},true).then(function(r){if(r&&r.j&&typeof r.j.balance==='number'){state.balance=r.j.balance;if(typeof refreshBalanceUI==='function')refreshBalanceUI();}else if(r&&r.status===403&&typeof toast==='function')toast('管理员令牌不正确，未能开通');});
   state.ledger.unshift({type:"充值开通",amount:"+"+o.credits,when:"刚刚"});
   renderAdmin();
   toast('已为订单开通 +'+o.credits+' 心元');
@@ -4174,7 +4178,9 @@ function adjustAdmin(sign){
   const v=el?parseInt(el.value,10):0;
   if(!v||v<=0){toast('请输入心元数量');return;}
   const delta=sign*v;
-  state.balance=Math.max(0,state.balance+delta);walletPush(delta);
+  state.balance=Math.max(0,state.balance+delta);
+  /* 加心元属管理员操作：带管理员令牌调用（服务端 adminOk 校验），普通用户无法借此刷分 */
+  if(state.phone&&typeof apiPost==='function')apiPost('/api/wallet',{action:'adjust',phone:state.phone,delta:delta},true).then(function(r){if(r&&r.j&&typeof r.j.balance==='number'){state.balance=r.j.balance;if(delta>0&&r.status===403&&typeof toast==='function')toast('需在下方填对管理员令牌才能加心元');if(typeof refreshBalanceUI==='function')refreshBalanceUI();}else if(r&&r.status===403&&typeof toast==='function')toast('管理员令牌不正确，无法加心元');});
   state.ledger.unshift({type:delta>=0?'管理员加分':'管理员扣分',amount:(delta>=0?'+':'')+delta,when:"刚刚"});
   if(el)el.value='';
   renderAdmin();
@@ -7521,16 +7527,17 @@ window.diyOrderContact=function(code){if(code&&typeof copyText==='function')copy
         if(_cr>0){_done[_no]=1;try{localStorage.setItem('py_paid_done',JSON.stringify(_done));}catch(_e){}
           if(state.orders)state.orders.unshift({no:_no,credits:_cr,label:_pk?_pk.label:'充值',cny:_cny,status:'paid'});
           if(state.ledger)state.ledger.unshift({type:'充值到账',amount:'+'+_cr,when:'刚刚'});
-          /* 以服务端权威余额为准，并延迟到开机余额拉取(loadWallet)之后，避免竞态把刚到账心元盖回旧值 */
-          (function(cr){setTimeout(function(){
+          /* 到账走服务端查单核实：按订单号让后端向微信核实已支付后幂等发放，前端不再自行加心元（防伪造到账）*/
+          (function(no,cr){setTimeout(function(){
             if(state.phone&&typeof apiPost==='function'){
-              apiPost('/api/wallet',{action:'adjust',phone:state.phone,delta:cr}).then(function(r){
-                state.balance=(r&&r.j&&typeof r.j.balance==='number')?r.j.balance:((state.balance||0)+cr);
+              apiPost('/api/wxpay/query',{phone:state.phone,orderNo:no}).then(function(r){
+                if(r&&r.j&&typeof r.j.balance==='number'){state.balance=r.j.balance;if(typeof toast==='function')toast(r.j.credited?('到账成功 +'+(r.j.awarded||cr)+' 心元'):'到账确认中，稍后自动到账');}
+                else if(typeof toast==='function')toast('到账确认中，稍后自动到账');
                 if(typeof refreshBalanceUI==='function')refreshBalanceUI();
-                if(typeof toast==='function')toast('到账成功 +'+cr+' 心元');
+                if(typeof loadWallet==='function')setTimeout(function(){loadWallet().then(function(){if(typeof refreshBalanceUI==='function')refreshBalanceUI();});},2500);
               });
-            }else{state.balance=(state.balance||0)+cr;if(typeof refreshBalanceUI==='function')refreshBalanceUI();if(typeof toast==='function')toast('到账成功 +'+cr+' 心元');}
-          },1000);})(_cr);}}
+            }
+          },1200);})(_no,_cr);}}
       window.__MP_PAID__=null; }}catch(e){}
     if(window.__MP_SCREEN__&&typeof go==='function')go(window.__MP_SCREEN__);
     else if(typeof state!=='undefined'&&state.phone&&typeof go==='function')go('home');

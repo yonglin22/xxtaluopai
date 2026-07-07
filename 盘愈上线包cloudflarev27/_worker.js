@@ -176,6 +176,7 @@ export default {
     if (url.pathname === '/api/wxphone') { if (request.method !== 'POST') return json(405, { error: 'Method Not Allowed' }); return handleWxPhone(request, env); }
     if (url.pathname === '/api/wxpay') { if (request.method !== 'POST') return json(405, { error: 'Method Not Allowed' }); return handleWxPay(request, env); }
     if (url.pathname === '/api/wxpay/notify') { if (request.method !== 'POST') return json(405, { error: 'Method Not Allowed' }); return handleWxPayNotify(request, env); }
+    if (url.pathname === '/api/wxpay/query') { if (request.method !== 'POST') return json(405, { error: 'Method Not Allowed' }); return handleWxPayQuery(request, env); }
     if (url.pathname === '/api/wxpay/diag') { return handleWxPayDiag(request, env); }
     { const _r = await env.ASSETS.fetch(request); const _ct = _r.headers.get('content-type') || ''; if (_ct.includes('text/html')) { const _h = new Headers(_r.headers); _h.set('cache-control', 'no-cache, must-revalidate'); return new Response(_r.body, { status: _r.status, statusText: _r.statusText, headers: _h }); } return _r; }
   }
@@ -260,6 +261,8 @@ async function handleWxPay(request, env) {
   if (!up.ok || !pj.prepay_id) return json(200, { ok: false, error: 'unifiedorder_failed', status: up.status, detail: pj });
   const pkg = 'prepay_id=' + pj.prepay_id, pts = Math.floor(Date.now() / 1000).toString(), pnonce = rkey().toUpperCase();
   let paySign; try { paySign = await rsaSign(PKEY, APPID + '\n' + pts + '\n' + pnonce + '\n' + pkg + '\n'); } catch (e) { return json(200, { ok: false, error: 'paysign_failed' }); }
+  // 记录下单意图 + 服务端权威到账额度，供回调/查单按订单幂等发放心元（前端无法自定金额）
+  try { if (env.CONFIG_KV) { const credits = PAY_PACKS_W[total] || total; await env.CONFIG_KV.put('order:' + outTradeNo, JSON.stringify({ status: 'created', total, credits, phone: String(body.phone || ''), openid, when: Date.now() }), { expirationTtl: 2592000 }); } } catch (e) {}
   return json(200, { ok: true, timeStamp: pts, nonceStr: pnonce, package: pkg, signType: 'RSA', paySign, orderNo: outTradeNo });
 }
 // 支付结果回调：解密后把订单标记为已支付（返回 SUCCESS 才停止重推）
@@ -270,11 +273,34 @@ async function handleWxPayNotify(request, env) {
     if (KEY && res && res.ciphertext) {
       const data = JSON.parse(await aesGcmDecrypt(KEY, res.nonce, res.associated_data, res.ciphertext));
       if (data.trade_state === 'SUCCESS' && KV && data.out_trade_no) {
-        try { await KV.put('order:' + data.out_trade_no, JSON.stringify({ paid: true, amount: data.amount, openid: (data.payer || {}).openid || '', when: Date.now() })); } catch (e) {}
+        await creditOrder(KV, data.out_trade_no, data); // 幂等发放：验签解密后按订单意图给用户加心元
       }
     }
   } catch (e) {}
   return json(200, { code: 'SUCCESS', message: '成功' });
+}
+// 前端支付成功后调用：服务端向微信「查单」核实 trade_state=SUCCESS 后按订单意图幂等发放心元。
+// 不信任前端金额；即使回调 notify 未到达也能安全到账。
+async function handleWxPayQuery(request, env) {
+  const KV = env.CONFIG_KV; if (!KV) return json(200, { ok: false, error: '未绑定KV' });
+  let body = {}; try { body = await request.json(); } catch (e) {}
+  const phone = String(body.phone || ''), orderNo = String(body.orderNo || '');
+  if (!/^1[3-9]\d{9}$/.test(phone)) return json(400, { error: '需要登录' });
+  if (!orderNo) return json(400, { error: '缺少订单号' });
+  let o = null; try { const raw = await KV.get('order:' + orderNo); if (raw) o = JSON.parse(raw); } catch (e) {}
+  if (!o) return json(200, { ok: false, error: 'order_not_found' });
+  if (o.phone && o.phone !== phone) return json(403, { error: '订单不属于该用户' });
+  if (o.credited) return json(200, { ok: true, credited: true, already: true, balance: (await walletGet(KV, phone)).balance });
+  const MCHID = env.WX_MCHID, SERIAL = env.WX_PAY_SERIAL, PKEY = env.WX_PAY_PRIVATE_KEY;
+  if (!MCHID || !SERIAL || !PKEY) return json(200, { ok: false, error: 'not_configured', pending: true });
+  const path = '/v3/pay/transactions/out-trade-no/' + encodeURIComponent(orderNo) + '?mchid=' + MCHID;
+  const ts = Math.floor(Date.now() / 1000).toString(), nonce = rkey().toUpperCase();
+  let sig; try { sig = await rsaSign(PKEY, 'GET\n' + path + '\n' + ts + '\n' + nonce + '\n\n'); } catch (e) { return json(200, { ok: false, error: 'sign_failed', detail: String(e) }); }
+  const auth = 'WECHATPAY2-SHA256-RSA2048 mchid="' + MCHID + '",nonce_str="' + nonce + '",signature="' + sig + '",timestamp="' + ts + '",serial_no="' + SERIAL + '"';
+  let up, txt; try { up = await fetch('https://api.mch.weixin.qq.com' + path, { headers: { 'Accept': 'application/json', 'Authorization': auth, 'User-Agent': 'panyu-cf-worker' } }); txt = await up.text(); } catch (e) { return json(200, { ok: false, error: 'network', pending: true }); }
+  let qj = {}; try { qj = JSON.parse(txt); } catch (e) {}
+  if (qj.trade_state === 'SUCCESS') { const cr = await creditOrder(KV, orderNo, qj); return json(200, { ok: true, credited: true, awarded: cr.credits || (o.credits | 0), balance: (await walletGet(KV, phone)).balance }); }
+  return json(200, { ok: false, pending: true, trade_state: qj.trade_state || 'UNKNOWN' });
 }
 // 排查用：一次性体检所有微信支付变量（存在 + 格式 + 私钥能否解析），不显示值。排查完可删本函数+路由。
 async function handleWxPayDiag(request, env) {
@@ -660,6 +686,21 @@ async function walletAdjust(KV, phone, delta) {
   try { await KV.put('wallet:' + phone, JSON.stringify(w)); } catch (e) {}
   return { balance: w.balance, streak: w.streak, signedToday: w.lastDay === cnDayKey(Date.now()) };
 }
+// 充值档位(分→心元，服务端权威额度，含赠送)：¥1=100 / ¥6=600 / ¥30=3300 / ¥68=8000；未知金额按 1分=1心元 兜底(无赠送)
+const PAY_PACKS_W = { 100: 100, 600: 600, 3000: 3300, 6800: 8000 };
+// 每日陪伴奖励(服务端权威固定额度，前端不可改)
+const FEAT_REWARD_W = { treehole: 5, wall: 2, sos: 5 };
+// 按订单幂等发放心元：先置 credited 标记(防并发重复到账)再加余额。只对有下单意图记录的订单发放，杜绝凭空发钱。
+async function creditOrder(KV, outTradeNo, wxData) {
+  let o = null; try { const raw = await KV.get('order:' + outTradeNo); if (raw) o = JSON.parse(raw); } catch (e) {}
+  if (!o) { try { await KV.put('order:' + outTradeNo, JSON.stringify({ status: 'paid', credited: false, amount: (wxData || {}).amount || null, when: Date.now() }), { expirationTtl: 2592000 }); } catch (e) {} return { credited: false, reason: 'no_intent' }; }
+  if (o.credited) return { credited: false, already: true, credits: o.credits | 0 };
+  o.status = 'paid'; o.credited = true; o.paidAt = Date.now();
+  try { await KV.put('order:' + outTradeNo, JSON.stringify(o), { expirationTtl: 2592000 }); } catch (e) {}
+  let balance = null;
+  if (o.phone && /^1[3-9]\d{9}$/.test(o.phone) && (o.credits | 0) > 0) balance = (await walletAdjust(KV, o.phone, o.credits | 0)).balance;
+  return { credited: true, credits: o.credits | 0, balance };
+}
 // ---- 邀请裂变（KV：inv:<手机号>={code,invited,earned}, invcode:<CODE>=手机号, invby:<手机号>=邀请人）----
 const INV_INVITER = 50, INV_INVITEE = 30;
 async function inviteEnsure(KV, phone) {
@@ -789,9 +830,27 @@ async function handleWallet(request, env, url) {
   let body; try { body = await request.json(); } catch (e) { body = {}; }
   const phone = String(body.phone || '');
   if (!/^1[3-9]\d{9}$/.test(phone)) return json(400, { error: '需要登录' });
-  if (String(body.action || '') !== 'adjust') return json(400, { error: '未知操作' });
-  const r = await walletAdjust(KV, phone, body.delta);
-  return json(200, { ok: true, balance: r.balance, streak: r.streak, signedToday: r.signedToday });
+  const act = String(body.action || '');
+  if (act === 'adjust') {
+    const delta = Number(body.delta) || 0;
+    // 安全：公开端点只允许「花掉自己的心元」(负数)。加心元(正数)必须走服务端可信来源
+    // (签到/邀请/兑换/支付到账/每日陪伴奖励)，或携带管理员令牌；否则任何人可无限刷心元。
+    if (delta > 0 && !adminOk(request, env)) return json(403, { error: '不允许直接加心元' });
+    const r = await walletAdjust(KV, phone, delta);
+    return json(200, { ok: true, balance: r.balance, streak: r.streak, signedToday: r.signedToday });
+  }
+  if (act === 'reward') {
+    // 每日陪伴奖励：额度由服务端固定，按 手机号+功能+自然日 去重，杜绝前端刷分
+    const feat = String(body.feat || ''), amt = Math.min(50, FEAT_REWARD_W[feat] || 0);
+    if (amt <= 0) return json(200, { ok: true, awarded: 0, balance: (await walletGet(KV, phone)).balance });
+    const dk = 'rwd:' + phone + ':' + feat + ':' + cnDayKey(Date.now());
+    let claimed = false; try { claimed = !!(await KV.get(dk)); } catch (e) {}
+    if (claimed) return json(200, { ok: true, awarded: 0, already: true, balance: (await walletGet(KV, phone)).balance });
+    try { await KV.put(dk, '1', { expirationTtl: 172800 }); } catch (e) {}
+    const r = await walletAdjust(KV, phone, amt);
+    return json(200, { ok: true, awarded: amt, balance: r.balance });
+  }
+  return json(400, { error: '未知操作' });
 }
 async function handleMood(request, env, url) {
   const KV = env.CONFIG_KV || null;
